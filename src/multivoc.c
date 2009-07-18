@@ -1784,90 +1784,12 @@ int MV_StartPlayback
    // Start playback
 	status = SoundDriver_BeginPlayback(MV_MixBuffer[0], TotalBufferSize,
 												  MV_NumberOfBuffers, MV_ServiceVoc);
-	/*
-   switch( ASS_SoundDevice )
-      {
-      case SoundBlaster :
-      case Awe32 :
-         status = BLASTER_BeginBufferedPlayback( MV_MixBuffer[ 0 ],
-            TotalBufferSize, MV_NumberOfBuffers,
-            MV_RequestedMixRate, MV_MixMode, MV_ServiceVoc );
-
-         if ( status != BLASTER_Ok )
-            {
-            MV_SetErrorCode( MV_BlasterError );
-            return( MV_Error );
-            }
-
-         MV_MixRate = BLASTER_GetPlaybackRate();
-         break;
-
-      case UltraSound :
-
-         status = GUSWAVE_StartDemandFeedPlayback( MV_ServiceGus, 1,
-            MV_Bits, MV_RequestedMixRate, 0, ( MV_Channels == 1 ) ?
-            0 : 24, 255, 0xffff, 0 );
-         if ( status < GUSWAVE_Ok )
-            {
-            MV_SetErrorCode( MV_BlasterError );
-            return( MV_Error );
-            }
-
-         if ( MV_Channels == 2 )
-            {
-            status = GUSWAVE_StartDemandFeedPlayback( MV_ServiceRightGus, 1,
-               MV_Bits, MV_RequestedMixRate, 0, 8, 255, 0xffff, 0 );
-            if ( status < GUSWAVE_Ok )
-               {
-               GUSWAVE_KillAllVoices();
-               MV_SetErrorCode( MV_BlasterError );
-               return( MV_Error );
-               }
-            }
-
-         MV_MixRate = MV_RequestedMixRate;
-         break;
-
-      case ProAudioSpectrum :
-      case SoundMan16 :
-         status = PAS_BeginBufferedPlayback( MV_MixBuffer[ 0 ],
-            TotalBufferSize, MV_NumberOfBuffers,
-            MV_RequestedMixRate, MV_MixMode, MV_ServiceVoc );
-
-         if ( status != PAS_Ok )
-            {
-            MV_SetErrorCode( MV_PasError );
-            return( MV_Error );
-            }
-
-         MV_MixRate = PAS_GetPlaybackRate();
-         break;
-
-      case SoundScape :
-         status = SOUNDSCAPE_BeginBufferedPlayback( MV_MixBuffer[ 0 ],
-            TotalBufferSize, MV_NumberOfBuffers, MV_RequestedMixRate,
-            MV_MixMode, MV_ServiceVoc );
-
-         if ( status != SOUNDSCAPE_Ok )
-            {
-            MV_SetErrorCode( MV_SoundScapeError );
-            return( MV_Error );
-            }
-
-         MV_MixRate = SOUNDSCAPE_GetPlaybackRate();
-         break;
-
-      #ifndef SOUNDSOURCE_OFF
-      case SoundSource :
-      case TandySoundSource :
-         SS_BeginBufferedPlayback( MV_MixBuffer[ 0 ],
-            TotalBufferSize, MV_NumberOfBuffers,
-            MV_ServiceVoc );
-         MV_MixRate = SS_SampleRate;
-         break;
-      #endif
-      }
-	 */
+	if (status != MV_Ok) {
+		MV_SetErrorCode(MV_DriverError);
+		return MV_Error;
+	}
+	
+	MV_MixRate = MV_RequestedMixRate;
 
    return( MV_Ok );
    }

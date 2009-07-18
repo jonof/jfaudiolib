@@ -5,7 +5,7 @@ int NoSoundDrv_GetError(void)
 
 const char *NoSoundDrv_ErrorString( int ErrorNumber )
 {
-	return "No sound, no error.";
+	return "No sound, Ok.";
 }
 
 int NoSoundDrv_Init(int mixrate, int numchannels, int samplebits)
