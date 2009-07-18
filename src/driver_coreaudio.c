@@ -274,7 +274,7 @@ int CoreAudioDrv_BeginPlayback(char *BufferStart, int BufferSize,
 	MixCallBack = CallBackFunc;
 	
 	// prime the buffer
-	MixCallback();
+	MixCallBack();
 	
 	AudioOutputUnitStart(output_audio_unit);
 	

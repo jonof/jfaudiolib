@@ -25,6 +25,7 @@
 		AB2E9E751011E66100DD2F1F /* music.h in Headers */ = {isa = PBXBuildFile; fileRef = AB2E9E721011E66100DD2F1F /* music.h */; };
 		AB2E9E761011E66100DD2F1F /* sndcards.h in Headers */ = {isa = PBXBuildFile; fileRef = AB2E9E731011E66100DD2F1F /* sndcards.h */; };
 		AB2EA0831012029200DD2F1F /* AudioUnit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = AB2EA0821012029200DD2F1F /* AudioUnit.framework */; };
+		AB2EA17710121AA900DD2F1F /* mix.c in Sources */ = {isa = PBXBuildFile; fileRef = AB2EA17610121AA900DD2F1F /* mix.c */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -47,6 +48,7 @@
 		AB2E9E721011E66100DD2F1F /* music.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = music.h; sourceTree = "<group>"; };
 		AB2E9E731011E66100DD2F1F /* sndcards.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = sndcards.h; sourceTree = "<group>"; };
 		AB2EA0821012029200DD2F1F /* AudioUnit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AudioUnit.framework; path = /System/Library/Frameworks/AudioUnit.framework; sourceTree = "<absolute>"; };
+		AB2EA17610121AA900DD2F1F /* mix.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = mix.c; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -96,6 +98,7 @@
 				AB2E9E5C1011E65900DD2F1F /* multivoc.h */,
 				AB2E9E5D1011E65900DD2F1F /* pitch.c */,
 				AB2E9E5E1011E65900DD2F1F /* pitch.h */,
+				AB2EA17610121AA900DD2F1F /* mix.c */,
 			);
 			path = src;
 			sourceTree = "<group>";
@@ -178,6 +181,7 @@
 				AB2E9E6A1011E65900DD2F1F /* fx_man.c in Sources */,
 				AB2E9E6D1011E65900DD2F1F /* multivoc.c in Sources */,
 				AB2E9E6F1011E65900DD2F1F /* pitch.c in Sources */,
+				AB2EA17710121AA900DD2F1F /* mix.c in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

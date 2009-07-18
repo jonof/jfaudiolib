@@ -233,16 +233,8 @@ static void       MV_SetVoicePitch( VoiceNode *voice, unsigned int rate, int pit
 static void       MV_CalcVolume( int MaxLevel );
 static void       MV_CalcPanTable( void );
 
+// implemented in mix.c
 void ClearBuffer_DW( void *ptr, unsigned data, int length );
-
-#pragma aux ClearBuffer_DW = \
-   "cld",                    \
-   "push   es",              \
-   "push   ds",              \
-   "pop    es",              \
-   "rep    stosd",           \
-   "pop    es",              \
-parm [ edi ] [ eax ] [ ecx ] modify exact [ ecx edi ];
 
 void MV_Mix8BitMono( unsigned int position, unsigned int rate,
    char *start, unsigned int length );
@@ -269,12 +261,11 @@ void MV_Mix16BitStereo16( unsigned int position,
    unsigned int rate, char *start, unsigned int length );
 
 void MV_16BitReverb( char *src, char *dest, VOLUME16 *volume, int count );
-#pragma aux MV_16BitReverb parm [eax] [edx] [ebx] [ecx] modify exact [eax ebx ecx edx esi edi]
+
 void MV_8BitReverb( signed char *src, signed char *dest, VOLUME16 *volume, int count );
-#pragma aux MV_8BitReverb parm [eax] [edx] [ebx] [ecx] modify exact [eax ebx ecx edx esi edi]
+
 void MV_16BitReverbFast( char *src, char *dest, int count, int shift );
-#pragma aux MV_16BitReverbFast parm [eax] [edx] [ebx] [ecx] modify exact [eax ebx ecx edx esi edi]
+
 void MV_8BitReverbFast( signed char *src, signed char *dest, int count, int shift );
-#pragma aux MV_8BitReverbFast parm [eax] [edx] [ebx] [ecx] modify exact [eax ebx ecx edx esi edi]
 
 #endif
