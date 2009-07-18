@@ -38,8 +38,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #define TRUE  ( 1 == 1 )
 #define FALSE ( !TRUE )
 
-static unsigned FX_MixRate;
-
 int FX_ErrorCode = FX_Ok;
 int FX_Installed = FALSE;
 
@@ -79,18 +77,8 @@ const char *FX_ErrorString
             "(c) Copyright 1995 James R. Dose.  All Rights Reserved.\n";
          break;
 		
-		case FX_NoCardSelected:
-			ErrorString = "FX_SetupCard was not called.";
-			break;
-
       case FX_SoundCardError :
-			if (ASS_SoundDevice < 0 || ASS_SoundDevice >= ASS_NumSoundCards) {
-				ErrorString = "No sound device selected.";
-			} else if (SoundDriver_GetError == 0) {
-				ErrorString = "Unsupported sound device.";
-			} else {
-				ErrorString = SoundDriver_ErrorString(SoundDriver_GetError());
-			}
+			ErrorString = SoundDriver_ErrorString(SoundDriver_GetError());
 			break;
 
       case FX_InvalidCard :
@@ -107,60 +95,6 @@ const char *FX_ErrorString
       }
 
    return( ErrorString );
-   }
-
-
-/*---------------------------------------------------------------------
-   Function: FX_SetupCard
-
-   Sets the configuration of a sound device.
----------------------------------------------------------------------*/
-
-int FX_SetupCard
-   (
-   int SoundCard
-   )
-
-   {
-   int status;
-   int DeviceStatus;
-
-	if (SoundCard == ASS_AutoDetect) {
-#if defined __APPLE__
-		SoundCard = ASS_CoreAudio;
-#elif defined WIN32
-		SoundCard = ASS_DirectSound;
-#elif defined HAVE_SDL
-		SoundCard = ASS_SDL;
-#else
-		SoundCard = ASS_NoSound;
-#endif
-	}
-	
-	if (SoundCard < 0 || SoundCard >= ASS_NumSoundCards) {
-		FX_SetErrorCode( FX_InvalidCard );
-		status = FX_Error;
-		return status;
-	}
-
-	if (ASS_SoundDrivers[SoundCard].GetError == 0) {
-		// unsupported cards fall back to no sound
-		SoundCard = ASS_NoSound;
-	}
-		
-	ASS_SoundDevice = SoundCard;
-   
-	status = FX_Ok;
-   FX_SetErrorCode( FX_Ok );
-
-	DeviceStatus = SoundDriver_Init();
-	if ( DeviceStatus != FX_Ok )
-		{
-		FX_SetErrorCode( FX_SoundCardError );
-		status = FX_Error;
-		}
-
-   return( status );
    }
 
 
@@ -206,15 +140,13 @@ int FX_Init
 		return status;
 	}
 	
-	if (ASS_SoundDrivers[SoundCard].GetError == 0) {
+	if (SoundDriver_IsSupported(SoundCard) == 0) {
 		// unsupported cards fall back to no sound
 		SoundCard = ASS_NoSound;
 	}
    
-   FX_MixRate = mixrate;
-
    status = FX_Ok;
-	devicestatus = MV_Init( SoundCard, FX_MixRate, numvoices, numchannels, samplebits );
+	devicestatus = MV_Init( SoundCard, mixrate, numvoices, numchannels, samplebits );
 	if ( devicestatus != MV_Ok )
 		{
 		FX_SetErrorCode( FX_MultiVocError );
@@ -270,7 +202,7 @@ int FX_Shutdown
 
 int FX_SetCallBack
    (
-   void ( *function )( unsigned long )
+   void ( *function )( unsigned int )
    )
 
    {
@@ -567,7 +499,7 @@ int FX_PlayVOC
    int left,
    int right,
    int priority,
-   unsigned long callbackval
+   unsigned int callbackval
    )
 
    {
@@ -594,14 +526,14 @@ int FX_PlayVOC
 int FX_PlayLoopedVOC
    (
    char *ptr,
-   long loopstart,
-   long loopend,
+   int loopstart,
+   int loopend,
    int pitchoffset,
    int vol,
    int left,
    int right,
    int priority,
-   unsigned long callbackval
+   unsigned int callbackval
    )
 
    {
@@ -633,7 +565,7 @@ int FX_PlayWAV
    int left,
    int right,
    int priority,
-   unsigned long callbackval
+   unsigned int callbackval
    )
 
    {
@@ -660,14 +592,14 @@ int FX_PlayWAV
 int FX_PlayLoopedWAV
    (
    char *ptr,
-   long loopstart,
-   long loopend,
+   int loopstart,
+   int loopend,
    int pitchoffset,
    int vol,
    int left,
    int right,
    int priority,
-   unsigned long callbackval
+   unsigned int callbackval
    )
 
    {
@@ -699,7 +631,7 @@ int FX_PlayVOC3D
    int angle,
    int distance,
    int priority,
-   unsigned long callbackval
+   unsigned int callbackval
    )
 
    {
@@ -731,7 +663,7 @@ int FX_PlayWAV3D
    int angle,
    int distance,
    int priority,
-   unsigned long callbackval
+   unsigned int callbackval
    )
 
    {
@@ -758,14 +690,14 @@ int FX_PlayWAV3D
 int FX_PlayRaw
    (
    char *ptr,
-   unsigned long length,
+   unsigned int length,
    unsigned rate,
    int pitchoffset,
    int vol,
    int left,
    int right,
    int priority,
-   unsigned long callbackval
+   unsigned int callbackval
    )
 
    {
@@ -792,7 +724,7 @@ int FX_PlayRaw
 int FX_PlayLoopedRaw
    (
    char *ptr,
-   unsigned long length,
+   unsigned int length,
    char *loopstart,
    char *loopend,
    unsigned rate,
@@ -801,7 +733,7 @@ int FX_PlayLoopedRaw
    int left,
    int right,
    int priority,
-   unsigned long callbackval
+   unsigned int callbackval
    )
 
    {
@@ -937,14 +869,14 @@ int FX_StopAllSounds
 
 int FX_StartDemandFeedPlayback
    (
-   void ( *function )( char **ptr, unsigned long *length ),
+   void ( *function )( char **ptr, unsigned int *length ),
    int rate,
    int pitchoffset,
    int vol,
    int left,
    int right,
    int priority,
-   unsigned long callbackval
+   unsigned int callbackval
    )
 
    {

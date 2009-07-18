@@ -42,13 +42,10 @@ enum MV_Errors
    MV_Ok      = 0,
    MV_UnsupportedCard,
    MV_NotInstalled,
+	MV_DriverError,
    MV_NoVoices,
    MV_NoMem,
    MV_VoiceNotFound,
-   MV_BlasterError,
-   MV_PasError,
-   MV_SoundScapeError,
-   MV_SoundSourceError,
    MV_InvalidVOCFile,
    MV_InvalidWAVFile,
 	MV_InvalidVorbisFile,
@@ -56,7 +53,7 @@ enum MV_Errors
    MV_NullRecordFunction
    };
 
-char *MV_ErrorString( int ErrorNumber );
+const char *MV_ErrorString( int ErrorNumber );
 int   MV_VoicePlaying( int handle );
 int   MV_KillAllVoices( void );
 int   MV_Kill( int handle );
@@ -77,34 +74,34 @@ int   MV_StartPlayback( void );
 void  MV_StopPlayback( void );
 int   MV_StartRecording( int MixRate, void ( *function )( char *ptr, int length ) );
 void  MV_StopRecord( void );
-int   MV_StartDemandFeedPlayback( void ( *function )( char **ptr, unsigned long *length ),
+int   MV_StartDemandFeedPlayback( void ( *function )( char **ptr, unsigned int *length ),
          int rate, int pitchoffset, int vol, int left, int right,
-         int priority, unsigned long callbackval );
-int   MV_PlayRaw( char *ptr, unsigned long length,
+         int priority, unsigned int callbackval );
+int   MV_PlayRaw( char *ptr, unsigned int length,
          unsigned rate, int pitchoffset, int vol, int left,
-         int right, int priority, unsigned long callbackval );
-int   MV_PlayLoopedRaw( char *ptr, unsigned long length,
+         int right, int priority, unsigned int callbackval );
+int   MV_PlayLoopedRaw( char *ptr, unsigned int length,
          char *loopstart, char *loopend, unsigned rate, int pitchoffset,
          int vol, int left, int right, int priority,
-         unsigned long callbackval );
+         unsigned int callbackval );
 int   MV_PlayWAV( char *ptr, int pitchoffset, int vol, int left,
-         int right, int priority, unsigned long callbackval );
+         int right, int priority, unsigned int callbackval );
 int   MV_PlayWAV3D( char *ptr, int pitchoffset, int angle, int distance,
-         int priority, unsigned long callbackval );
-int   MV_PlayLoopedWAV( char *ptr, long loopstart, long loopend,
+         int priority, unsigned int callbackval );
+int   MV_PlayLoopedWAV( char *ptr, int loopstart, int loopend,
          int pitchoffset, int vol, int left, int right, int priority,
-         unsigned long callbackval );
+         unsigned int callbackval );
 int   MV_PlayVOC3D( char *ptr, int pitchoffset, int angle, int distance,
-         int priority, unsigned long callbackval );
+         int priority, unsigned int callbackval );
 int   MV_PlayVOC( char *ptr, int pitchoffset, int vol, int left, int right,
-         int priority, unsigned long callbackval );
-int   MV_PlayLoopedVOC( char *ptr, long loopstart, long loopend,
+         int priority, unsigned int callbackval );
+int   MV_PlayLoopedVOC( char *ptr, int loopstart, int loopend,
          int pitchoffset, int vol, int left, int right, int priority,
-         unsigned long callbackval );
+         unsigned int callbackval );
 void  MV_CreateVolumeTable( int index, int volume, int MaxVolume );
 void  MV_SetVolume( int volume );
 int   MV_GetVolume( void );
-void  MV_SetCallBack( void ( *function )( unsigned long ) );
+void  MV_SetCallBack( void ( *function )( unsigned int ) );
 void  MV_SetReverseStereo( int setting );
 int   MV_GetReverseStereo( void );
 int   MV_Init( int soundcard, int MixRate, int Voices, int numchannels,

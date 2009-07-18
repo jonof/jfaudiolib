@@ -48,7 +48,7 @@ enum FX_ERRORS
 const char *FX_ErrorString( int ErrorNumber );
 int   FX_Init( int SoundCard, int numvoices, int numchannels, int samplebits, unsigned mixrate );
 int   FX_Shutdown( void );
-int   FX_SetCallBack( void ( *function )( unsigned long ) );
+int   FX_SetCallBack( void ( *function )( unsigned int ) );
 void  FX_SetVolume( int volume );
 int   FX_GetVolume( void );
 
@@ -67,33 +67,33 @@ int FX_SetPitch( int handle, int pitchoffset );
 int FX_SetFrequency( int handle, int frequency );
 
 int FX_PlayVOC( char *ptr, int pitchoffset, int vol, int left, int right,
-       int priority, unsigned long callbackval );
-int FX_PlayLoopedVOC( char *ptr, long loopstart, long loopend,
+       int priority, unsigned int callbackval );
+int FX_PlayLoopedVOC( char *ptr, int loopstart, int loopend,
        int pitchoffset, int vol, int left, int right, int priority,
-       unsigned long callbackval );
+       unsigned int callbackval );
 int FX_PlayWAV( char *ptr, int pitchoffset, int vol, int left, int right,
-       int priority, unsigned long callbackval );
-int FX_PlayLoopedWAV( char *ptr, long loopstart, long loopend,
+       int priority, unsigned int callbackval );
+int FX_PlayLoopedWAV( char *ptr, int loopstart, int loopend,
        int pitchoffset, int vol, int left, int right, int priority,
-       unsigned long callbackval );
+       unsigned int callbackval );
 int FX_PlayVOC3D( char *ptr, int pitchoffset, int angle, int distance,
-       int priority, unsigned long callbackval );
+       int priority, unsigned int callbackval );
 int FX_PlayWAV3D( char *ptr, int pitchoffset, int angle, int distance,
-       int priority, unsigned long callbackval );
-int FX_PlayRaw( char *ptr, unsigned long length, unsigned rate,
+       int priority, unsigned int callbackval );
+int FX_PlayRaw( char *ptr, unsigned int length, unsigned rate,
        int pitchoffset, int vol, int left, int right, int priority,
-       unsigned long callbackval );
-int FX_PlayLoopedRaw( char *ptr, unsigned long length, char *loopstart,
+       unsigned int callbackval );
+int FX_PlayLoopedRaw( char *ptr, unsigned int length, char *loopstart,
        char *loopend, unsigned rate, int pitchoffset, int vol, int left,
-       int right, int priority, unsigned long callbackval );
+       int right, int priority, unsigned int callbackval );
 int FX_Pan3D( int handle, int angle, int distance );
 int FX_SoundActive( int handle );
 int FX_SoundsPlaying( void );
 int FX_StopSound( int handle );
 int FX_StopAllSounds( void );
-int FX_StartDemandFeedPlayback( void ( *function )( char **ptr, unsigned long *length ),
+int FX_StartDemandFeedPlayback( void ( *function )( char **ptr, unsigned int *length ),
        int rate, int pitchoffset, int vol, int left, int right,
-       int priority, unsigned long callbackval );
+       int priority, unsigned int callbackval );
 int  FX_StartRecording( int MixRate, void ( *function )( char *ptr, int length ) );
 void FX_StopRecord( void );
 

@@ -1,3 +1,28 @@
+/*
+ Copyright (C) 2009 Jonathon Fowler <jf@jonof.id.au>
+ 
+ This program is free software; you can redistribute it and/or
+ modify it under the terms of the GNU General Public License
+ as published by the Free Software Foundation; either version 2
+ of the License, or (at your option) any later version.
+ 
+ This program is distributed in the hope that it will be useful,
+ but WITHOUT ANY WARRANTY; without even the implied warranty of
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+ 
+ See the GNU General Public License for more details.
+ 
+ You should have received a copy of the GNU General Public License
+ along with this program; if not, write to the Free Software
+ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
+ 
+ */
+
+/**
+ * Abstraction layer for hiding the various supported sound devices
+ * behind a common and opaque interface called on by MultiVoc.
+ */
+
 #include "drivers.h"
 
 #include "driver_nosound.h"
@@ -14,39 +39,116 @@
 # include "driver_directsound.h"
 #endif
 
-int ASS_SoundDevice = -1;
+int ASS_SoundDriver = -1;
 
-ASS_SoundDriver ASS_SoundDrivers[ASS_NumSoundCards] = {
-{
-	NoSoundDrv_GetError,
-	NoSoundDrv_ErrorString,
-},
-{
-#ifdef HAVE_SDL
-	SDLDrv_GetError,
-	SDLDrv_ErrorString,
-#else
-	0,
-	0,
-#endif
-},
-{
-#ifdef __APPLE__
-	CoreAudioDrv_GetError,
-	CoreAudioDrv_ErrorString,
-#else
-	0,
-	0,
-#endif
-},
-{
-#ifdef WIN32
-	DirectSoundDrv_GetError,
-	DirectSoundDrv_ErrorString,
-#else
-	0,
-	0,
-#endif
-},
+#define UNSUPPORTED { 0,0,0,0,0,0, },
+
+static struct {
+	int          (* GetError)(void);
+	const char * (* ErrorString)(int);
+	int          (* Init)(int, int, int);
+	void         (* Shutdown)(void);
+	int          (* BeginPlayback)(char *, int, int, void ( * )(void) );
+	void         (* StopPlayback)(void);
+} SoundDrivers[ASS_NumSoundCards] = {
+	
+	// Everyone gets the "no sound" driver
+	{
+		NoSoundDrv_GetError,
+		NoSoundDrv_ErrorString,
+		NoSoundDrv_Init,
+		NoSoundDrv_Shutdown,
+		NoSoundDrv_BeginPlayback,
+		NoSoundDrv_StopPlayback,
+	},
+	
+	// Simple DirectMedia Layer
+	#ifdef HAVE_SDL
+	{
+		SDLDrv_GetError,
+		SDLDrv_ErrorString,
+		SDLDrv_Init,
+		SDLDrv_Shutdown,
+		SDLDrv_BeginPlayback,
+		SDLDrv_StopPlayback,
+	},
+	#else
+		UNSUPPORTED
+	#endif
+	
+	// OS X CoreAudio
+	#ifdef __APPLE__
+	{
+		CoreAudioDrv_GetError,
+		CoreAudioDrv_ErrorString,
+		CoreAudioDrv_Init,
+		CoreAudioDrv_Shutdown,
+		CoreAudioDrv_BeginPlayback,
+		CoreAudioDrv_StopPlayback,
+	},
+	#else
+		UNSUPPORTED
+	#endif
+	
+	// Windows DirectSound
+	#ifdef WIN32
+	{
+		DirectSoundDrv_GetError,
+		DirectSoundDrv_ErrorString,
+		DirectSoundDrv_Init,
+		DirectSoundDrv_Shutdown,
+		DirectSoundDrv_BeginPlayback,
+		DirectSoundDrv_StopPlayback,
+	},
+	#else
+		UNSUPPORTED
+	#endif
 };
 
+
+int SoundDriver_IsSupported(int driver)
+{
+	return (SoundDrivers[driver].GetError != 0);
+}
+
+
+int SoundDriver_GetError(void)
+{
+	if (!SoundDriver_IsSupported(ASS_SoundDriver)) {
+		return -1;
+	}
+	return SoundDrivers[ASS_SoundDriver].GetError();
+}
+
+const char * SoundDriver_ErrorString( int ErrorNumber )
+{
+	if (ASS_SoundDriver < 0 || ASS_SoundDriver >= ASS_NumSoundCards) {
+		return "No sound driver selected.";
+	}
+	if (!SoundDriver_IsSupported(ASS_SoundDriver)) {
+		return "Unsupported sound driver selected.";
+	}
+	return SoundDrivers[ASS_SoundDriver].ErrorString(ErrorNumber);
+}
+
+int SoundDriver_Init(int mixrate, int numchannels, int samplebits)
+{
+	return SoundDrivers[ASS_SoundDriver].Init(mixrate, numchannels, samplebits);
+}
+
+void SoundDriver_Shutdown(void)
+{
+	SoundDrivers[ASS_SoundDriver].Shutdown();
+}
+
+int SoundDriver_BeginPlayback(char *BufferStart, int BufferSize,
+		int NumDivisions, void ( *CallBackFunc )( void ) )
+{
+	return SoundDrivers[ASS_SoundDriver].BeginPlayback(BufferStart,
+			BufferSize, NumDivisions, CallBackFunc);
+}
+
+void SoundDriver_StopPlayback(void)
+{
+	SoundDrivers[ASS_SoundDriver].StopPlayback();
+}

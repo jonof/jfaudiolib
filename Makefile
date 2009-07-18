@@ -5,6 +5,7 @@ CPPFLAGS=-Iinclude -Isrc
 SOURCES=src/drivers.c \
         src/fx_man.c \
         src/multivoc.c \
+	src/pitch.c \
         src/driver_nosound.c \
         src/driver_coreaudio.c
 
