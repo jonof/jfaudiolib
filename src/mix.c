@@ -39,71 +39,148 @@ void ClearBuffer_DW( void *ptr, unsigned data, int length )
 }
 
 /*
+ JBF:
+ 
  position = offset of starting sample in start
  rate = resampling increment
  start = sound data
  length = count of samples to mix
-
- Notes:
-   - The volume tables contain signed data, but the 8 bit mixers
-     operate on unsigned samples
-   - The mixers mix only an even number of samples, so MV_Mix will
-     silently skip the odd-numbered trailing sample if it exists
  */
 
+// 8-bit mono source, 8-bit mono output
 void MV_Mix8BitMono( unsigned int position, unsigned int rate,
 							char *start, unsigned int length )
 {
-	unsigned int sample0;
+	unsigned char *source = (unsigned char *) start;
+	unsigned char *dest = (unsigned char *) MV_MixDestination;
+	int sample0;
 	
 	length &= ~1;
 	
 	while (length--) {
-		sample0 = (unsigned int) *(start + (position >> 16));
+		sample0 = source[position >> 16];
 		position += rate;
 		
-		sample0 = MV_LeftVolume[sample0] + (unsigned int) *MV_MixDestination;
+		sample0 = MV_LeftVolume[sample0] + *dest;
 		sample0 = MV_HarshClipTable[sample0 + 128];
 		
-		*MV_MixDestination = sample0;
-		MV_MixDestination += MV_SampleSize;
+		*dest = sample0 & 255;
+		
+		dest += MV_SampleSize;
 	}
 	
 	MV_MixPosition = position;
+	MV_MixDestination = (char *) dest;
 }
 
-void MV_Mix8BitStereo( unsigned int position,
-							  unsigned int rate, char *start, unsigned int length )
+// 8-bit mono source, 8-bit stereo output
+void MV_Mix8BitStereo( unsigned int position, unsigned int rate,
+							  char *start, unsigned int length )
+{
+	unsigned char *source = (unsigned char *) start;
+	unsigned char *dest = (unsigned char *) MV_MixDestination;
+	int sample0, sample1;
+	
+	length &= ~1;
+	
+	while (length--) {
+		sample0 = source[position >> 16];
+		sample1 = sample0;
+		position += rate;
+		
+		sample0 = MV_LeftVolume[sample0] + *dest;
+		sample1 = MV_RightVolume[sample1] + *(dest + MV_RightChannelOffset);
+		sample0 = MV_HarshClipTable[sample0 + 128];
+		sample1 = MV_HarshClipTable[sample1 + 128];
+		
+		*dest = sample0 & 255;
+		*(dest + MV_RightChannelOffset) = sample1 & 255;
+		
+		dest += MV_SampleSize;
+	}
+	
+	MV_MixPosition = position;
+	MV_MixDestination = (char *) dest;
+}
+
+// 8-bit mono source, 16-bit mono output
+void MV_Mix16BitMono( unsigned int position, unsigned int rate,
+							 char *start, unsigned int length )
+{
+	unsigned char *source = (unsigned char *) start;
+	short *dest = (short *) MV_MixDestination;
+	int sample0;
+	
+	length &= ~1;
+	
+	while (length--) {
+		sample0 = source[position >> 16];
+		position += rate;
+		
+		sample0 = MV_LeftVolume[sample0] + *dest;
+		if (sample0 < -32768) sample0 = -32768;
+		else if (sample0 > 32767) sample0 = 32767;
+		
+		*dest = (short) sample0;
+		
+		dest += MV_SampleSize / 2;
+	}
+	
+	MV_MixPosition = position;
+	MV_MixDestination = (char *) dest;
+}
+
+// 8-bit mono source, 16-bit stereo output
+void MV_Mix16BitStereo( unsigned int position, unsigned int rate,
+								char *start, unsigned int length )
+{
+	unsigned char *source = (unsigned char *) start;
+	short *dest = (short *) MV_MixDestination;
+	int sample0, sample1;
+	
+	while (length--) {
+		sample0 = source[position >> 16];
+		sample1 = sample0;
+		position += rate;
+		
+		sample0 = MV_LeftVolume[sample0] + *dest;
+		sample1 = MV_RightVolume[sample1] + *(dest + MV_RightChannelOffset / 2);
+		if (sample0 < -32768) sample0 = -32768;
+		else if (sample0 > 32767) sample0 = 32767;
+		if (sample1 < -32768) sample1 = -32768;
+		else if (sample1 > 32767) sample1 = 32767;
+		
+		*dest = (short) sample0;
+		*(dest + MV_RightChannelOffset/2) = (short) sample1;
+		
+		dest += MV_SampleSize / 2;
+	}
+	
+	MV_MixPosition = position;
+	MV_MixDestination = (char *) dest;
+}
+
+// 16-bit mono source, 16-bit mono output
+void MV_Mix16BitMono16( unsigned int position, unsigned int rate,
+								char *start, unsigned int length )
 {
 }
 
-void MV_Mix16BitMono( unsigned int position,
-							 unsigned int rate, char *start, unsigned int length )
-{
-}
-
-void MV_Mix16BitStereo( unsigned int position,
-								unsigned int rate, char *start, unsigned int length )
-{
-}
-
-void MV_Mix16BitMono16( unsigned int position,
-								unsigned int rate, char *start, unsigned int length )
-{
-}
-
+// 16-bit mono source, 8-bit mono output
 void MV_Mix8BitMono16( unsigned int position, unsigned int rate,
 							  char *start, unsigned int length )
 {
 }
 
-void MV_Mix8BitStereo16( unsigned int position,
-								 unsigned int rate, char *start, unsigned int length )
+// 16-bit mono source, 8-bit stereo output
+void MV_Mix8BitStereo16( unsigned int position, unsigned int rate,
+								 char *start, unsigned int length )
 {
 }
 
-void MV_Mix16BitStereo16( unsigned int position,
-								  unsigned int rate, char *start, unsigned int length )
+// 16-bit mono source, 16-bit stereo output
+void MV_Mix16BitStereo16( unsigned int position, unsigned int rate,
+								  char *start, unsigned int length )
 {
 }
 

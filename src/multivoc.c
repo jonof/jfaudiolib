@@ -297,7 +297,9 @@ static void MV_Mix
          voclength = length;
          }
 
-      voice->mix( position, rate, start, voclength );
+		if (voice->mix) {
+			voice->mix( position, rate, start, voclength );
+      }
 
       if ( voclength & 1 )
          {
@@ -378,9 +380,15 @@ void MV_StopVoice
 
    JBF: no synchronisation happens inside MV_ServiceVoc nor the
         supporting functions it calls. This would cause a deadlock
-        between the mixer threads in the drivers vs the nested
+        between the mixer thread in the driver vs the nested
         locking in the user-space functions of MultiVoc. The call
         to MV_ServiceVoc is synchronised in the driver.
+
+        Known functions called by MV_ServiceVoc and its helpers:
+           MV_Mix (and its MV_Mix*bit* workers)
+           MV_GetNextVOCBlock
+           MV_GetNextWAVBlock
+           MV_SetVoiceMixMode
 ---------------------------------------------------------------------*/
 void MV_ServiceVoc
    (
@@ -596,6 +604,7 @@ playbackstatus MV_GetNextVOCBlock
          case 1 :
             // Sound data block
             voice->bits  = 8;
+				voice->channels = 1;
             if ( lastblocktype != 8 )
                {
                tc = ( unsigned int )*ptr << 8;
@@ -680,6 +689,7 @@ playbackstatus MV_GetNextVOCBlock
          case 8 :
             // Extended block
             voice->bits  = 8;
+				voice->channels = 1;
             tc = LITTLE16( *( unsigned short * )ptr );
             packtype = *( ptr + 2 );
             voicemode = *( ptr + 3 );
@@ -699,6 +709,7 @@ playbackstatus MV_GetNextVOCBlock
                ptr         += 12;
                blocklength -= 12;
                voice->bits  = 8;
+					voice->channels = 1;
                done         = TRUE;
                }
             else if ( ( BitsPerSample == 16 ) && ( Channels == 1 ) &&
@@ -707,6 +718,7 @@ playbackstatus MV_GetNextVOCBlock
                ptr         += 12;
                blocklength -= 12;
                voice->bits  = 16;
+					voice->channels = 1;
                done         = TRUE;
                }
             else
@@ -1339,6 +1351,20 @@ static short *MV_GetVolumeTable
    Function: MV_SetVoiceMixMode
 
    Selects which method should be used to mix the voice.
+
+ 8Bit  16Bit  8Bit  16Bit |  8Bit  16Bit  8Bit  16Bit |
+ Mono  Mono   Ster  Ster  |  Mono  Mono   Ster  Ster  |  Mixer
+ Out   Out    Out   Out   |  In    In     In    In    |
+--------------------------+---------------------------+-------------
+  X                       |         X                 | Mix8BitMono16
+  X                       |   X                       | Mix8BitMono
+               X          |         X                 | Mix8BitStereo16
+               X          |   X                       | Mix8BitStereo
+        X                 |         X                 | Mix16BitMono16
+        X                 |   X                       | Mix16BitMono
+                     X    |         X                 | Mix16BitStereo16
+                     X    |   X                       | Mix16BitStereo
+
 ---------------------------------------------------------------------*/
 
 static void MV_SetVoiceMixMode
@@ -1358,11 +1384,6 @@ static void MV_SetVoiceMixMode
       test |= T_8BITS;
       }
 
-   if ( voice->bits == 16 )
-      {
-      test |= T_16BITSOURCE;
-      }
-
    if ( MV_Channels == 1 )
       {
       test |= T_MONO;
@@ -1378,9 +1399,16 @@ static void MV_SetVoiceMixMode
          test |= T_LEFTQUIET;
          }
       }
-
-   // Default case
-   voice->mix = MV_Mix8BitMono;
+	
+   if ( voice->bits == 16 )
+      {
+      test |= T_16BITSOURCE;
+      }
+	
+	if ( voice->channels == 2 )
+      {
+      test |= T_STEREOSOURCE;
+      }
 
    switch( test )
       {
@@ -1453,7 +1481,7 @@ static void MV_SetVoiceMixMode
          break;
 
       default :
-         voice->mix = MV_Mix8BitMono;
+         voice->mix = 0;
       }
 
    //RestoreInterrupts( flags );
@@ -1931,6 +1959,7 @@ int MV_StartDemandFeedPlayback
 
    voice->wavetype    = DemandFeed;
    voice->bits        = 8;
+	voice->channels    = 1;
    voice->GetSound    = MV_GetNextDemandFeedBlock;
    voice->NextBlock   = NULL;
    voice->DemandFeed  = function;
@@ -2026,6 +2055,7 @@ int MV_PlayLoopedRaw
 
    voice->wavetype    = Raw;
    voice->bits        = 8;
+	voice->channels    = 1;
    voice->GetSound    = MV_GetNextRawBlock;
    voice->Playing     = TRUE;
    voice->NextBlock   = ptr;
@@ -2222,6 +2252,7 @@ int MV_PlayLoopedWAV
 
    voice->wavetype    = WAV;
    voice->bits        = format.nBitsPerSample;
+	voice->channels    = 1;
    voice->GetSound    = MV_GetNextWAVBlock;
 
    length = data.size;
@@ -2397,6 +2428,7 @@ int MV_PlayLoopedVOC
 
    voice->wavetype    = VOC;
    voice->bits        = 8;
+	voice->channels    = 1;
    voice->GetSound    = MV_GetNextVOCBlock;
    voice->NextBlock   = ptr + LITTLE16(*( unsigned short * )( ptr + 0x14 ));
    voice->DemandFeed  = NULL;

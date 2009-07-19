@@ -44,12 +44,13 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #define VOC_CREATIVE_ADPCM  0x200
 
 #define T_SIXTEENBIT_STEREO 0
-#define T_8BITS       1
-#define T_MONO        2
-#define T_16BITSOURCE 4
-#define T_LEFTQUIET   8
-#define T_RIGHTQUIET  16
-#define T_DEFAULT     T_SIXTEENBIT_STEREO
+#define T_8BITS        1
+#define T_MONO         2
+#define T_16BITSOURCE  4
+#define T_STEREOSOURCE 8
+#define T_LEFTQUIET    16
+#define T_RIGHTQUIET   32
+#define T_DEFAULT      T_SIXTEENBIT_STEREO
 
 #define MV_MaxPanPosition  31
 #define MV_NumPanPositions ( MV_MaxPanPosition + 1 )
@@ -109,6 +110,7 @@ typedef struct VoiceNode
 
    wavedata      wavetype;
    char          bits;
+	char          channels;
 
    playbackstatus ( *GetSound )( struct VoiceNode *voice );
 
