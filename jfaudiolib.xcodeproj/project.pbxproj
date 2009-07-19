@@ -191,14 +191,34 @@
 		AB2E9E341011E60300DD2F1F /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				ARCHS = (
+					ppc,
+					i386,
+				);
 				COPY_PHASE_STRIP = NO;
+				GCC_VERSION_i386 = 4.0;
+				GCC_VERSION_ppc = 4.0;
+				MACOSX_DEPLOYMENT_TARGET_i386 = 10.4;
+				MACOSX_DEPLOYMENT_TARGET_ppc = 10.3;
+				SDKROOT_i386 = /Developer/SDKs/MacOSX10.4u.sdk;
+				SDKROOT_ppc = /Developer/SDKs/MacOSX10.3.9.sdk;
 			};
 			name = Debug;
 		};
 		AB2E9E351011E60300DD2F1F /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				ARCHS = (
+					ppc,
+					i386,
+				);
 				COPY_PHASE_STRIP = YES;
+				GCC_VERSION_i386 = 4.0;
+				GCC_VERSION_ppc = 4.0;
+				MACOSX_DEPLOYMENT_TARGET_i386 = 10.4;
+				MACOSX_DEPLOYMENT_TARGET_ppc = 10.3;
+				SDKROOT_i386 = /Developer/SDKs/MacOSX10.4u.sdk;
+				SDKROOT_ppc = /Developer/SDKs/MacOSX10.3.9.sdk;
 			};
 			name = Release;
 		};

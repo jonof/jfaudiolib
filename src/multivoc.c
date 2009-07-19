@@ -57,6 +57,9 @@ static inline unsigned int SWAP32(unsigned int s)
 	return (s >> 24) | (s << 24) | ((s&0xff00) << 8) | ((s & 0xff0000) >> 8);
 }
 
+#define min(x,y) ((x) < (y) ? (x) : (y))
+#define max(x,y) ((x) > (y) ? (x) : (y))
+
 #define RoundFixed( fixedval, bits )            \
         (                                       \
           (                                     \
@@ -130,6 +133,16 @@ int MV_ErrorCode = MV_Ok;
 
 #define MV_SetErrorCode( status ) \
    MV_ErrorCode   = ( status );
+
+
+int DisableInterrupts(void)
+{
+	return 0;
+}
+
+void RestoreInterrupts(int a)
+{
+}
 
 
 /*---------------------------------------------------------------------
@@ -1782,7 +1795,7 @@ int MV_StartPlayback
 //   return( MV_Ok );
 
    // Start playback
-	status = SoundDriver_BeginPlayback(MV_MixBuffer[0], TotalBufferSize,
+	status = SoundDriver_BeginPlayback(MV_MixBuffer[0], MV_BufferSize,
 												  MV_NumberOfBuffers, MV_ServiceVoc);
 	if (status != MV_Ok) {
 		MV_SetErrorCode(MV_DriverError);
@@ -2781,4 +2794,3 @@ int MV_Shutdown
 
    return( MV_Ok );
    }
-

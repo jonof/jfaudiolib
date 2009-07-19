@@ -21,8 +21,8 @@
 #include "_multivc.h"
 
 extern char  *MV_HarshClipTable;
-extern char  *MV_MixDestination;
-extern unsigned int MV_MixPosition;
+extern char  *MV_MixDestination;			// pointer to the next output sample
+extern unsigned int MV_MixPosition;		// return value of where the source pointer got to
 extern short *MV_LeftVolume;
 extern short *MV_RightVolume;
 extern int    MV_SampleSize;
@@ -38,9 +38,38 @@ void ClearBuffer_DW( void *ptr, unsigned data, int length )
 	}
 }
 
+/*
+ position = offset of starting sample in start
+ rate = resampling increment
+ start = sound data
+ length = count of samples to mix
+
+ Notes:
+   - The volume tables contain signed data, but the 8 bit mixers
+     operate on unsigned samples
+   - The mixers mix only an even number of samples, so MV_Mix will
+     silently skip the odd-numbered trailing sample if it exists
+ */
+
 void MV_Mix8BitMono( unsigned int position, unsigned int rate,
 							char *start, unsigned int length )
 {
+	unsigned int sample0;
+	
+	length &= ~1;
+	
+	while (length--) {
+		sample0 = (unsigned int) *(start + (position >> 16));
+		position += rate;
+		
+		sample0 = MV_LeftVolume[sample0] + (unsigned int) *MV_MixDestination;
+		sample0 = MV_HarshClipTable[sample0 + 128];
+		
+		*MV_MixDestination = sample0;
+		MV_MixDestination += MV_SampleSize;
+	}
+	
+	MV_MixPosition = position;
 }
 
 void MV_Mix8BitStereo( unsigned int position,
