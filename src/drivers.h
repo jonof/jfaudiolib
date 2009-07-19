@@ -35,5 +35,7 @@ int SoundDriver_BeginPlayback( char *BufferStart,
 			 int BufferSize, int NumDivisions, 
 			 void ( *CallBackFunc )( void ) );
 void SoundDriver_StopPlayback(void);
+void *SoundDriver_Lock(void);
+void SoundDriver_Unlock(void *);
 
 #endif

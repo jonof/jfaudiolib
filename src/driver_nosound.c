@@ -26,3 +26,12 @@ int NoSoundDrv_BeginPlayback(char *BufferStart, int BufferSize,
 void NoSoundDrv_StopPlayback(void)
 {
 }
+
+void * NoSoundDrv_Lock(void)
+{
+	return 0;
+}
+
+void NoSoundDrv_Unlock(void * a)
+{
+}

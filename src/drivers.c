@@ -41,7 +41,7 @@
 
 int ASS_SoundDriver = -1;
 
-#define UNSUPPORTED { 0,0,0,0,0,0, },
+#define UNSUPPORTED { 0,0,0,0,0,0,0,0, },
 
 static struct {
 	int          (* GetError)(void);
@@ -50,6 +50,8 @@ static struct {
 	void         (* Shutdown)(void);
 	int          (* BeginPlayback)(char *, int, int, void ( * )(void) );
 	void         (* StopPlayback)(void);
+	void *       (* Lock)(void);
+	void         (* Unlock)(void *);
 } SoundDrivers[ASS_NumSoundCards] = {
 	
 	// Everyone gets the "no sound" driver
@@ -60,6 +62,8 @@ static struct {
 		NoSoundDrv_Shutdown,
 		NoSoundDrv_BeginPlayback,
 		NoSoundDrv_StopPlayback,
+		NoSoundDrv_Lock,
+		NoSoundDrv_Unlock,
 	},
 	
 	// Simple DirectMedia Layer
@@ -71,6 +75,8 @@ static struct {
 		SDLDrv_Shutdown,
 		SDLDrv_BeginPlayback,
 		SDLDrv_StopPlayback,
+		SDLDrv_Lock,
+		SDLDrv_Unlock,
 	},
 	#else
 		UNSUPPORTED
@@ -85,6 +91,8 @@ static struct {
 		CoreAudioDrv_Shutdown,
 		CoreAudioDrv_BeginPlayback,
 		CoreAudioDrv_StopPlayback,
+		CoreAudioDrv_Lock,
+		CoreAudioDrv_Unlock,
 	},
 	#else
 		UNSUPPORTED
@@ -99,6 +107,8 @@ static struct {
 		DirectSoundDrv_Shutdown,
 		DirectSoundDrv_BeginPlayback,
 		DirectSoundDrv_StopPlayback,
+		DirectSoundDrv_Lock,
+		DirectSoundDrv_Unlock,
 	},
 	#else
 		UNSUPPORTED
@@ -151,4 +161,14 @@ int SoundDriver_BeginPlayback(char *BufferStart, int BufferSize,
 void SoundDriver_StopPlayback(void)
 {
 	SoundDrivers[ASS_SoundDriver].StopPlayback();
+}
+
+void * SoundDriver_Lock(void)
+{
+	return SoundDrivers[ASS_SoundDriver].Lock();
+}
+
+void SoundDriver_Unlock(void * a)
+{
+	SoundDrivers[ASS_SoundDriver].Unlock(a);
 }

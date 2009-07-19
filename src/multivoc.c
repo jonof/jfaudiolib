@@ -135,13 +135,14 @@ int MV_ErrorCode = MV_Ok;
    MV_ErrorCode   = ( status );
 
 
-int DisableInterrupts(void)
+static void * DisableInterrupts(void)
 {
-	return 0;
+	return SoundDriver_Lock();
 }
 
-void RestoreInterrupts(int a)
+static void RestoreInterrupts(void * a)
 {
+	SoundDriver_Unlock(a);
 }
 
 
@@ -329,7 +330,7 @@ void MV_PlayVoice
    )
 
    {
-   unsigned flags;
+   void * flags;
 
    flags = DisableInterrupts();
    LL_SortedInsertion( &VoiceList, voice, prev, next, VoiceNode, priority );
@@ -350,13 +351,13 @@ void MV_StopVoice
    )
 
    {
-   unsigned  flags;
+   void * flags;
 
    flags = DisableInterrupts();
 
    // move the voice from the play list to the free list
    LL_Remove( voice, next, prev );
-   LL_Add( &VoicePool, voice, next, prev );
+   LL_Add( (VoiceNode*) &VoicePool, voice, next, prev );
 
    RestoreInterrupts( flags );
    }
@@ -379,6 +380,7 @@ void MV_ServiceVoc
    VoiceNode *voice;
    VoiceNode *next;
    char      *buffer;
+	void *     flags;
 
    // Toggle which buffer we'll mix next
    MV_MixPage++;
@@ -455,6 +457,8 @@ void MV_ServiceVoc
       }
 
    // Play any waiting voices
+	flags = DisableInterrupts();
+	
    for( voice = VoiceList.next; voice != &VoiceList; voice = next )
       {
 //      if ( ( voice < &MV_Voices[ 0 ] ) || ( voice > &MV_Voices[ 8 ] ) )
@@ -472,7 +476,9 @@ void MV_ServiceVoc
       // Is this voice done?
       if ( !voice->Playing )
          {
-         MV_StopVoice( voice );
+         //MV_StopVoice( voice );
+			LL_Remove( voice, next, prev );
+			LL_Add( (VoiceNode*) &VoicePool, voice, next, prev );
 
          if ( MV_CallBackFunc )
             {
@@ -480,6 +486,8 @@ void MV_ServiceVoc
             }
          }
       }
+	
+	RestoreInterrupts(flags);
    }
 
 
@@ -922,7 +930,7 @@ VoiceNode *MV_GetVoice
 
    {
    VoiceNode *voice;
-   unsigned  flags;
+   void * flags;
 
    flags = DisableInterrupts();
 
@@ -1018,7 +1026,7 @@ int MV_Kill
 
    {
    VoiceNode *voice;
-   unsigned  flags;
+   void * flags;
    unsigned  long callbackval;
 
    if ( !MV_Installed )
@@ -1066,7 +1074,7 @@ int MV_VoicesPlaying
    {
    VoiceNode   *voice;
    int         NumVoices = 0;
-   unsigned    flags;
+   void * flags;
 
    if ( !MV_Installed )
       {
@@ -1101,7 +1109,7 @@ VoiceNode *MV_AllocVoice
    {
    VoiceNode   *voice;
    VoiceNode   *node;
-   unsigned    flags;
+   void * flags;
 
 //return( NULL );
    if ( MV_Recording )
@@ -1173,7 +1181,7 @@ int MV_VoiceAvailable
    {
    VoiceNode   *voice;
    VoiceNode   *node;
-   unsigned    flags;
+   void * flags;
 
    // Check if we have any free voices
    if ( !LL_Empty( &VoicePool, next, prev ) )
@@ -1332,7 +1340,7 @@ static void MV_SetVoiceMixMode
    )
 
    {
-   unsigned flags;
+   void * flags;
    int test;
 
    flags = DisableInterrupts();
@@ -1497,7 +1505,7 @@ int MV_EndLooping
 
    {
    VoiceNode *voice;
-   unsigned flags;
+   void * flags;
 
    if ( !MV_Installed )
       {
@@ -1822,7 +1830,7 @@ void MV_StopPlayback
    {
    VoiceNode   *voice;
    VoiceNode   *next;
-   unsigned    flags;
+   void * flags;
 
    // Stop sound playback
 	SoundDriver_StopPlayback();
@@ -2663,12 +2671,12 @@ int MV_Init
    // Set number of voices before calculating volume table
    MV_MaxVoices = Voices;
 
-   LL_Reset( &VoiceList, next, prev );
-   LL_Reset( &VoicePool, next, prev );
+   LL_Reset( (VoiceNode*) &VoiceList, next, prev );
+   LL_Reset( (VoiceNode*) &VoicePool, next, prev );
 
    for( index = 0; index < Voices; index++ )
       {
-      LL_Add( &VoicePool, &MV_Voices[ index ], next, prev );
+      LL_Add( (VoiceNode*) &VoicePool, &MV_Voices[ index ], next, prev );
       }
 
    MV_SetReverseStereo( FALSE );
@@ -2749,7 +2757,7 @@ int MV_Shutdown
 
    {
    int      buffer;
-   unsigned flags;
+   void * flags;
 
    if ( !MV_Installed )
       {
@@ -2781,8 +2789,8 @@ int MV_Shutdown
    MV_Voices      = NULL;
    MV_TotalMemory = 0;
 
-   LL_Reset( &VoiceList, next, prev );
-   LL_Reset( &VoicePool, next, prev );
+   LL_Reset( (VoiceNode*) &VoiceList, next, prev );
+   LL_Reset( (VoiceNode*) &VoicePool, next, prev );
 
    MV_MaxVoices = 1;
 

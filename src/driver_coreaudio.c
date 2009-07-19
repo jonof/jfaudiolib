@@ -27,6 +27,7 @@
  */
 
 #include <AudioUnit/AudioUnit.h>
+#include <pthread.h>
 #include "driver_coreaudio.h"
 
 enum {
@@ -38,12 +39,14 @@ enum {
 	CAErr_OpenAComponent,
 	CAErr_AudioUnitInitialize,
 	CAErr_AudioUnitSetProperty,
+	CAErr_Mutex
 };
 
 static int ErrorCode = CAErr_Ok;
 static int Initialised = 0;
 static int Playing = 0;
 static ComponentInstance output_audio_unit;
+static pthread_mutex_t mutex;
 
 static char *MixBuffer = 0;
 static int MixBufferSize = 0;
@@ -64,7 +67,7 @@ static OSStatus fillInput(
 	
 	remaining = ioData->mDataByteSize;
 	ptr = ioData->mData;
-
+	
 	while (remaining > 0) {
 		if (MixBufferUsed == MixBufferSize) {
 			MixCallBack();
@@ -91,7 +94,7 @@ static OSStatus fillInput(
 			remaining -= len;
 		}
 	}
-	
+
 	return noErr;
 }
 
@@ -134,6 +137,10 @@ const char *CoreAudioDrv_ErrorString( int ErrorNumber )
 		case CAErr_AudioUnitSetProperty:
 			ErrorString = "CoreAudio error: AudioUnitSetProperty failed.";
 			break;
+
+		case CAErr_Mutex:
+			ErrorString = "CoreAudio error: could not initialise mutex.";
+			break;
 			
 		default:
 			ErrorString = "Unknown CoreAudio error code.";
@@ -155,6 +162,11 @@ int CoreAudioDrv_Init(int mixrate, int numchannels, int samplebits)
 		CoreAudioDrv_Shutdown();
 	}
 	
+	if (pthread_mutex_init(&mutex, 0) < 0) {
+		ErrorCode = CAErr_Mutex;
+		return CAErr_Error;
+	}
+
    // Setup a AudioStreamBasicDescription with the requested format
 	requestedDesc.mFormatID = kAudioFormatLinearPCM;
 	requestedDesc.mFormatFlags = kLinearPCMFormatFlagIsPacked;
@@ -182,6 +194,7 @@ int CoreAudioDrv_Init(int mixrate, int numchannels, int samplebits)
 	comp = FindNextComponent(NULL, &desc);
 	if (comp == NULL) {
       ErrorCode = CAErr_FindNextComponent;
+		pthread_mutex_destroy(&mutex);
       return CAErr_Error;
 	}
 	
@@ -190,6 +203,7 @@ int CoreAudioDrv_Init(int mixrate, int numchannels, int samplebits)
 	if (result != noErr) {
       ErrorCode = CAErr_OpenAComponent;
       CloseComponent(output_audio_unit);
+		pthread_mutex_destroy(&mutex);
       return CAErr_Error;
 	}
 	
@@ -197,6 +211,7 @@ int CoreAudioDrv_Init(int mixrate, int numchannels, int samplebits)
 	if (result != noErr) {
       ErrorCode = CAErr_AudioUnitInitialize;
       CloseComponent(output_audio_unit);
+		pthread_mutex_destroy(&mutex);
       return CAErr_Error;
 	}
 	
@@ -210,6 +225,7 @@ int CoreAudioDrv_Init(int mixrate, int numchannels, int samplebits)
 	if (result != noErr) {
       ErrorCode = CAErr_AudioUnitSetProperty;
       CloseComponent(output_audio_unit);
+		pthread_mutex_destroy(&mutex);
       return CAErr_Error;
 	}
 	
@@ -250,6 +266,8 @@ void CoreAudioDrv_Shutdown(void)
 											&callback,
 											sizeof(callback));
 	result = CloseComponent(output_audio_unit);
+
+	pthread_mutex_destroy(&mutex);
 	
 	Initialised = 0;
 }
@@ -289,7 +307,20 @@ void CoreAudioDrv_StopPlayback(void)
 		return;
 	}
 	
+	CoreAudioDrv_Lock();
 	AudioOutputUnitStop(output_audio_unit);
+	CoreAudioDrv_Unlock(0);
 	
 	Playing = 0;
+}
+
+void * CoreAudioDrv_Lock(void)
+{
+	pthread_mutex_lock(&mutex);
+	return 0;
+}
+
+void CoreAudioDrv_Unlock(void * a)
+{
+	pthread_mutex_unlock(&mutex);
 }
