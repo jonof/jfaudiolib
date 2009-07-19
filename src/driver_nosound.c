@@ -27,11 +27,10 @@ void NoSoundDrv_StopPlayback(void)
 {
 }
 
-void * NoSoundDrv_Lock(void)
+void NoSoundDrv_Lock(void)
 {
-	return 0;
 }
 
-void NoSoundDrv_Unlock(void * a)
+void NoSoundDrv_Unlock(void)
 {
 }

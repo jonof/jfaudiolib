@@ -70,7 +70,9 @@ static OSStatus fillInput(
 	
 	while (remaining > 0) {
 		if (MixBufferUsed == MixBufferSize) {
+			CoreAudioDrv_Lock();
 			MixCallBack();
+			CoreAudioDrv_Unlock();
 			
 			MixBufferUsed = 0;
 			MixBufferCurrent++;
@@ -309,18 +311,17 @@ void CoreAudioDrv_StopPlayback(void)
 	
 	CoreAudioDrv_Lock();
 	AudioOutputUnitStop(output_audio_unit);
-	CoreAudioDrv_Unlock(0);
+	CoreAudioDrv_Unlock();
 	
 	Playing = 0;
 }
 
-void * CoreAudioDrv_Lock(void)
+void CoreAudioDrv_Lock(void)
 {
 	pthread_mutex_lock(&mutex);
-	return 0;
 }
 
-void CoreAudioDrv_Unlock(void * a)
+void CoreAudioDrv_Unlock(void)
 {
 	pthread_mutex_unlock(&mutex);
 }

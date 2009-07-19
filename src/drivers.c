@@ -50,8 +50,8 @@ static struct {
 	void         (* Shutdown)(void);
 	int          (* BeginPlayback)(char *, int, int, void ( * )(void) );
 	void         (* StopPlayback)(void);
-	void *       (* Lock)(void);
-	void         (* Unlock)(void *);
+	void         (* Lock)(void);
+	void         (* Unlock)(void);
 } SoundDrivers[ASS_NumSoundCards] = {
 	
 	// Everyone gets the "no sound" driver
@@ -163,12 +163,12 @@ void SoundDriver_StopPlayback(void)
 	SoundDrivers[ASS_SoundDriver].StopPlayback();
 }
 
-void * SoundDriver_Lock(void)
+void SoundDriver_Lock(void)
 {
-	return SoundDrivers[ASS_SoundDriver].Lock();
+	SoundDrivers[ASS_SoundDriver].Lock();
 }
 
-void SoundDriver_Unlock(void * a)
+void SoundDriver_Unlock(void)
 {
-	SoundDrivers[ASS_SoundDriver].Unlock(a);
+	SoundDrivers[ASS_SoundDriver].Unlock();
 }

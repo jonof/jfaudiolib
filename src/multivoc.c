@@ -32,6 +32,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include <stdlib.h>
 #include <string.h>
 #include <time.h>
+#include <stdio.h>
 #include "linklist.h"
 #include "sndcards.h"
 #include "drivers.h"
@@ -134,15 +135,22 @@ int MV_ErrorCode = MV_Ok;
 #define MV_SetErrorCode( status ) \
    MV_ErrorCode   = ( status );
 
-
-static void * DisableInterrupts(void)
+static int lockdepth = 0;
+static int DisableInterrupts(void)
 {
-	return SoundDriver_Lock();
+	if (lockdepth++ > 0) {
+		return 0;
+	}
+	SoundDriver_Lock();
+	return 0;
 }
 
-static void RestoreInterrupts(void * a)
+static void RestoreInterrupts(int a)
 {
-	SoundDriver_Unlock(a);
+	if (--lockdepth > 0) {
+		return;
+	}
+	SoundDriver_Unlock();
 }
 
 
@@ -180,9 +188,9 @@ const char *MV_ErrorString
          ErrorString = "Multivoc not installed.";
          break;
 			
-		case MV_DriverError :
-			ErrorString = SoundDriver_ErrorString(SoundDriver_GetError());
-			break;
+      case MV_DriverError :
+         ErrorString = SoundDriver_ErrorString(SoundDriver_GetError());
+         break;
 
       case MV_NoVoices :
          ErrorString = "No free voices available to Multivoc.";
@@ -330,7 +338,7 @@ void MV_PlayVoice
    )
 
    {
-   void * flags;
+   int flags;
 
    flags = DisableInterrupts();
    LL_SortedInsertion( &VoiceList, voice, prev, next, VoiceNode, priority );
@@ -351,7 +359,7 @@ void MV_StopVoice
    )
 
    {
-   void * flags;
+   int flags;
 
    flags = DisableInterrupts();
 
@@ -367,10 +375,13 @@ void MV_StopVoice
    Function: MV_ServiceVoc
 
    Starts playback of the waiting buffer and mixes the next one.
+
+   JBF: no synchronisation happens inside MV_ServiceVoc nor the
+        supporting functions it calls. This would cause a deadlock
+        between the mixer threads in the drivers vs the nested
+        locking in the user-space functions of MultiVoc. The call
+        to MV_ServiceVoc is synchronised in the driver.
 ---------------------------------------------------------------------*/
-
-// static int backcolor = 1;
-
 void MV_ServiceVoc
    (
    void
@@ -380,7 +391,7 @@ void MV_ServiceVoc
    VoiceNode *voice;
    VoiceNode *next;
    char      *buffer;
-	void *     flags;
+	//int        flags;
 
    // Toggle which buffer we'll mix next
    MV_MixPage++;
@@ -457,16 +468,10 @@ void MV_ServiceVoc
       }
 
    // Play any waiting voices
-	flags = DisableInterrupts();
+   //flags = DisableInterrupts();
 	
    for( voice = VoiceList.next; voice != &VoiceList; voice = next )
       {
-//      if ( ( voice < &MV_Voices[ 0 ] ) || ( voice > &MV_Voices[ 8 ] ) )
-//         {
-//         SetBorderColor(backcolor++);
-//         break;
-//         }
-
       MV_BufferEmpty[ MV_MixPage ] = FALSE;
 
       MV_MixFunction( voice, MV_MixPage );
@@ -476,9 +481,10 @@ void MV_ServiceVoc
       // Is this voice done?
       if ( !voice->Playing )
          {
-         //MV_StopVoice( voice );
-			LL_Remove( voice, next, prev );
-			LL_Add( (VoiceNode*) &VoicePool, voice, next, prev );
+         //JBF: prevent a deadlock caused by MV_StopVoice grabbing the mutex again
+			//MV_StopVoice( voice );
+         LL_Remove( voice, next, prev );
+         LL_Add( (VoiceNode*) &VoicePool, voice, next, prev );
 
          if ( MV_CallBackFunc )
             {
@@ -487,7 +493,7 @@ void MV_ServiceVoc
          }
       }
 	
-	RestoreInterrupts(flags);
+   //RestoreInterrupts(flags);
    }
 
 
@@ -682,7 +688,7 @@ playbackstatus MV_GetNextVOCBlock
 
          case 9 :
             // New sound data block
-            samplespeed = LITTLE32( *( unsigned long * )ptr );
+            samplespeed = LITTLE32( *( unsigned int * )ptr );
             BitsPerSample = ( unsigned )*( ptr + 4 );
             Channels = ( unsigned )*( ptr + 5 );
             Format = ( unsigned )LITTLE16( *( unsigned short * )( ptr + 6 ) );
@@ -733,17 +739,17 @@ playbackstatus MV_GetNextVOCBlock
 
       if ( voice->LoopEnd != NULL )
          {
-         if ( blocklength > ( unsigned long )voice->LoopEnd )
+         if ( blocklength > ( unsigned int )voice->LoopEnd )
             {
-            blocklength = ( unsigned long )voice->LoopEnd;
+            blocklength = ( unsigned int )voice->LoopEnd;
             }
          else
             {
             voice->LoopEnd = ( char * )blocklength;
             }
 
-         voice->LoopStart = voice->sound + ( unsigned long )voice->LoopStart;
-         voice->LoopEnd   = voice->sound + ( unsigned long )voice->LoopEnd;
+         voice->LoopStart = voice->sound + ( unsigned int )voice->LoopStart;
+         voice->LoopEnd   = voice->sound + ( unsigned int )voice->LoopEnd;
          voice->LoopSize  = voice->LoopEnd - voice->LoopStart;
          }
 
@@ -930,7 +936,7 @@ VoiceNode *MV_GetVoice
 
    {
    VoiceNode *voice;
-   void * flags;
+   int        flags;
 
    flags = DisableInterrupts();
 
@@ -947,6 +953,7 @@ VoiceNode *MV_GetVoice
    if ( voice == &VoiceList )
       {
       MV_SetErrorCode( MV_VoiceNotFound );
+      voice = 0;
       }
 
    return( voice );
@@ -1026,8 +1033,8 @@ int MV_Kill
 
    {
    VoiceNode *voice;
-   void * flags;
-   unsigned  long callbackval;
+   int        flags;
+   unsigned int callbackval;
 
    if ( !MV_Installed )
       {
@@ -1074,7 +1081,7 @@ int MV_VoicesPlaying
    {
    VoiceNode   *voice;
    int         NumVoices = 0;
-   void * flags;
+   int         flags;
 
    if ( !MV_Installed )
       {
@@ -1109,7 +1116,7 @@ VoiceNode *MV_AllocVoice
    {
    VoiceNode   *voice;
    VoiceNode   *node;
-   void * flags;
+   int          flags;
 
 //return( NULL );
    if ( MV_Recording )
@@ -1181,7 +1188,7 @@ int MV_VoiceAvailable
    {
    VoiceNode   *voice;
    VoiceNode   *node;
-   void * flags;
+   int          flags;
 
    // Check if we have any free voices
    if ( !LL_Empty( &VoicePool, next, prev ) )
@@ -1340,10 +1347,10 @@ static void MV_SetVoiceMixMode
    )
 
    {
-   void * flags;
+   //int flags;
    int test;
 
-   flags = DisableInterrupts();
+   //flags = DisableInterrupts();
 
    test = T_DEFAULT;
    if ( MV_Bits == 8 )
@@ -1449,7 +1456,7 @@ static void MV_SetVoiceMixMode
          voice->mix = MV_Mix8BitMono;
       }
 
-   RestoreInterrupts( flags );
+   //RestoreInterrupts( flags );
    }
 
 
@@ -1505,7 +1512,7 @@ int MV_EndLooping
 
    {
    VoiceNode *voice;
-   void * flags;
+   int        flags;
 
    if ( !MV_Installed )
       {
@@ -1803,14 +1810,14 @@ int MV_StartPlayback
 //   return( MV_Ok );
 
    // Start playback
-	status = SoundDriver_BeginPlayback(MV_MixBuffer[0], MV_BufferSize,
+   status = SoundDriver_BeginPlayback(MV_MixBuffer[0], MV_BufferSize,
 												  MV_NumberOfBuffers, MV_ServiceVoc);
-	if (status != MV_Ok) {
-		MV_SetErrorCode(MV_DriverError);
-		return MV_Error;
-	}
+   if (status != MV_Ok) {
+      MV_SetErrorCode(MV_DriverError);
+      return MV_Error;
+   }
 	
-	MV_MixRate = MV_RequestedMixRate;
+   MV_MixRate = MV_RequestedMixRate;
 
    return( MV_Ok );
    }
@@ -1830,10 +1837,10 @@ void MV_StopPlayback
    {
    VoiceNode   *voice;
    VoiceNode   *next;
-   void * flags;
+   int          flags;
 
    // Stop sound playback
-	SoundDriver_StopPlayback();
+   SoundDriver_StopPlayback();
 
    // Make sure all callbacks are done.
    flags = DisableInterrupts();
@@ -2695,7 +2702,7 @@ int MV_Init
 
       free( MV_Voices );
       MV_Voices      = NULL;
-		MV_HarshClipTable = NULL;
+      MV_HarshClipTable = NULL;
       MV_TotalMemory = 0;
 
       MV_SetErrorCode( status );
@@ -2757,14 +2764,11 @@ int MV_Shutdown
 
    {
    int      buffer;
-   void * flags;
 
    if ( !MV_Installed )
       {
       return( MV_Ok );
       }
-
-   flags = DisableInterrupts();
 
    MV_KillAllVoices();
 
@@ -2781,8 +2785,6 @@ int MV_Shutdown
 
    // Shutdown the sound card
 	SoundDriver_Shutdown();
-
-   RestoreInterrupts( flags );
 
    // Free any voices we allocated
    free( MV_Voices );

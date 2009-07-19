@@ -5,5 +5,5 @@ void CoreAudioDrv_Shutdown(void);
 int CoreAudioDrv_BeginPlayback(char *BufferStart, int BufferSize,
 										 int NumDivisions, void ( *CallBackFunc )( void ) );
 void CoreAudioDrv_StopPlayback(void);
-void * CoreAudioDrv_Lock(void);
-void CoreAudioDrv_Unlock(void *);
+void CoreAudioDrv_Lock(void);
+void CoreAudioDrv_Unlock(void);
