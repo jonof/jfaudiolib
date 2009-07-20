@@ -154,8 +154,8 @@ typedef struct
 
 typedef struct
    {
-   char left;
-   char right;
+   unsigned char left;
+   unsigned char right;
    } Pan;
 
 typedef signed short MONO16;
