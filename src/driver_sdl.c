@@ -6,7 +6,8 @@ enum {
    SDLErr_Error   = -1,
    SDLErr_Ok      = 0,
    SDLErr_Uninitialised,
-   SDLErr_InitSubSystem
+   SDLErr_InitSubSystem,
+   SDLErr_OpenAudio
 };
 
 static int ErrorCode = SDLErr_Ok;
@@ -82,6 +83,10 @@ const char *SDLDrv_ErrorString( int ErrorNumber )
             ErrorString = "SDL Audio: error in Init or InitSubSystem.";
             break;
 
+        case SDLErr_OpenAudio:
+            ErrorString = "SDL Audio: error in OpenAudio.";
+            break;
+
         default:
             ErrorString = "Unknown SDL Audio error code.";
             break;
@@ -124,6 +129,10 @@ int SDLDrv_Init(int mixrate, int numchannels, int samplebits)
     spec.userdata = 0;
 
     err = SDL_OpenAudio(&spec, NULL);
+    if (err < 0) {
+        ErrorCode = SDLErr_OpenAudio;
+        return SDLErr_Error;
+    }
 
     Initialised = 1;
 
