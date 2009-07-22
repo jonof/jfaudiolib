@@ -164,12 +164,54 @@ void MV_Mix16BitStereo( unsigned int position, unsigned int rate,
 void MV_Mix16BitMono16( unsigned int position, unsigned int rate,
 								char *start, unsigned int length )
 {
+	
+	short *dest = (short *) MV_MixDestination;
+	int sample0l, sample0h, sample0;
+	
+	while (length--) {
+		sample0l = ((unsigned char *) start)[((position >> 16) << 1) + 0];
+		sample0h = ((unsigned char *) start)[((position >> 16) << 1) + 1] ^ 128;
+		position += rate;
+		
+		sample0l = MV_LeftVolume[sample0l] >> 8;
+		sample0h = MV_LeftVolume[sample0h];
+		sample0 = sample0l + sample0h + 128;
+		if (sample0 < -32768) sample0 = -32768;
+		else if (sample0 > 32767) sample0 = 32767;
+		
+		*dest = (short)sample0;
+		
+		dest += MV_SampleSize / 2;
+	}
+	
+	MV_MixPosition = position;
+	MV_MixDestination = (char *) dest;
 }
 
 // 16-bit mono source, 8-bit mono output
 void MV_Mix8BitMono16( unsigned int position, unsigned int rate,
 							  char *start, unsigned int length )
 {
+	signed char *source = (signed char *) start + 1;
+	unsigned char *dest = (unsigned char *) MV_MixDestination;
+	int sample0;
+	
+	length &= ~1;
+	
+	while (length--) {
+		sample0 = source[(position >> 16) << 1];
+		position += rate;
+		
+		sample0 = MV_LeftVolume[sample0 + 128] + *dest;
+		sample0 = MV_HarshClipTable[sample0 + 128];
+		
+		*dest = sample0 & 255;
+		
+		dest += MV_SampleSize;
+	}
+	
+	MV_MixPosition = position;
+	MV_MixDestination = (char *) dest;
 }
 
 // 16-bit mono source, 8-bit stereo output
