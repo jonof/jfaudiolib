@@ -28,7 +28,9 @@ extern short *MV_RightVolume;
 extern int    MV_SampleSize;
 extern int    MV_RightChannelOffset;
 
-
+#ifdef __POWERPC__
+# define BIGENDIAN
+#endif
 
 void ClearBuffer_DW( void *ptr, unsigned data, int length )
 {
@@ -163,23 +165,29 @@ void MV_Mix16BitStereo( unsigned int position, unsigned int rate,
 // 16-bit mono source, 16-bit mono output
 void MV_Mix16BitMono16( unsigned int position, unsigned int rate,
 								char *start, unsigned int length )
-{
-	
+{//?
+	unsigned short *source = (unsigned short *) start;
 	short *dest = (short *) MV_MixDestination;
 	int sample0l, sample0h, sample0;
 	
 	while (length--) {
-		sample0l = ((unsigned char *) start)[((position >> 16) << 1) + 0];
-		sample0h = ((unsigned char *) start)[((position >> 16) << 1) + 1] ^ 128;
+		sample0 = source[position >> 16];
+#ifdef BIGENDIAN
+		sample0l = sample0 >> 8;
+		sample0h = (sample0 & 255) ^ 128;
+#else
+		sample0l = sample0 & 255;
+		sample0h = (sample0 >> 8) ^ 128;
+#endif
 		position += rate;
 		
 		sample0l = MV_LeftVolume[sample0l] >> 8;
 		sample0h = MV_LeftVolume[sample0h];
-		sample0 = sample0l + sample0h + 128;
+		sample0 = sample0l + sample0h + 128 + *dest;
 		if (sample0 < -32768) sample0 = -32768;
 		else if (sample0 > 32767) sample0 = 32767;
 		
-		*dest = (short)sample0;
+		*dest = (short) sample0;
 		
 		dest += MV_SampleSize / 2;
 	}
@@ -218,12 +226,73 @@ void MV_Mix8BitMono16( unsigned int position, unsigned int rate,
 void MV_Mix8BitStereo16( unsigned int position, unsigned int rate,
 								 char *start, unsigned int length )
 {
+	signed char *source = (signed char *) start + 1;
+	unsigned char *dest = (unsigned char *) MV_MixDestination;
+	int sample0, sample1;
+	
+	length &= ~1;
+	
+	while (length--) {
+		sample0 = source[(position >> 16) << 1];
+		sample1 = sample0;
+		position += rate;
+		
+		sample0 = MV_LeftVolume[sample0 + 128] + *dest;
+		sample1 = MV_RightVolume[sample1 + 128] + *(dest + MV_RightChannelOffset);
+		sample0 = MV_HarshClipTable[sample0 + 128];
+		sample1 = MV_HarshClipTable[sample1 + 128];
+		
+		*dest = sample0 & 255;
+		*(dest + MV_RightChannelOffset) = sample1 & 255;
+		
+		dest += MV_SampleSize;
+	}
+	
+	MV_MixPosition = position;
+	MV_MixDestination = (char *) dest;
 }
 
 // 16-bit mono source, 16-bit stereo output
 void MV_Mix16BitStereo16( unsigned int position, unsigned int rate,
 								  char *start, unsigned int length )
 {
+	unsigned short *source = (unsigned short *) start;
+	short *dest = (short *) MV_MixDestination;
+	int sample0l, sample0h, sample0;
+	int sample1l, sample1h, sample1;
+
+	while (length--) {
+		sample0 = source[position >> 16];
+#ifdef BIGENDIAN
+		sample0l = sample0 >> 8;
+		sample0h = (sample0 & 255) ^ 128;
+#else
+		sample0l = sample0 & 255;
+		sample0h = (sample0 >> 8) ^ 128;
+#endif
+		sample1l = sample0l;
+		sample1h = sample0h;
+		position += rate;
+		
+		sample0l = MV_LeftVolume[sample0l] >> 8;
+		sample0h = MV_LeftVolume[sample0h];
+		sample1l = MV_RightVolume[sample1l] >> 8;
+		sample1h = MV_RightVolume[sample1h];
+		sample0 = sample0l + sample0h + 128 + *dest;
+		sample1 = sample1l + sample1h + 128 + *(dest + MV_RightChannelOffset/2);
+		if (sample0 < -32768) sample0 = -32768;
+		else if (sample0 > 32767) sample0 = 32767;
+		if (sample1 < -32768) sample1 = -32768;
+		else if (sample1 > 32767) sample1 = 32767;
+		
+		*dest = (short) sample0;
+		*(dest + MV_RightChannelOffset/2) = (short) sample1;
+
+		dest += MV_SampleSize / 2;
+	}
+	
+	MV_MixPosition = position;
+	MV_MixDestination = (char *) dest;
 }
 
 void MV_16BitReverb( char *src, char *dest, VOLUME16 *volume, int count )

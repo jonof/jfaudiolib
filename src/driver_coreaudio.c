@@ -178,6 +178,9 @@ int CoreAudioDrv_Init(int mixrate, int numchannels, int samplebits)
 	requestedDesc.mBitsPerChannel = samplebits;
 	if (samplebits == 16) {
 		requestedDesc.mFormatFlags |= kLinearPCMFormatFlagIsSignedInteger;
+#ifdef __POWERPC__
+		requestedDesc.mFormatFlags |= kLinearPCMFormatFlagIsBigEndian;
+#endif
 	}
 	
 	requestedDesc.mFramesPerPacket = 1;
