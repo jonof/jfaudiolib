@@ -165,7 +165,7 @@ void MV_Mix16BitStereo( unsigned int position, unsigned int rate,
 // 16-bit mono source, 16-bit mono output
 void MV_Mix16BitMono16( unsigned int position, unsigned int rate,
 								char *start, unsigned int length )
-{//?
+{
 	unsigned short *source = (unsigned short *) start;
 	short *dest = (short *) MV_MixDestination;
 	int sample0l, sample0h, sample0;
@@ -297,17 +297,67 @@ void MV_Mix16BitStereo16( unsigned int position, unsigned int rate,
 
 void MV_16BitReverb( char *src, char *dest, VOLUME16 *volume, int count )
 {
+    unsigned short * input = (unsigned short *) src;
+    short * output = (short *) dest;
+    short sample0l, sample0h, sample0;
+    
+    do {
+        sample0 = *input;
+#ifdef BIGENDIAN
+        sample0l = sample0 >> 8;
+        sample0h = (sample0 & 255) ^ 128;
+#else
+        sample0l = sample0 & 255;
+        sample0h = (sample0 >> 8) ^ 128;
+#endif
+        
+        sample0l = ((short *) volume)[sample0l] >> 8;
+        sample0h = ((short *) volume)[sample0h];
+        *output = (short) (sample0l + sample0h + 128);
+        
+        input++;
+        output++;
+    } while (count-- > 0);
 }
 
 void MV_8BitReverb( signed char *src, signed char *dest, VOLUME16 *volume, int count )
 {
+    unsigned char * input = (unsigned char *) src;
+    unsigned char * output = (unsigned char *) dest;
+    
+    do {
+        *output = ((short *) volume)[*input] + 128;
+        
+        input++;
+        output++;
+    } while (count-- > 0);
 }
 
 void MV_16BitReverbFast( char *src, char *dest, int count, int shift )
 {
+    short * input = (short *) src;
+    short * output = (short *) dest;
+    
+    do {
+        *output = *input >> shift;
+        
+        input++;
+        output++;
+    } while (count-- > 0);
 }
 
 void MV_8BitReverbFast( signed char *src, signed char *dest, int count, int shift )
 {
+    unsigned char sample0, c;
+    
+    c = 128 - (128 >> shift);
+    
+    do {
+        sample0 = *((unsigned char *) src) >> shift;
+        *dest = sample0 + c + ((sample0 ^ 128) >> 7);
+        
+        src++;
+        dest++;
+    } while (count-- > 0);
 }
 
