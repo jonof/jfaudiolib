@@ -302,11 +302,6 @@ static void MV_Mix
 			voice->mix( position, rate, start, voclength );
       }
 
-      if ( voclength & 1 )
-         {
-         MV_MixPosition += rate;
-         voclength -= 1;
-         }
       voice->position = MV_MixPosition;
 
       length -= voclength;
@@ -605,7 +600,7 @@ playbackstatus MV_GetNextVOCBlock
          case 1 :
             // Sound data block
             voice->bits  = 8;
-				voice->channels = 1;
+            voice->channels = 1;
             if ( lastblocktype != 8 )
                {
                tc = ( unsigned int )*ptr << 8;
@@ -690,7 +685,7 @@ playbackstatus MV_GetNextVOCBlock
          case 8 :
             // Extended block
             voice->bits  = 8;
-				voice->channels = 1;
+            voice->channels = 1;
             tc = LITTLE16( *( unsigned short * )ptr );
             packtype = *( ptr + 2 );
             voicemode = *( ptr + 3 );
@@ -710,7 +705,7 @@ playbackstatus MV_GetNextVOCBlock
                ptr         += 12;
                blocklength -= 12;
                voice->bits  = 8;
-					voice->channels = 1;
+               voice->channels = 1;
                done         = TRUE;
                }
             else if ( ( BitsPerSample == 16 ) && ( Channels == 1 ) &&
@@ -719,7 +714,7 @@ playbackstatus MV_GetNextVOCBlock
                ptr         += 12;
                blocklength -= 12;
                voice->bits  = 16;
-					voice->channels = 1;
+               voice->channels = 1;
                done         = TRUE;
                }
             else

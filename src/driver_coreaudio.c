@@ -152,6 +152,15 @@ const char *CoreAudioDrv_ErrorString( int ErrorNumber )
 	return ErrorString;
 }
 
+/*
+int CoreAudioDrv_InitMIDI()
+{
+    AudioStreamBasicDescription requestedDesc;
+    
+    requestedDesc.mFormatID = kAudioFormatMIDIStream;
+}
+ */
+
 int CoreAudioDrv_Init(int mixrate, int numchannels, int samplebits)
 {
 	OSStatus result = noErr;
