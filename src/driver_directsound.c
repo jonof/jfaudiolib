@@ -139,11 +139,9 @@ static void FillBuffer(int bufnum)
     
     if (ptr) {
         FillBufferPortion((char *) ptr, remaining);
-        *(short *)ptr = 0xffff;
     }
     if (ptr2) {
         FillBufferPortion((char *) ptr2, remaining2);
-        *(short *)ptr2 = 0xffff;
     }
     
     IDirectSoundBuffer_Unlock(lpdsbsec, ptr, remaining, ptr2, remaining2);
