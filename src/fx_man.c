@@ -110,7 +110,8 @@ int FX_Init
    int numvoices,
    int numchannels,
    int samplebits,
-   unsigned mixrate
+   unsigned mixrate,
+   void * initdata
    )
 
    {
@@ -146,7 +147,7 @@ int FX_Init
 	}
    
    status = FX_Ok;
-	devicestatus = MV_Init( SoundCard, mixrate, numvoices, numchannels, samplebits );
+	devicestatus = MV_Init( SoundCard, mixrate, numvoices, numchannels, samplebits, initdata );
 	if ( devicestatus != MV_Ok )
 		{
 		FX_SetErrorCode( FX_MultiVocError );

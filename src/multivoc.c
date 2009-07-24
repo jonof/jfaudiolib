@@ -2673,7 +2673,8 @@ int MV_Init
    int MixRate,
    int Voices,
    int numchannels,
-   int samplebits
+   int samplebits,
+   void * initdata
    )
 
    {
@@ -2719,7 +2720,7 @@ int MV_Init
 	ASS_SoundDriver = soundcard;
 
    // Initialize the sound card
-	status = SoundDriver_Init(MixRate, numchannels, samplebits);
+	status = SoundDriver_Init(MixRate, numchannels, samplebits, initdata);
 	if ( status != MV_Ok ) {
 		MV_SetErrorCode( MV_DriverError );
 	}

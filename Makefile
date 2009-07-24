@@ -1,14 +1,21 @@
 CC=gcc
 CFLAGS=-g -O2 -Wall
-CPPFLAGS=-Iinclude -Isrc -DHAVE_SDL
+CPPFLAGS=-Iinclude -Isrc
 
 SOURCES=src/drivers.c \
         src/fx_man.c \
         src/multivoc.c \
 		src/mix.c \
         src/pitch.c \
-        src/driver_nosound.c \
-        src/driver_sdl.c
+        src/driver_nosound.c
+
+ifneq (,$(findstring MINGW,$(shell uname -s)))
+ CPPFLAGS+= -I/z/sdks/directx/dx7/include
+ SOURCES+= src/driver_directsound.c
+else
+ CPPFLAGS+= -DHAVE_SDL
+ SOURCES+= src/driver_sdl.c
+endif
 
 OBJECTS=$(SOURCES:%.c=%.o)
 

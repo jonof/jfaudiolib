@@ -46,7 +46,7 @@ int ASS_SoundDriver = -1;
 static struct {
 	int          (* GetError)(void);
 	const char * (* ErrorString)(int);
-	int          (* Init)(int, int, int);
+	int          (* Init)(int, int, int, void *);
 	void         (* Shutdown)(void);
 	int          (* BeginPlayback)(char *, int, int, void ( * )(void) );
 	void         (* StopPlayback)(void);
@@ -141,9 +141,9 @@ const char * SoundDriver_ErrorString( int ErrorNumber )
 	return SoundDrivers[ASS_SoundDriver].ErrorString(ErrorNumber);
 }
 
-int SoundDriver_Init(int mixrate, int numchannels, int samplebits)
+int SoundDriver_Init(int mixrate, int numchannels, int samplebits, void * initdata)
 {
-	return SoundDrivers[ASS_SoundDriver].Init(mixrate, numchannels, samplebits);
+	return SoundDrivers[ASS_SoundDriver].Init(mixrate, numchannels, samplebits, initdata);
 }
 
 void SoundDriver_Shutdown(void)

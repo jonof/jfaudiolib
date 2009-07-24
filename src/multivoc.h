@@ -105,7 +105,7 @@ void  MV_SetCallBack( void ( *function )( unsigned int ) );
 void  MV_SetReverseStereo( int setting );
 int   MV_GetReverseStereo( void );
 int   MV_Init( int soundcard, int MixRate, int Voices, int numchannels,
-         int samplebits );
+         int samplebits, void * initdata );
 int   MV_Shutdown( void );
 
 #endif

@@ -21,7 +21,7 @@
 /**
  * CoreAudio output driver for MultiVoc
  *
- * Ripped almost completely from the Audiere LGPL sound library available at
+ * Inspired by the example set by the Audiere sound library available at
  *   https://audiere.svn.sourceforge.net/svnroot/audiere/trunk/audiere/
  *
  */
@@ -161,7 +161,7 @@ int CoreAudioDrv_InitMIDI()
 }
  */
 
-int CoreAudioDrv_Init(int mixrate, int numchannels, int samplebits)
+int CoreAudioDrv_Init(int mixrate, int numchannels, int samplebits, void * initdata)
 {
 	OSStatus result = noErr;
 	Component comp;
