@@ -204,8 +204,8 @@ void MV_Mix8BitMono16Stereo( unsigned int position, unsigned int rate,
     int sample0, sample1;
     
     while (length--) {
-        sample0 = source[(position >> 16) << 1];
-        sample1 = source[((position >> 16) << 1) + 2];
+        sample0 = source[(position >> 16) << 2];
+        sample1 = source[((position >> 16) << 2) + 2];
         position += rate;
         
         sample0 = MV_LeftVolume[sample0 + 128];
@@ -231,8 +231,8 @@ void MV_Mix8BitStereo16Stereo( unsigned int position, unsigned int rate,
     int sample0, sample1;
     
     while (length--) {
-        sample0 = source[(position >> 16) << 1];
-        sample1 = source[((position >> 16) << 1) + 2];
+        sample0 = source[(position >> 16) << 2];
+        sample1 = source[((position >> 16) << 2) + 2];
         position += rate;
         
         sample0 = MV_LeftVolume[sample0 + 128] + *dest;
