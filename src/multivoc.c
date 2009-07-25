@@ -2276,9 +2276,7 @@ int MV_PlayLoopedWAV
       }
    if ( voice->channels == 2 )
       {
-      loopstart *= 2;
       data.size &= ~1;
-      loopend   *= 2;
       length    /= 2;
       }
 
