@@ -930,3 +930,58 @@ void FX_StopRecord
 
    {
    }
+
+
+/*---------------------------------------------------------------------
+   Function: FX_PlayAuto
+
+   Play a sound, autodetecting the format.
+---------------------------------------------------------------------*/
+int FX_PlayAuto( char *ptr, int pitchoffset, int vol, int left, int right,
+                 int priority, unsigned int callbackval )
+{
+   if (!memcmp("Creative Voice File\x1a", ptr, 20)) {
+      return FX_PlayVOC(ptr, pitchoffset, vol, left, right, priority, callbackval);
+   }
+   if (!memcmp("RIFF", ptr, 4) && !memcmp("WAVE", ptr + 8, 4)) {
+      return FX_PlayWAV(ptr, pitchoffset, vol, left, right, priority, callbackval);
+   }
+   return -1;
+}
+
+/*---------------------------------------------------------------------
+   Function: FX_PlayLoopedAuto
+
+   Play a looped sound, autodetecting the format.
+---------------------------------------------------------------------*/
+int FX_PlayLoopedAuto( char *ptr, int loopstart, int loopend,
+                       int pitchoffset, int vol, int left, int right, int priority,
+                       unsigned int callbackval )
+{
+   if (!memcmp("Creative Voice File\x1a", ptr, 20)) {
+      return FX_PlayLoopedVOC(ptr, loopstart, loopend, pitchoffset,
+                              vol, left, right, priority, callbackval);
+   }
+   if (!memcmp("RIFF", ptr, 4) && !memcmp("WAVE", ptr + 8, 4)) {
+      return FX_PlayLoopedWAV(ptr, loopstart, loopend, pitchoffset,
+                              vol, left, right, priority, callbackval);
+   }
+   return -1;
+}
+
+/*---------------------------------------------------------------------
+   Function: FX_PlayAuto3D
+
+   Play a positioned sound, autodetecting the format.
+---------------------------------------------------------------------*/
+int FX_PlayAuto3D( char *ptr, int pitchoffset, int angle, int distance,
+                   int priority, unsigned int callbackval )
+{
+   if (!memcmp("Creative Voice File\x1a", ptr, 20)) {
+      return FX_PlayVOC3D(ptr, pitchoffset, angle, distance, priority, callbackval);
+   }
+   if (!memcmp("RIFF", ptr, 4) && !memcmp("WAVE", ptr + 8, 4)) {
+      return FX_PlayWAV3D(ptr, pitchoffset, angle, distance, priority, callbackval);
+   }
+   return -1;
+}
