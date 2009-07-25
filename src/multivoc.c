@@ -285,7 +285,7 @@ static void MV_Mix
          {
          if ( position < voice->length )
             {
-            voclength = ( voice->length - position + rate - 1 ) / rate;
+            voclength = ( voice->length - position + rate - voice->channels ) / rate;
             }
          else
             {
@@ -298,8 +298,8 @@ static void MV_Mix
          voclength = length;
          }
 
-		if (voice->mix) {
-			voice->mix( position, rate, start, voclength );
+      if (voice->mix) {
+         voice->mix( position, rate, start, voclength );
       }
 
       voice->position = MV_MixPosition;
@@ -317,7 +317,7 @@ static void MV_Mix
          if ( length > 0 )
             {
             // Get the position of the last sample in the buffer
-            FixedPointBufferSize = voice->RateScale * ( length - 1 );
+            FixedPointBufferSize = voice->RateScale * ( length - voice->channels );
             }
          }
       }
@@ -529,7 +529,7 @@ playbackstatus MV_GetNextVOCBlock
    if ( voice->BlockLength > 0 )
       {
       voice->position    -= voice->length;
-      voice->sound       += (voice->length >> 16) * (voice->bits / 8);
+      voice->sound       += (voice->length >> 16) * (voice->channels * voice->bits / 8);
       voice->length       = min( voice->BlockLength, 0x8000 );
       voice->BlockLength -= voice->length;
       voice->length     <<= 16;
@@ -721,9 +721,6 @@ playbackstatus MV_GetNextVOCBlock
 
       voice->SamplingRate = samplespeed;
       voice->RateScale    = ( voice->SamplingRate * voice->PitchScale ) / MV_MixRate;
-      if (voice->channels == 2) {
-         voice->RateScale *= 2;
-      }
 
       // Multiply by MixBufferSize - 1
       voice->FixedPointBufferSize = ( voice->RateScale * MixBufferSize ) -
@@ -746,6 +743,10 @@ playbackstatus MV_GetNextVOCBlock
          }
 
       if ( voice->bits == 16 )
+         {
+         blocklength /= 2;
+         }
+      if ( voice->channels == 2 )
          {
          blocklength /= 2;
          }
@@ -835,11 +836,7 @@ playbackstatus MV_GetNextRawBlock
    voice->sound        = voice->NextBlock;
    voice->position    -= voice->length;
    voice->length       = min( voice->BlockLength, 0x8000 );
-   voice->NextBlock   += voice->length;
-   if ( voice->bits == 16 )
-      {
-      voice->NextBlock += voice->length;
-      }
+   voice->NextBlock   += voice->length * (voice->channels * voice->bits / 8);
    voice->BlockLength -= voice->length;
    voice->length     <<= 16;
 
@@ -876,11 +873,7 @@ playbackstatus MV_GetNextWAVBlock
    voice->sound        = voice->NextBlock;
    voice->position    -= voice->length;
    voice->length       = min( voice->BlockLength, 0x8000 );
-   voice->NextBlock   += voice->length;
-   if ( voice->bits == 16 )
-      {
-      voice->NextBlock += voice->length;
-      }
+   voice->NextBlock   += voice->length * (voice->channels * voice->bits / 8);
    voice->BlockLength -= voice->length;
    voice->length     <<= 16;
 
@@ -1228,9 +1221,6 @@ void MV_SetVoicePitch
    voice->SamplingRate = rate;
    voice->PitchScale   = PITCH_GetScale( pitchoffset );
    voice->RateScale    = ( rate * voice->PitchScale ) / MV_MixRate;
-   if (voice->channels == 2) {
-      voice->RateScale *= 2;
-   }
 
    // Multiply by MixBufferSize - 1
    voice->FixedPointBufferSize = ( voice->RateScale * MixBufferSize ) -
@@ -2246,7 +2236,7 @@ int MV_PlayLoopedWAV
       return( MV_Error );
       }
 
-   if ( format.nChannels != 1 )
+   if ( format.nChannels != 1 && format.nChannels != 2 )
       {
       MV_SetErrorCode( MV_InvalidWAVFile );
       return( MV_Error );
@@ -2275,7 +2265,7 @@ int MV_PlayLoopedWAV
 
    voice->wavetype    = WAV;
    voice->bits        = format.nBitsPerSample;
-	voice->channels    = 1;
+	voice->channels    = format.nChannels;
    voice->GetSound    = MV_GetNextWAVBlock;
 
    length = data.size;
@@ -2283,6 +2273,13 @@ int MV_PlayLoopedWAV
       {
       data.size  &= ~1;
       length     /= 2;
+      }
+   if ( voice->channels == 2 )
+      {
+      loopstart *= 2;
+      data.size &= ~1;
+      loopend   *= 2;
+      length    /= 2;
       }
 
    voice->Playing     = TRUE;
@@ -2437,7 +2434,7 @@ int MV_PlayLoopedVOC
 
    voice->wavetype    = VOC;
    voice->bits        = 8;
-	voice->channels    = 1;
+   voice->channels    = 1;
    voice->GetSound    = MV_GetNextVOCBlock;
    voice->NextBlock   = ptr + LITTLE16(*( unsigned short * )( ptr + 0x14 ));
    voice->DemandFeed  = NULL;
@@ -2846,3 +2843,5 @@ int MV_Shutdown
 
    return( MV_Ok );
    }
+
+// vim:ts=3:expandtab:
