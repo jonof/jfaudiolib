@@ -103,6 +103,11 @@ static int seek_vorbis(void * datasource, ogg_int64_t offset, int whence)
    return vorb->pos;
 }
 
+static int close_vorbis(void * datasource)
+{
+   return 0;
+}
+
 static int tell_vorbis(void * datasource)
 {
    vorbis_data * vorb = (vorbis_data *) datasource;
@@ -113,7 +118,7 @@ static int tell_vorbis(void * datasource)
 static ov_callbacks vorbis_callbacks = {
    read_vorbis,
    seek_vorbis,
-   0,
+   close_vorbis,
    tell_vorbis
 };
 
