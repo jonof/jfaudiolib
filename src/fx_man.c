@@ -495,6 +495,7 @@ int FX_SetFrequency
 int FX_PlayVOC
    (
    char *ptr,
+   unsigned int ptrlength,
    int pitchoffset,
    int vol,
    int left,
@@ -506,7 +507,7 @@ int FX_PlayVOC
    {
    int handle;
 
-   handle = MV_PlayVOC( ptr, pitchoffset, vol, left, right,
+   handle = MV_PlayVOC( ptr, ptrlength, pitchoffset, vol, left, right,
       priority, callbackval );
    if ( handle < MV_Ok )
       {
@@ -527,6 +528,7 @@ int FX_PlayVOC
 int FX_PlayLoopedVOC
    (
    char *ptr,
+   unsigned int ptrlength,
    int loopstart,
    int loopend,
    int pitchoffset,
@@ -540,7 +542,7 @@ int FX_PlayLoopedVOC
    {
    int handle;
 
-   handle = MV_PlayLoopedVOC( ptr, loopstart, loopend, pitchoffset,
+   handle = MV_PlayLoopedVOC( ptr, ptrlength, loopstart, loopend, pitchoffset,
       vol, left, right, priority, callbackval );
    if ( handle < MV_Ok )
       {
@@ -561,6 +563,7 @@ int FX_PlayLoopedVOC
 int FX_PlayWAV
    (
    char *ptr,
+   unsigned int ptrlength,
    int pitchoffset,
    int vol,
    int left,
@@ -572,7 +575,7 @@ int FX_PlayWAV
    {
    int handle;
 
-   handle = MV_PlayWAV( ptr, pitchoffset, vol, left, right,
+   handle = MV_PlayWAV( ptr, ptrlength, pitchoffset, vol, left, right,
       priority, callbackval );
    if ( handle < MV_Ok )
       {
@@ -593,6 +596,7 @@ int FX_PlayWAV
 int FX_PlayLoopedWAV
    (
    char *ptr,
+   unsigned int ptrlength,
    int loopstart,
    int loopend,
    int pitchoffset,
@@ -606,7 +610,7 @@ int FX_PlayLoopedWAV
    {
    int handle;
 
-   handle = MV_PlayLoopedWAV( ptr, loopstart, loopend,
+   handle = MV_PlayLoopedWAV( ptr, ptrlength, loopstart, loopend,
       pitchoffset, vol, left, right, priority, callbackval );
    if ( handle < MV_Ok )
       {
@@ -628,6 +632,7 @@ int FX_PlayLoopedWAV
 int FX_PlayVOC3D
    (
    char *ptr,
+   unsigned int ptrlength,
    int pitchoffset,
    int angle,
    int distance,
@@ -638,7 +643,7 @@ int FX_PlayVOC3D
    {
    int handle;
 
-   handle = MV_PlayVOC3D( ptr, pitchoffset, angle, distance,
+   handle = MV_PlayVOC3D( ptr, ptrlength, pitchoffset, angle, distance,
       priority, callbackval );
    if ( handle < MV_Ok )
       {
@@ -660,6 +665,7 @@ int FX_PlayVOC3D
 int FX_PlayWAV3D
    (
    char *ptr,
+   unsigned int ptrlength,
    int pitchoffset,
    int angle,
    int distance,
@@ -670,7 +676,7 @@ int FX_PlayWAV3D
    {
    int handle;
 
-   handle = MV_PlayWAV3D( ptr, pitchoffset, angle, distance,
+   handle = MV_PlayWAV3D( ptr, ptrlength, pitchoffset, angle, distance,
       priority, callbackval );
    if ( handle < MV_Ok )
       {
@@ -937,16 +943,26 @@ void FX_StopRecord
 
    Play a sound, autodetecting the format.
 ---------------------------------------------------------------------*/
-int FX_PlayAuto( char *ptr, int pitchoffset, int vol, int left, int right,
-                 int priority, unsigned int callbackval )
+int FX_PlayAuto( char *ptr, unsigned int length, int pitchoffset, int vol,
+                 int left, int right, int priority, unsigned int callbackval )
 {
+   int handle = -1;
+   
    if (!memcmp("Creative Voice File\x1a", ptr, 20)) {
-      return FX_PlayVOC(ptr, pitchoffset, vol, left, right, priority, callbackval);
+      handle = MV_PlayVOC(ptr, length, pitchoffset, vol, left, right, priority, callbackval);
+   } else if (!memcmp("RIFF", ptr, 4) && !memcmp("WAVE", ptr + 8, 4)) {
+      handle = MV_PlayWAV(ptr, length, pitchoffset, vol, left, right, priority, callbackval);
+   } else if (!memcmp("OggS", ptr, 4)) {
+      handle = MV_PlayVorbis(ptr, length, pitchoffset, vol, left, right, priority, callbackval);
    }
-   if (!memcmp("RIFF", ptr, 4) && !memcmp("WAVE", ptr + 8, 4)) {
-      return FX_PlayWAV(ptr, pitchoffset, vol, left, right, priority, callbackval);
+   
+   if ( handle < MV_Ok )
+   {
+      FX_SetErrorCode( FX_MultiVocError );
+      handle = FX_Warning;
    }
-   return -1;
+   
+   return handle;
 }
 
 /*---------------------------------------------------------------------
@@ -954,19 +970,30 @@ int FX_PlayAuto( char *ptr, int pitchoffset, int vol, int left, int right,
 
    Play a looped sound, autodetecting the format.
 ---------------------------------------------------------------------*/
-int FX_PlayLoopedAuto( char *ptr, int loopstart, int loopend,
+int FX_PlayLoopedAuto( char *ptr, unsigned int length, int loopstart, int loopend,
                        int pitchoffset, int vol, int left, int right, int priority,
                        unsigned int callbackval )
 {
+   int handle = -1;
+   
    if (!memcmp("Creative Voice File\x1a", ptr, 20)) {
-      return FX_PlayLoopedVOC(ptr, loopstart, loopend, pitchoffset,
+      handle = MV_PlayLoopedVOC(ptr, length, loopstart, loopend, pitchoffset,
+                              vol, left, right, priority, callbackval);
+   } else if (!memcmp("RIFF", ptr, 4) && !memcmp("WAVE", ptr + 8, 4)) {
+      handle = MV_PlayLoopedWAV(ptr, length, loopstart, loopend, pitchoffset,
+                              vol, left, right, priority, callbackval);
+   } else if (!memcmp("OggS", ptr, 4)) {
+      handle = MV_PlayLoopedVorbis(ptr, length, loopstart, loopend, pitchoffset,
                               vol, left, right, priority, callbackval);
    }
-   if (!memcmp("RIFF", ptr, 4) && !memcmp("WAVE", ptr + 8, 4)) {
-      return FX_PlayLoopedWAV(ptr, loopstart, loopend, pitchoffset,
-                              vol, left, right, priority, callbackval);
+   
+   if ( handle < MV_Ok )
+   {
+      FX_SetErrorCode( FX_MultiVocError );
+      handle = FX_Warning;
    }
-   return -1;
+   
+   return handle;
 }
 
 /*---------------------------------------------------------------------
@@ -974,14 +1001,24 @@ int FX_PlayLoopedAuto( char *ptr, int loopstart, int loopend,
 
    Play a positioned sound, autodetecting the format.
 ---------------------------------------------------------------------*/
-int FX_PlayAuto3D( char *ptr, int pitchoffset, int angle, int distance,
-                   int priority, unsigned int callbackval )
+int FX_PlayAuto3D( char *ptr, unsigned int length, int pitchoffset, int angle,
+                   int distance, int priority, unsigned int callbackval )
 {
+   int handle = -1;
+   
    if (!memcmp("Creative Voice File\x1a", ptr, 20)) {
-      return FX_PlayVOC3D(ptr, pitchoffset, angle, distance, priority, callbackval);
+      handle = MV_PlayVOC3D(ptr, length, pitchoffset, angle, distance, priority, callbackval);
+   } else if (!memcmp("RIFF", ptr, 4) && !memcmp("WAVE", ptr + 8, 4)) {
+      handle = MV_PlayWAV3D(ptr, length, pitchoffset, angle, distance, priority, callbackval);
+   } else if (!memcmp("OggS", ptr, 4)) {
+      handle = MV_PlayVorbis3D(ptr, length, pitchoffset, angle, distance, priority, callbackval);
    }
-   if (!memcmp("RIFF", ptr, 4) && !memcmp("WAVE", ptr + 8, 4)) {
-      return FX_PlayWAV3D(ptr, pitchoffset, angle, distance, priority, callbackval);
+   
+   if ( handle < MV_Ok )
+   {
+      FX_SetErrorCode( FX_MultiVocError );
+      handle = FX_Warning;
    }
-   return -1;
+   
+   return handle;
 }

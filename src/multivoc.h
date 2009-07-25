@@ -84,20 +84,27 @@ int   MV_PlayLoopedRaw( char *ptr, unsigned int length,
          char *loopstart, char *loopend, unsigned rate, int pitchoffset,
          int vol, int left, int right, int priority,
          unsigned int callbackval );
-int   MV_PlayWAV( char *ptr, int pitchoffset, int vol, int left,
+int   MV_PlayWAV( char *ptr, unsigned int length, int pitchoffset, int vol, int left,
          int right, int priority, unsigned int callbackval );
-int   MV_PlayWAV3D( char *ptr, int pitchoffset, int angle, int distance,
+int   MV_PlayWAV3D( char *ptr, unsigned int length, int pitchoffset, int angle, int distance,
          int priority, unsigned int callbackval );
-int   MV_PlayLoopedWAV( char *ptr, int loopstart, int loopend,
+int   MV_PlayLoopedWAV( char *ptr, unsigned int length, int loopstart, int loopend,
          int pitchoffset, int vol, int left, int right, int priority,
          unsigned int callbackval );
-int   MV_PlayVOC3D( char *ptr, int pitchoffset, int angle, int distance,
+int   MV_PlayVOC3D( char *ptr, unsigned int length, int pitchoffset, int angle, int distance,
          int priority, unsigned int callbackval );
-int   MV_PlayVOC( char *ptr, int pitchoffset, int vol, int left, int right,
+int   MV_PlayVOC( char *ptr, unsigned int length, int pitchoffset, int vol, int left, int right,
          int priority, unsigned int callbackval );
-int   MV_PlayLoopedVOC( char *ptr, int loopstart, int loopend,
+int   MV_PlayLoopedVOC( char *ptr, unsigned int length, int loopstart, int loopend,
          int pitchoffset, int vol, int left, int right, int priority,
          unsigned int callbackval );
+int   MV_PlayVorbis3D( char *ptr, unsigned int length, int pitchoffset, int angle, int distance,
+                    int priority, unsigned int callbackval );
+int   MV_PlayVorbis( char *ptr, unsigned int length, int pitchoffset, int vol, int left, int right,
+                  int priority, unsigned int callbackval );
+int   MV_PlayLoopedVorbis( char *ptr, unsigned int length, int loopstart, int loopend,
+                        int pitchoffset, int vol, int left, int right, int priority,
+                        unsigned int callbackval );
 void  MV_CreateVolumeTable( int index, int volume, int MaxVolume );
 void  MV_SetVolume( int volume );
 int   MV_GetVolume( void );

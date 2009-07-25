@@ -79,9 +79,9 @@ static VOLUME16 *MV_ReverbTable = NULL;
 static signed short MV_VolumeTable[ 63 + 1 ][ 256 ];
 
 //static Pan MV_PanTable[ MV_NumPanPositions ][ MV_MaxVolume + 1 ];
-static Pan MV_PanTable[ MV_NumPanPositions ][ 63 + 1 ];
+Pan MV_PanTable[ MV_NumPanPositions ][ 63 + 1 ];
 
-static int MV_Installed   = FALSE;
+int MV_Installed   = FALSE;
 static int MV_TotalVolume = MV_MaxTotalVolume;
 static int MV_MaxVoices   = 1;
 static int MV_Recording;
@@ -99,7 +99,7 @@ static int MV_Silence    = SILENCE_8BIT;
 static int MV_SwapLeftRight = FALSE;
 
 static int MV_RequestedMixRate;
-static int MV_MixRate;
+int MV_MixRate;
 
 static int MV_BuffShift;
 
@@ -120,7 +120,7 @@ static void ( *MV_CallBackFunc )( unsigned int ) = NULL;
 static void ( *MV_RecordFunc )( char *ptr, int length ) = NULL;
 static void ( *MV_MixFunction )( VoiceNode *voice, int buffer );
 
-static int MV_MaxVolume = 63;
+int MV_MaxVolume = 63;
 
 char  *MV_HarshClipTable;
 char  *MV_MixDestination;
@@ -132,9 +132,6 @@ int    MV_RightChannelOffset;
 unsigned int MV_MixPosition;
 
 int MV_ErrorCode = MV_Ok;
-
-#define MV_SetErrorCode( status ) \
-   MV_ErrorCode   = ( status );
 
 static int lockdepth = 0;
 static int DisableInterrupts(void)
@@ -366,6 +363,11 @@ void MV_StopVoice
    LL_Add( (VoiceNode*) &VoicePool, voice, next, prev );
 
    RestoreInterrupts( flags );
+   
+   if (voice->wavetype == Vorbis)
+      {
+      MV_ReleaseVorbisVoice(voice);
+      }
    }
 
 
@@ -1349,7 +1351,7 @@ static short *MV_GetVolumeTable
 
 ---------------------------------------------------------------------*/
 
-static void MV_SetVoiceMixMode
+void MV_SetVoiceMixMode
    (
    VoiceNode *voice
    )
@@ -2103,6 +2105,7 @@ int MV_PlayLoopedRaw
 int MV_PlayWAV
    (
    char *ptr,
+   unsigned int length,
    int   pitchoffset,
    int   vol,
    int   left,
@@ -2114,7 +2117,7 @@ int MV_PlayWAV
    {
    int status;
 
-   status = MV_PlayLoopedWAV( ptr, -1, -1, pitchoffset, vol, left, right,
+   status = MV_PlayLoopedWAV( ptr, length, -1, -1, pitchoffset, vol, left, right,
       priority, callbackval );
 
    return( status );
@@ -2131,6 +2134,7 @@ int MV_PlayWAV
 int MV_PlayWAV3D
    (
    char *ptr,
+   unsigned int length,
    int  pitchoffset,
    int  angle,
    int  distance,
@@ -2166,7 +2170,7 @@ int MV_PlayWAV3D
    right = MV_PanTable[ angle ][ volume ].right;
    mid   = max( 0, 255 - distance );
 
-   status = MV_PlayWAV( ptr, pitchoffset, mid, left, right, priority,
+   status = MV_PlayWAV( ptr, length, pitchoffset, mid, left, right, priority,
       callbackval );
 
    return( status );
@@ -2183,6 +2187,7 @@ int MV_PlayWAV3D
 int MV_PlayLoopedWAV
    (
    char *ptr,
+   unsigned int ptrlength,
    int   loopstart,
    int   loopend,
    int   pitchoffset,
@@ -2314,6 +2319,7 @@ int MV_PlayLoopedWAV
 int MV_PlayVOC3D
    (
    char *ptr,
+   unsigned int ptrlength,
    int  pitchoffset,
    int  angle,
    int  distance,
@@ -2349,7 +2355,7 @@ int MV_PlayVOC3D
    right = MV_PanTable[ angle ][ volume ].right;
    mid   = max( 0, 255 - distance );
 
-   status = MV_PlayVOC( ptr, pitchoffset, mid, left, right, priority,
+   status = MV_PlayVOC( ptr, ptrlength, pitchoffset, mid, left, right, priority,
       callbackval );
 
    return( status );
@@ -2366,6 +2372,7 @@ int MV_PlayVOC3D
 int MV_PlayVOC
    (
    char *ptr,
+   unsigned int ptrlength,
    int   pitchoffset,
    int   vol,
    int   left,
@@ -2377,7 +2384,7 @@ int MV_PlayVOC
    {
    int status;
 
-   status = MV_PlayLoopedVOC( ptr, -1, -1, pitchoffset, vol, left, right,
+   status = MV_PlayLoopedVOC( ptr, ptrlength, -1, -1, pitchoffset, vol, left, right,
       priority, callbackval );
 
    return( status );
@@ -2394,6 +2401,7 @@ int MV_PlayVOC
 int MV_PlayLoopedVOC
    (
    char *ptr,
+   unsigned int ptrlength,
    int   loopstart,
    int   loopend,
    int   pitchoffset,

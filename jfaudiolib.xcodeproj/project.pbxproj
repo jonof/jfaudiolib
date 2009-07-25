@@ -27,6 +27,9 @@
 		AB2EA0831012029200DD2F1F /* AudioUnit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = AB2EA0821012029200DD2F1F /* AudioUnit.framework */; };
 		AB2EA17710121AA900DD2F1F /* mix.c in Sources */ = {isa = PBXBuildFile; fileRef = AB2EA17610121AA900DD2F1F /* mix.c */; };
 		AB8C5612101A077700B42306 /* mixst.c in Sources */ = {isa = PBXBuildFile; fileRef = AB8C5611101A077700B42306 /* mixst.c */; };
+		AB8C5828101B6B7100B42306 /* ogg.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = AB8C5826101B6B7100B42306 /* ogg.framework */; };
+		AB8C5829101B6B7100B42306 /* vorbis.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = AB8C5827101B6B7100B42306 /* vorbis.framework */; };
+		AB8C5868101B6D7500B42306 /* vorbis.c in Sources */ = {isa = PBXBuildFile; fileRef = AB8C5867101B6D7500B42306 /* vorbis.c */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -51,6 +54,9 @@
 		AB2EA0821012029200DD2F1F /* AudioUnit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AudioUnit.framework; path = /System/Library/Frameworks/AudioUnit.framework; sourceTree = "<absolute>"; };
 		AB2EA17610121AA900DD2F1F /* mix.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = mix.c; sourceTree = "<group>"; };
 		AB8C5611101A077700B42306 /* mixst.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = mixst.c; sourceTree = "<group>"; };
+		AB8C5826101B6B7100B42306 /* ogg.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = ogg.framework; path = "third-party/ogg.framework"; sourceTree = "<group>"; };
+		AB8C5827101B6B7100B42306 /* vorbis.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = vorbis.framework; path = "third-party/vorbis.framework"; sourceTree = "<group>"; };
+		AB8C5867101B6D7500B42306 /* vorbis.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = vorbis.c; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -59,6 +65,8 @@
 			buildActionMask = 2147483647;
 			files = (
 				AB2EA0831012029200DD2F1F /* AudioUnit.framework in Frameworks */,
+				AB8C5828101B6B7100B42306 /* ogg.framework in Frameworks */,
+				AB8C5829101B6B7100B42306 /* vorbis.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -68,7 +76,7 @@
 		AB2E9E301011E60300DD2F1F = {
 			isa = PBXGroup;
 			children = (
-				AB2EA0821012029200DD2F1F /* AudioUnit.framework */,
+				AB8C582E101B6B7900B42306 /* Linked frameworks */,
 				AB2E9E481011E63F00DD2F1F /* include */,
 				AB2E9E471011E63900DD2F1F /* src */,
 				AB2E9E431011E61700DD2F1F /* Products */,
@@ -102,6 +110,7 @@
 				AB2E9E5E1011E65900DD2F1F /* pitch.h */,
 				AB2EA17610121AA900DD2F1F /* mix.c */,
 				AB8C5611101A077700B42306 /* mixst.c */,
+				AB8C5867101B6D7500B42306 /* vorbis.c */,
 			);
 			path = src;
 			sourceTree = "<group>";
@@ -114,6 +123,16 @@
 				AB2E9E731011E66100DD2F1F /* sndcards.h */,
 			);
 			path = include;
+			sourceTree = "<group>";
+		};
+		AB8C582E101B6B7900B42306 /* Linked frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				AB2EA0821012029200DD2F1F /* AudioUnit.framework */,
+				AB8C5827101B6B7100B42306 /* vorbis.framework */,
+				AB8C5826101B6B7100B42306 /* ogg.framework */,
+			);
+			name = "Linked frameworks";
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -187,6 +206,7 @@
 				AB2E9E6F1011E65900DD2F1F /* pitch.c in Sources */,
 				AB2EA17710121AA900DD2F1F /* mix.c in Sources */,
 				AB8C5612101A077700B42306 /* mixst.c in Sources */,
+				AB8C5868101B6D7500B42306 /* vorbis.c in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -201,6 +221,7 @@
 					i386,
 				);
 				COPY_PHASE_STRIP = NO;
+				GCC_PREPROCESSOR_DEFINITIONS = __MACOSX__;
 				GCC_VERSION_i386 = 4.0;
 				GCC_VERSION_ppc = 4.0;
 				MACOSX_DEPLOYMENT_TARGET_i386 = 10.4;
@@ -218,6 +239,7 @@
 					i386,
 				);
 				COPY_PHASE_STRIP = YES;
+				GCC_PREPROCESSOR_DEFINITIONS = __MACOSX__;
 				GCC_VERSION_i386 = 4.0;
 				GCC_VERSION_ppc = 4.0;
 				MACOSX_DEPLOYMENT_TARGET_i386 = 10.4;
@@ -231,6 +253,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				COPY_PHASE_STRIP = NO;
+				FRAMEWORK_SEARCH_PATHS = "$(inherited)";
 				GCC_DYNAMIC_NO_PIC = NO;
 				GCC_ENABLE_FIX_AND_CONTINUE = YES;
 				GCC_GENERATE_DEBUGGING_SYMBOLS = YES;
@@ -245,6 +268,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				COPY_PHASE_STRIP = YES;
+				FRAMEWORK_SEARCH_PATHS = "$(inherited)";
 				GCC_ENABLE_FIX_AND_CONTINUE = NO;
 				GCC_GENERATE_DEBUGGING_SYMBOLS = NO;
 				PREBINDING = NO;

@@ -66,27 +66,27 @@ int FX_SetPan( int handle, int vol, int left, int right );
 int FX_SetPitch( int handle, int pitchoffset );
 int FX_SetFrequency( int handle, int frequency );
 
-int FX_PlayVOC( char *ptr, int pitchoffset, int vol, int left, int right,
+int FX_PlayVOC( char *ptr, unsigned int ptrlength, int pitchoffset, int vol, int left, int right,
        int priority, unsigned int callbackval );
-int FX_PlayLoopedVOC( char *ptr, int loopstart, int loopend,
+int FX_PlayLoopedVOC( char *ptr, unsigned int ptrlength, int loopstart, int loopend,
        int pitchoffset, int vol, int left, int right, int priority,
        unsigned int callbackval );
-int FX_PlayWAV( char *ptr, int pitchoffset, int vol, int left, int right,
+int FX_PlayWAV( char *ptr, unsigned int ptrlength, int pitchoffset, int vol, int left, int right,
        int priority, unsigned int callbackval );
-int FX_PlayLoopedWAV( char *ptr, int loopstart, int loopend,
+int FX_PlayLoopedWAV( char *ptr, unsigned int ptrlength, int loopstart, int loopend,
        int pitchoffset, int vol, int left, int right, int priority,
        unsigned int callbackval );
-int FX_PlayVOC3D( char *ptr, int pitchoffset, int angle, int distance,
+int FX_PlayVOC3D( char *ptr, unsigned int ptrlength, int pitchoffset, int angle, int distance,
        int priority, unsigned int callbackval );
-int FX_PlayWAV3D( char *ptr, int pitchoffset, int angle, int distance,
+int FX_PlayWAV3D( char *ptr, unsigned int ptrlength, int pitchoffset, int angle, int distance,
        int priority, unsigned int callbackval );
 
-int FX_PlayAuto( char *ptr, int pitchoffset, int vol, int left, int right,
+int FX_PlayAuto( char *ptr, unsigned int ptrlength, int pitchoffset, int vol, int left, int right,
                 int priority, unsigned int callbackval );
-int FX_PlayLoopedAuto( char *ptr, int loopstart, int loopend,
+int FX_PlayLoopedAuto( char *ptr, unsigned int ptrlength, int loopstart, int loopend,
                       int pitchoffset, int vol, int left, int right, int priority,
                       unsigned int callbackval );
-int FX_PlayAuto3D( char *ptr, int pitchoffset, int angle, int distance,
+int FX_PlayAuto3D( char *ptr, unsigned int ptrlength, int pitchoffset, int angle, int distance,
                   int priority, unsigned int callbackval );
 
 int FX_PlayRaw( char *ptr, unsigned int length, unsigned rate,

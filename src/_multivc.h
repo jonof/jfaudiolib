@@ -138,6 +138,7 @@ typedef struct VoiceNode
    int           priority;
 
    void          ( *DemandFeed )( char **ptr, unsigned int *length );
+   void         *extra;
 
    short        *LeftVolume;
    short        *RightVolume;
@@ -211,10 +212,18 @@ typedef struct
 typedef MONO8  VOLUME8[ 256 ];
 typedef MONO16 VOLUME16[ 256 ];
 
+extern Pan MV_PanTable[ MV_NumPanPositions ][ 63 + 1 ];
+extern int MV_ErrorCode;
+extern int MV_Installed;
+extern int MV_MaxVolume;
+extern int MV_MixRate;
 typedef char HARSH_CLIP_TABLE_8[ MV_NumVoices * 256 ];
 
+#define MV_SetErrorCode( status ) \
+   MV_ErrorCode   = ( status );
+
 static void MV_Mix( VoiceNode *voice, int buffer );
-static void MV_PlayVoice( VoiceNode *voice );
+void MV_PlayVoice( VoiceNode *voice );
 static void MV_StopVoice( VoiceNode *voice );
 static void MV_ServiceVoc( void );
 
@@ -222,18 +231,21 @@ static playbackstatus MV_GetNextVOCBlock( VoiceNode *voice );
 static playbackstatus MV_GetNextDemandFeedBlock( VoiceNode *voice );
 static playbackstatus MV_GetNextRawBlock( VoiceNode *voice );
 static playbackstatus MV_GetNextWAVBlock( VoiceNode *voice );
+static playbackstatus MV_GetNextVorbisBlock( VoiceNode *voice );
 
 static void       MV_ServiceRecord( void );
 static VoiceNode *MV_GetVoice( int handle );
-static VoiceNode *MV_AllocVoice( int priority );
+VoiceNode *MV_AllocVoice( int priority );
 
 static short     *MV_GetVolumeTable( int vol );
 
-static void       MV_SetVoiceMixMode( VoiceNode *voice );
+void       MV_SetVoiceMixMode( VoiceNode *voice );
 
 static void       MV_SetVoicePitch( VoiceNode *voice, unsigned int rate, int pitchoffset );
 static void       MV_CalcVolume( int MaxLevel );
 static void       MV_CalcPanTable( void );
+
+void MV_ReleaseVorbisVoice( VoiceNode * voice );
 
 // implemented in mix.c
 void ClearBuffer_DW( void *ptr, unsigned data, int length );
