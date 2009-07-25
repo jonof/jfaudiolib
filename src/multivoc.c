@@ -529,23 +529,7 @@ playbackstatus MV_GetNextVOCBlock
    if ( voice->BlockLength > 0 )
       {
       voice->position    -= voice->length;
-      voice->sound       += voice->length >> 16;
-      if ( voice->bits == 16 )
-         {
-         voice->sound += voice->length >> 16;
-         }
-      voice->length       = min( voice->BlockLength, 0x8000 );
-      voice->BlockLength -= voice->length;
-      voice->length     <<= 16;
-      return( KeepPlaying );
-      }
-
-   if ( ( voice->length > 0 ) && ( voice->LoopEnd != NULL ) &&
-      ( voice->LoopStart != NULL ) )
-      {
-      voice->BlockLength  = voice->LoopSize;
-      voice->sound        = voice->LoopStart;
-      voice->position     = 0;
+      voice->sound       += (voice->length >> 16) * (voice->bits / 8);
       voice->length       = min( voice->BlockLength, 0x8000 );
       voice->BlockLength -= voice->length;
       voice->length     <<= 16;
@@ -587,13 +571,10 @@ playbackstatus MV_GetNextVOCBlock
                }
             else
                {
-               voice->BlockLength  = ( (intptr_t) ptr - 4 ) - (intptr_t) voice->LoopStart;
-               voice->sound        = voice->LoopStart;
+               voice->NextBlock    = voice->LoopStart;
+               voice->BlockLength  = 0;
                voice->position     = 0;
-               voice->length       = min( voice->BlockLength, 0x8000 );
-               voice->BlockLength -= voice->length;
-               voice->length     <<= 16;
-               return( KeepPlaying );
+               return MV_GetNextVOCBlock(voice);
                }
             break;
 
@@ -2228,8 +2209,6 @@ int MV_PlayLoopedWAV
    data_header   data;
    VoiceNode     *voice;
    int length;
-   int absloopend;
-   int absloopstart;
 
    if ( !MV_Installed )
       {
@@ -2300,18 +2279,11 @@ int MV_PlayLoopedWAV
    voice->GetSound    = MV_GetNextWAVBlock;
 
    length = data.size;
-   absloopstart = loopstart;
-   absloopend   = loopend;
    if ( voice->bits == 16 )
       {
-      loopstart  *= 2;
       data.size  &= ~1;
-      loopend    *= 2;
       length     /= 2;
       }
-
-   loopend    = min( loopend, data.size );
-   absloopend = min( absloopend, length );
 
    voice->Playing     = TRUE;
    voice->DemandFeed  = NULL;
@@ -2319,22 +2291,15 @@ int MV_PlayLoopedWAV
    voice->LoopCount   = 0;
    voice->position    = 0;
    voice->length      = 0;
-   voice->BlockLength = absloopend;
+   voice->BlockLength = length;
    voice->NextBlock   = ( char * )( (intptr_t) ptr + sizeof(riff_header) + riff.format_size + sizeof(data_header) );
    voice->next        = NULL;
    voice->prev        = NULL;
    voice->priority    = priority;
    voice->callbackval = callbackval;
-   voice->LoopStart   = voice->NextBlock + loopstart;
-   voice->LoopEnd     = voice->NextBlock + loopend;
-   voice->LoopSize    = absloopend - absloopstart;
-
-   if ( ( loopstart >= data.size ) || ( loopstart < 0 ) )
-      {
-      voice->LoopStart = NULL;
-      voice->LoopEnd   = NULL;
-      voice->BlockLength = length;
-      }
+   voice->LoopStart   = loopstart >= 0 ? voice->NextBlock : NULL;
+   voice->LoopEnd     = NULL;
+   voice->LoopSize    = length;
 
    MV_SetVoicePitch( voice, format.nSamplesPerSec, pitchoffset );
    MV_SetVoiceVolume( voice, vol, left, right );
@@ -2485,8 +2450,8 @@ int MV_PlayLoopedVOC
    voice->prev        = NULL;
    voice->priority    = priority;
    voice->callbackval = callbackval;
-   voice->LoopStart   = ( char * )loopstart;
-   voice->LoopEnd     = ( char * )loopend;
+   voice->LoopStart   = loopstart >= 0 ? voice->NextBlock : 0;
+   voice->LoopEnd     = 0;
    voice->LoopSize    = loopend - loopstart + 1;
 
    if ( loopstart < 0 )
