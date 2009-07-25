@@ -600,7 +600,7 @@ playbackstatus MV_GetNextVOCBlock
          case 1 :
             // Sound data block
             voice->bits  = 8;
-            voice->channels = 1;
+            voice->channels = voicemode + 1;
             if ( lastblocktype != 8 )
                {
                tc = ( unsigned int )*ptr << 8;
@@ -610,10 +610,10 @@ playbackstatus MV_GetNextVOCBlock
             ptr += 2;
             blocklength -= 2;
 
-            samplespeed = 256000000L / ( 65536 - tc );
-
+            samplespeed = 256000000L / ( voice->channels * ( 65536 - tc ) );
+ 
             // Skip packed or stereo data
-            if ( ( packtype != 0 ) || ( voicemode != 0 ) )
+            if ( ( packtype != 0 ) || ( voicemode != 0 && voicemode != 1 ) )
                {
                ptr += blocklength;
                }
@@ -699,22 +699,22 @@ playbackstatus MV_GetNextVOCBlock
             Channels = ( unsigned )*( ptr + 5 );
             Format = ( unsigned )LITTLE16( *( unsigned short * )( ptr + 6 ) );
 
-            if ( ( BitsPerSample == 8 ) && ( Channels == 1 ) &&
+            if ( ( BitsPerSample == 8 ) && ( Channels == 1 || Channels == 2 ) &&
                ( Format == VOC_8BIT ) )
                {
                ptr         += 12;
                blocklength -= 12;
                voice->bits  = 8;
-               voice->channels = 1;
+               voice->channels = Channels;
                done         = TRUE;
                }
-            else if ( ( BitsPerSample == 16 ) && ( Channels == 1 ) &&
+            else if ( ( BitsPerSample == 16 ) && ( Channels == 1 || Channels == 2 ) &&
                ( Format == VOC_16BIT ) )
                {
                ptr         += 12;
                blocklength -= 12;
                voice->bits  = 16;
-               voice->channels = 1;
+               voice->channels = Channels;
                done         = TRUE;
                }
             else
@@ -740,6 +740,9 @@ playbackstatus MV_GetNextVOCBlock
 
       voice->SamplingRate = samplespeed;
       voice->RateScale    = ( voice->SamplingRate * voice->PitchScale ) / MV_MixRate;
+      if (voice->channels == 2) {
+         voice->RateScale *= 2;
+      }
 
       // Multiply by MixBufferSize - 1
       voice->FixedPointBufferSize = ( voice->RateScale * MixBufferSize ) -
@@ -1244,6 +1247,9 @@ void MV_SetVoicePitch
    voice->SamplingRate = rate;
    voice->PitchScale   = PITCH_GetScale( pitchoffset );
    voice->RateScale    = ( rate * voice->PitchScale ) / MV_MixRate;
+   if (voice->channels == 2) {
+      voice->RateScale *= 2;
+   }
 
    // Multiply by MixBufferSize - 1
    voice->FixedPointBufferSize = ( voice->RateScale * MixBufferSize ) -
@@ -1360,6 +1366,15 @@ static short *MV_GetVolumeTable
         X                 |   X                       | Mix16BitMono
                      X    |         X                 | Mix16BitStereo16
                      X    |   X                       | Mix16BitStereo
+--------------------------+---------------------------+-------------
+                     X    |                      X    | Mix16BitStereo16Stereo
+                     X    |                X          | Mix16BitStereo8Stereo
+					X          |                      X    | Mix8BitStereo16Stereo
+               X          |                X          | Mix8BitStereo8Stereo
+		  X                 |                      X    | Mix16BitMono16Stereo
+        X                 |                X          | Mix16BitMono8Stereo
+  X                       |                      X    | Mix8BitMono16Stereo
+  X                       |                X          | Mix8BitMono8Stereo
 
 ---------------------------------------------------------------------*/
 
@@ -1404,6 +1419,7 @@ static void MV_SetVoiceMixMode
 	if ( voice->channels == 2 )
       {
       test |= T_STEREOSOURCE;
+		test &= ~(T_RIGHTQUIET | T_LEFTQUIET);
       }
 
    switch( test )
@@ -1475,7 +1491,39 @@ static void MV_SetVoiceMixMode
       case T_SIXTEENBIT_STEREO :
          voice->mix = MV_Mix16BitStereo;
          break;
+			
+		case T_16BITSOURCE | T_STEREOSOURCE:
+			voice->mix = MV_Mix16BitStereo16Stereo;
+			break;
 
+		case T_16BITSOURCE | T_STEREOSOURCE | T_8BITS:
+			voice->mix = MV_Mix8BitStereo16Stereo;
+			break;
+			
+		case T_16BITSOURCE | T_STEREOSOURCE | T_MONO:
+			voice->mix = MV_Mix16BitMono16Stereo;
+			break;
+			
+		case T_16BITSOURCE | T_STEREOSOURCE | T_8BITS | T_MONO:
+			voice->mix = MV_Mix8BitMono16Stereo;
+			break;
+			
+		case T_STEREOSOURCE:
+			voice->mix = MV_Mix16BitStereo8Stereo;
+			break;
+         
+		case T_STEREOSOURCE | T_8BITS:
+			voice->mix = MV_Mix8BitStereo8Stereo;
+			break;
+			
+		case T_STEREOSOURCE | T_MONO:
+			voice->mix = MV_Mix16BitMono8Stereo;
+			break;
+			
+		case T_STEREOSOURCE | T_8BITS | T_MONO:
+			voice->mix = MV_Mix8BitMono8Stereo;
+			break;
+			
       default :
          voice->mix = 0;
       }
@@ -2407,7 +2455,7 @@ int MV_PlayLoopedVOC
       }
 
    // Make sure it's a valid VOC file.
-   status = strncmp( ptr, "Creative Voice File", 19 );
+   status = memcmp( ptr, "Creative Voice File", 19 );
    if ( status != 0 )
       {
       MV_SetErrorCode( MV_InvalidVOCFile );
