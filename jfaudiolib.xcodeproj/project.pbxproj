@@ -182,6 +182,7 @@
 		AB2E9E321011E60300DD2F1F /* Project object */ = {
 			isa = PBXProject;
 			buildConfigurationList = AB2E9E331011E60300DD2F1F /* Build configuration list for PBXProject "jfaudiolib" */;
+			compatibilityVersion = "Xcode 2.4";
 			hasScannedForEncodings = 0;
 			mainGroup = AB2E9E301011E60300DD2F1F;
 			productRefGroup = AB2E9E431011E61700DD2F1F /* Products */;
@@ -221,6 +222,7 @@
 					i386,
 				);
 				COPY_PHASE_STRIP = NO;
+				FRAMEWORK_SEARCH_PATHS = "third-party";
 				GCC_PREPROCESSOR_DEFINITIONS = __MACOSX__;
 				GCC_VERSION_i386 = 4.0;
 				GCC_VERSION_ppc = 4.0;
@@ -239,6 +241,7 @@
 					i386,
 				);
 				COPY_PHASE_STRIP = YES;
+				FRAMEWORK_SEARCH_PATHS = "third-party";
 				GCC_PREPROCESSOR_DEFINITIONS = __MACOSX__;
 				GCC_VERSION_i386 = 4.0;
 				GCC_VERSION_ppc = 4.0;
