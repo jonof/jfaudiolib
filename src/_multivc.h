@@ -58,6 +58,9 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 //#define MV_MaxVolume       63
 #define MV_NumVoices       8
 
+// mirrors FX_MUSIC_PRIORITY from fx_man.h
+#define MV_MUSIC_PRIORITY 0x7fffffffl
+
 #define MIX_VOLUME( volume ) \
    ( ( max( 0, min( ( volume ), 255 ) ) * ( MV_MaxVolume + 1 ) ) >> 8 )
 //   ( ( max( 0, min( ( volume ), 255 ) ) ) >> 2 )
@@ -239,7 +242,8 @@ VoiceNode *MV_AllocVoice( int priority );
 
 static short     *MV_GetVolumeTable( int vol );
 
-void       MV_SetVoiceMixMode( VoiceNode *voice );
+void MV_SetVoiceMixMode( VoiceNode *voice );
+void MV_SetVoiceVolume ( VoiceNode *voice, int vol, int left, int right );
 
 static void       MV_SetVoicePitch( VoiceNode *voice, unsigned int rate, int pitchoffset );
 static void       MV_CalcVolume( int MaxLevel );

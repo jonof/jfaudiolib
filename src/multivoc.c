@@ -1000,7 +1000,10 @@ int MV_KillAllVoices
    // Remove all the voices from the list
    while( VoiceList.next != &VoiceList )
       {
-      MV_Kill( VoiceList.next->handle );
+      if (VoiceList.next->priority < MV_MUSIC_PRIORITY)
+         {
+         MV_Kill( VoiceList.next->handle );
+         }
       }
 
    return( MV_Ok );

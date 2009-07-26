@@ -445,6 +445,8 @@ int DirectSoundDrv_BeginPlayback(char *BufferStart, int BufferSize,
         ErrorCode = DSErr_CreateThread;
         return DSErr_Error;
     }
+
+    SetThreadPriority(mixThread, THREAD_PRIORITY_HIGHEST);
     
     err = IDirectSoundBuffer_Play(lpdsbsec, 0, 0, DSBPLAY_LOOPING);
     if (FAILED( err )) {

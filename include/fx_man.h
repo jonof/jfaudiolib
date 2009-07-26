@@ -44,6 +44,8 @@ enum FX_ERRORS
    FX_MultiVocError,
    };
 
+#define FX_MUSIC_PRIORITY	0x7fffffffl
+
 
 const char *FX_ErrorString( int ErrorNumber );
 int   FX_Init( int SoundCard, int numvoices, int numchannels, int samplebits, unsigned mixrate, void * initdata );
