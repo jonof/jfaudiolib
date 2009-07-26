@@ -991,6 +991,8 @@ int MV_KillAllVoices
    )
 
    {
+   VoiceNode * voice, * next;
+
    if ( !MV_Installed )
       {
       MV_SetErrorCode( MV_NotInstalled );
@@ -998,11 +1000,12 @@ int MV_KillAllVoices
       }
 
    // Remove all the voices from the list
-   while( VoiceList.next != &VoiceList )
+   for( voice = VoiceList.next; voice != &VoiceList; voice = next )
       {
-      if (VoiceList.next->priority < MV_MUSIC_PRIORITY)
+      next = voice->next;
+      if (voice->priority < MV_MUSIC_PRIORITY)
          {
-         MV_Kill( VoiceList.next->handle );
+         MV_Kill( voice->handle );
          }
       }
 
