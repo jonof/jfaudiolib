@@ -109,7 +109,7 @@ static int close_vorbis(void * datasource)
    return 0;
 }
 
-static int tell_vorbis(void * datasource)
+static long tell_vorbis(void * datasource)
 {
    vorbis_data * vorb = (vorbis_data *) datasource;
    
@@ -137,7 +137,7 @@ playbackstatus MV_GetNextVorbisBlock
 
 {
    vorbis_data * vd = (vorbis_data *) voice->extra;
-   long bytes;
+   int bytes, bytesread;
    int bitstream, err;
 
    voice->Playing = TRUE;
@@ -153,8 +153,10 @@ playbackstatus MV_GetNextVorbisBlock
       return( KeepPlaying );
       }
 
+   bytesread = 0;
    do {
-      bytes = ov_read(&vd->vf, vd->block, sizeof(vd->block), 0, 2, 1, &bitstream);
+      bytes = ov_read(&vd->vf, vd->block + bytesread, sizeof(vd->block) - bytesread, 0, 2, 1, &bitstream);
+      //fprintf(stderr, "ov_read = %d\n", bytes);
       if (bytes == OV_HOLE) continue;
       if (bytes == 0) {
          if (voice->LoopStart) {
@@ -162,19 +164,24 @@ playbackstatus MV_GetNextVorbisBlock
             if (err != 0) {
                fprintf(stderr, "MV_GetNextVorbisBlock ov_pcm_seek_page_lap: err %d\n", err);
             } else {
-               break;
+               continue;
             }
-         }
+         } else {
+           break;
+	 }
+      } else if (bytes < 0) {
+         fprintf(stderr, "MV_GetNextVorbisBlock ov_read: err %d\n", bytes);
          voice->Playing = FALSE;
          return NoMoreData;
-      } else if (bytes > 0) {
-         break;
-      } else {
-         fprintf(stderr, "MV_GetNextVorbisBlock ov_read: err %d\n", err);
-         voice->Playing = FALSE;
-         return NoMoreData;
-      }   
-   } while (1);
+      }
+
+      bytesread += bytes;
+   } while (bytesread < sizeof(vd->block));
+
+   if (bytesread == 0) {
+      voice->Playing = FALSE;
+      return NoMoreData;
+   }
       
    if (bitstream != vd->lastbitstream) {
       vorbis_info * vi = 0;
@@ -197,12 +204,12 @@ playbackstatus MV_GetNextVorbisBlock
    }
    vd->lastbitstream = bitstream;
 
-   vd->blockused = bytes;
-   bytes /= 2 * voice->channels;
+   vd->blockused = bytesread;
+   bytesread /= 2 * voice->channels;
    
    voice->position    = 0;
    voice->sound       = vd->block;
-   voice->BlockLength = bytes;
+   voice->BlockLength = bytesread;
    voice->length      = min( voice->BlockLength, 0x8000 );
    voice->BlockLength -= voice->length;
    voice->length     <<= 16;
