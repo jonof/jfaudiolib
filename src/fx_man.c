@@ -844,6 +844,32 @@ int FX_StopSound
 
 
 /*---------------------------------------------------------------------
+   Function: FX_PauseSound
+
+   Pauses or resumes playback of a specific voice
+---------------------------------------------------------------------*/
+
+int FX_PauseSound
+   (
+   int handle,
+   int pauseon
+   )
+
+   {
+   int status;
+   
+   status = MV_PauseVoice( handle, pauseon );
+   if ( status != MV_Ok )
+      {
+      FX_SetErrorCode( FX_MultiVocError );
+      return( FX_Warning );
+      }
+   
+   return( FX_Ok );
+   }
+
+
+/*---------------------------------------------------------------------
    Function: FX_StopAllSounds
 
    Halts playback of all sounds.

@@ -396,6 +396,8 @@ int MV_PlayLoopedVorbis
    voice->LoopStart   = (char *) (loopstart >= 0 ? TRUE : FALSE);
    voice->LoopEnd     = 0;
    voice->LoopSize    = 0;
+   voice->Playing     = TRUE;
+   voice->Paused      = FALSE;
    
    voice->SamplingRate = vi->rate;
    voice->RateScale    = ( voice->SamplingRate * voice->PitchScale ) / MV_MixRate;

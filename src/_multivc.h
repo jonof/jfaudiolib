@@ -136,6 +136,7 @@ typedef struct VoiceNode
    unsigned int  RateScale;
    unsigned int  position;
    int           Playing;
+   int           Paused;
 
    int           handle;
    int           priority;

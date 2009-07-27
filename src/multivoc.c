@@ -478,6 +478,12 @@ void MV_ServiceVoc
 	
    for( voice = VoiceList.next; voice != &VoiceList; voice = next )
       {
+      if ( voice->Paused )
+         {
+         next = voice->next;
+         continue;
+         }
+      
       MV_BufferEmpty[ MV_MixPage ] = FALSE;
 
       MV_MixFunction( voice, MV_MixPage );
@@ -980,6 +986,38 @@ int MV_VoicePlaying
 
 
 /*---------------------------------------------------------------------
+Function: MV_VoicePaused
+
+Checks if the voice associated with the specified handle is
+paused.
+---------------------------------------------------------------------*/
+
+int MV_VoicePaused
+   (
+   int handle
+   )
+
+   {
+   VoiceNode *voice;
+   
+   if ( !MV_Installed )
+      {
+      MV_SetErrorCode( MV_NotInstalled );
+      return( FALSE );
+      }
+   
+   voice = MV_GetVoice( handle );
+   
+   if ( voice == NULL )
+      {
+      return( FALSE );
+      }
+   
+   return voice->Paused;
+   }
+
+
+/*---------------------------------------------------------------------
    Function: MV_KillAllVoices
 
    Stops output of all currently active voices.
@@ -1058,6 +1096,46 @@ int MV_Kill
 
    return( MV_Ok );
    }
+
+
+/*---------------------------------------------------------------------
+   Function: MV_PauseVoice
+
+   Pauses or resumes output of the voice associated with the specified handle.
+---------------------------------------------------------------------*/
+
+int MV_PauseVoice
+(
+ int handle,
+ int pauseon
+ )
+
+{
+   VoiceNode *voice;
+   int        flags;
+   
+   if ( !MV_Installed )
+   {
+      MV_SetErrorCode( MV_NotInstalled );
+      return( MV_Error );
+   }
+   
+   flags = DisableInterrupts();
+   
+   voice = MV_GetVoice( handle );
+   if ( voice == NULL )
+   {
+      RestoreInterrupts( flags );
+      MV_SetErrorCode( MV_VoiceNotFound );
+      return( MV_Error );
+   }
+   
+   voice->Paused = pauseon;
+   
+   RestoreInterrupts( flags );
+   
+   return( MV_Ok );
+}
 
 
 /*---------------------------------------------------------------------
@@ -1994,6 +2072,7 @@ int MV_StartDemandFeedPlayback
    voice->length      = 0;
    voice->BlockLength = 0;
    voice->Playing     = TRUE;
+   voice->Paused      = FALSE;
    voice->next        = NULL;
    voice->prev        = NULL;
    voice->priority    = priority;
@@ -2081,6 +2160,7 @@ int MV_PlayLoopedRaw
 	voice->channels    = 1;
    voice->GetSound    = MV_GetNextRawBlock;
    voice->Playing     = TRUE;
+   voice->Paused      = FALSE;
    voice->NextBlock   = ptr;
    voice->position    = 0;
    voice->BlockLength = length;
@@ -2292,6 +2372,7 @@ int MV_PlayLoopedWAV
       }
 
    voice->Playing     = TRUE;
+   voice->Paused      = FALSE;
    voice->DemandFeed  = NULL;
    voice->LoopStart   = NULL;
    voice->LoopCount   = 0;
@@ -2719,6 +2800,8 @@ int MV_Init
       MV_SetErrorCode( MV_NoMem );
       return( MV_Error );
       }
+   
+   memset(ptr, 0, MV_TotalMemory);
 
    MV_Voices = ( VoiceNode * )ptr;
 	ptr += Voices * sizeof( VoiceNode );

@@ -55,8 +55,10 @@ enum MV_Errors
 
 const char *MV_ErrorString( int ErrorNumber );
 int   MV_VoicePlaying( int handle );
+int   MV_VoicePaused( int handle );
 int   MV_KillAllVoices( void );
 int   MV_Kill( int handle );
+int   MV_PauseVoice( int handle, int pauseon );
 int   MV_VoicesPlaying( void );
 int   MV_VoiceAvailable( int priority );
 int   MV_SetPitch( int handle, int pitchoffset );
