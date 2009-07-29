@@ -21,10 +21,18 @@
 
 int NoSoundDrv_GetError(void);
 const char *NoSoundDrv_ErrorString( int ErrorNumber );
-int NoSoundDrv_Init(int mixrate, int numchannels, int samplebits, void * initdata);
-void NoSoundDrv_Shutdown(void);
-int NoSoundDrv_BeginPlayback(char *BufferStart, int BufferSize,
+
+int  NoSoundDrv_PCM_Init(int mixrate, int numchannels, int samplebits, void * initdata);
+void NoSoundDrv_PCM_Shutdown(void);
+int  NoSoundDrv_PCM_BeginPlayback(char *BufferStart, int BufferSize,
               int NumDivisions, void ( *CallBackFunc )( void ) );
-void NoSoundDrv_StopPlayback(void);
-void NoSoundDrv_Lock(void);
-void NoSoundDrv_Unlock(void);
+void NoSoundDrv_PCM_StopPlayback(void);
+void NoSoundDrv_PCM_Lock(void);
+void NoSoundDrv_PCM_Unlock(void);
+
+int  NoSoundDrv_CD_Init(void);
+void NoSoundDrv_CD_Shutdown(void);
+int  NoSoundDrv_CD_Play(int track, int loop);
+void NoSoundDrv_CD_Stop(void);
+void NoSoundDrv_CD_Pause(int pauseon);
+int  NoSoundDrv_CD_IsPlaying(void);

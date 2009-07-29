@@ -41,78 +41,104 @@
 
 int ASS_SoundDriver = -1;
 
-#define UNSUPPORTED { 0,0,0,0,0,0,0,0, },
+#define UNSUPPORTED { 0,0, 0,0,0,0,0,0, 0,0,0,0,0, },
 
 static struct {
-	int          (* GetError)(void);
-	const char * (* ErrorString)(int);
-	int          (* Init)(int, int, int, void *);
-	void         (* Shutdown)(void);
-	int          (* BeginPlayback)(char *, int, int, void ( * )(void) );
-	void         (* StopPlayback)(void);
-	void         (* Lock)(void);
-	void         (* Unlock)(void);
+    int          (* GetError)(void);
+    const char * (* ErrorString)(int);
+
+    int          (* PCM_Init)(int, int, int, void *);
+    void         (* PCM_Shutdown)(void);
+    int          (* PCM_BeginPlayback)(char *, int, int, void ( * )(void) );
+    void         (* PCM_StopPlayback)(void);
+    void         (* PCM_Lock)(void);
+    void         (* PCM_Unlock)(void);
+
+    int          (* CD_Init)(void);
+    void         (* CD_Shutdown)(void);
+    int          (* CD_Play)(int track, int loop);
+    void         (* CD_Stop)(void);
+    void         (* CD_Pause)(int pauseon);
+    int          (* CD_IsPlaying)(void);
 } SoundDrivers[ASS_NumSoundCards] = {
-	
-	// Everyone gets the "no sound" driver
-	{
-		NoSoundDrv_GetError,
-		NoSoundDrv_ErrorString,
-		NoSoundDrv_Init,
-		NoSoundDrv_Shutdown,
-		NoSoundDrv_BeginPlayback,
-		NoSoundDrv_StopPlayback,
-		NoSoundDrv_Lock,
-		NoSoundDrv_Unlock,
-	},
-	
-	// Simple DirectMedia Layer
-	#ifdef HAVE_SDL
-	{
-		SDLDrv_GetError,
-		SDLDrv_ErrorString,
-		SDLDrv_Init,
-		SDLDrv_Shutdown,
-		SDLDrv_BeginPlayback,
-		SDLDrv_StopPlayback,
-		SDLDrv_Lock,
-		SDLDrv_Unlock,
-	},
-	#else
-		UNSUPPORTED
-	#endif
-	
-	// OS X CoreAudio
-	#ifdef __APPLE__
-	{
-		CoreAudioDrv_GetError,
-		CoreAudioDrv_ErrorString,
-		CoreAudioDrv_Init,
-		CoreAudioDrv_Shutdown,
-		CoreAudioDrv_BeginPlayback,
-		CoreAudioDrv_StopPlayback,
-		CoreAudioDrv_Lock,
-		CoreAudioDrv_Unlock,
-	},
-	#else
-		UNSUPPORTED
-	#endif
-	
-	// Windows DirectSound
-	#ifdef WIN32
-	{
-		DirectSoundDrv_GetError,
-		DirectSoundDrv_ErrorString,
-		DirectSoundDrv_Init,
-		DirectSoundDrv_Shutdown,
-		DirectSoundDrv_BeginPlayback,
-		DirectSoundDrv_StopPlayback,
-		DirectSoundDrv_Lock,
-		DirectSoundDrv_Unlock,
-	},
-	#else
-		UNSUPPORTED
-	#endif
+    
+    // Everyone gets the "no sound" driver
+    {
+        NoSoundDrv_GetError,
+        NoSoundDrv_ErrorString,
+        NoSoundDrv_PCM_Init,
+        NoSoundDrv_PCM_Shutdown,
+        NoSoundDrv_PCM_BeginPlayback,
+        NoSoundDrv_PCM_StopPlayback,
+        NoSoundDrv_PCM_Lock,
+        NoSoundDrv_PCM_Unlock,
+        NoSoundDrv_CD_Init,
+        NoSoundDrv_CD_Shutdown,
+        NoSoundDrv_CD_Play,
+        NoSoundDrv_CD_Stop,
+        NoSoundDrv_CD_Pause,
+        NoSoundDrv_CD_IsPlaying,
+    },
+    
+    // Simple DirectMedia Layer
+    #ifdef HAVE_SDL
+    {
+        SDLDrv_GetError,
+        SDLDrv_ErrorString,
+        SDLDrv_PCM_Init,
+        SDLDrv_PCM_Shutdown,
+        SDLDrv_PCM_BeginPlayback,
+        SDLDrv_PCM_StopPlayback,
+        SDLDrv_PCM_Lock,
+        SDLDrv_PCM_Unlock,
+        SDLDrv_CD_Init,
+        SDLDrv_CD_Shutdown,
+        SDLDrv_CD_Play,
+        SDLDrv_CD_Stop,
+        SDLDrv_CD_Pause,
+        SDLDrv_CD_IsPlaying,
+    },
+    #else
+        UNSUPPORTED
+    #endif
+    
+    // OS X CoreAudio
+    #if 0 //def __APPLE__
+    {
+        CoreAudioDrv_GetError,
+        CoreAudioDrv_ErrorString,
+        CoreAudioDrv_PCM_Init,
+        CoreAudioDrv_PCM_Shutdown,
+        CoreAudioDrv_PCM_BeginPlayback,
+        CoreAudioDrv_PCM_StopPlayback,
+        CoreAudioDrv_PCM_Lock,
+        CoreAudioDrv_PCM_Unlock,
+        CoreAudioDrv_CD_Init,
+        CoreAudioDrv_CD_Shutdown,
+        CoreAudioDrv_CD_Play,
+        CoreAudioDrv_CD_Stop,
+        CoreAudioDrv_CD_Pause,
+        CoreAudioDrv_CD_IsPlaying,
+    },
+    #else
+        UNSUPPORTED
+    #endif
+    
+    // Windows DirectSound
+    #ifdef WIN32
+    {
+        DirectSoundDrv_GetError,
+        DirectSoundDrv_ErrorString,
+        DirectSoundDrv_PCM_Init,
+        DirectSoundDrv_PCM_Shutdown,
+        DirectSoundDrv_PCM_BeginPlayback,
+        DirectSoundDrv_PCM_StopPlayback,
+        DirectSoundDrv_PCM_Lock,
+        DirectSoundDrv_PCM_Unlock,
+    },
+    #else
+        UNSUPPORTED
+    #endif
 };
 
 
@@ -141,34 +167,64 @@ const char * SoundDriver_ErrorString( int ErrorNumber )
 	return SoundDrivers[ASS_SoundDriver].ErrorString(ErrorNumber);
 }
 
-int SoundDriver_Init(int mixrate, int numchannels, int samplebits, void * initdata)
+int SoundDriver_PCM_Init(int mixrate, int numchannels, int samplebits, void * initdata)
 {
-	return SoundDrivers[ASS_SoundDriver].Init(mixrate, numchannels, samplebits, initdata);
+	return SoundDrivers[ASS_SoundDriver].PCM_Init(mixrate, numchannels, samplebits, initdata);
 }
 
-void SoundDriver_Shutdown(void)
+void SoundDriver_PCM_Shutdown(void)
 {
-	SoundDrivers[ASS_SoundDriver].Shutdown();
+	SoundDrivers[ASS_SoundDriver].PCM_Shutdown();
 }
 
-int SoundDriver_BeginPlayback(char *BufferStart, int BufferSize,
+int SoundDriver_PCM_BeginPlayback(char *BufferStart, int BufferSize,
 		int NumDivisions, void ( *CallBackFunc )( void ) )
 {
-	return SoundDrivers[ASS_SoundDriver].BeginPlayback(BufferStart,
+	return SoundDrivers[ASS_SoundDriver].PCM_BeginPlayback(BufferStart,
 			BufferSize, NumDivisions, CallBackFunc);
 }
 
-void SoundDriver_StopPlayback(void)
+void SoundDriver_PCM_StopPlayback(void)
 {
-	SoundDrivers[ASS_SoundDriver].StopPlayback();
+	SoundDrivers[ASS_SoundDriver].PCM_StopPlayback();
 }
 
-void SoundDriver_Lock(void)
+void SoundDriver_PCM_Lock(void)
 {
-	SoundDrivers[ASS_SoundDriver].Lock();
+	SoundDrivers[ASS_SoundDriver].PCM_Lock();
 }
 
-void SoundDriver_Unlock(void)
+void SoundDriver_PCM_Unlock(void)
 {
-	SoundDrivers[ASS_SoundDriver].Unlock();
+	SoundDrivers[ASS_SoundDriver].PCM_Unlock();
+}
+
+int  SoundDriver_CD_Init(void)
+{
+    return SoundDrivers[ASS_SoundDriver].CD_Init();
+}
+
+void SoundDriver_CD_Shutdown(void)
+{
+    SoundDrivers[ASS_SoundDriver].CD_Shutdown();
+}
+
+int  SoundDriver_CD_Play(int track, int loop)
+{
+    return SoundDrivers[ASS_SoundDriver].CD_Play(track, loop);
+}
+
+void SoundDriver_CD_Stop(void)
+{
+    SoundDrivers[ASS_SoundDriver].CD_Stop();
+}
+
+void SoundDriver_CD_Pause(int pauseon)
+{
+    SoundDrivers[ASS_SoundDriver].CD_Pause(pauseon);
+}
+
+int SoundDriver_CD_IsPlaying(void)
+{
+    return SoundDrivers[ASS_SoundDriver].CD_IsPlaying();
 }

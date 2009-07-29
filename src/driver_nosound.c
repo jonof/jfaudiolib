@@ -32,29 +32,57 @@ const char *NoSoundDrv_ErrorString( int ErrorNumber )
 	return "No sound, Ok.";
 }
 
-int NoSoundDrv_Init(int mixrate, int numchannels, int samplebits, void * initdata)
+int NoSoundDrv_PCM_Init(int mixrate, int numchannels, int samplebits, void * initdata)
 {
 	return 0;
 }
 
-void NoSoundDrv_Shutdown(void)
+void NoSoundDrv_PCM_Shutdown(void)
 {
 }
 
-int NoSoundDrv_BeginPlayback(char *BufferStart, int BufferSize,
+int NoSoundDrv_PCM_BeginPlayback(char *BufferStart, int BufferSize,
 						int NumDivisions, void ( *CallBackFunc )( void ) )
 {
 	return 0;
 }
 
-void NoSoundDrv_StopPlayback(void)
+void NoSoundDrv_PCM_StopPlayback(void)
 {
 }
 
-void NoSoundDrv_Lock(void)
+void NoSoundDrv_PCM_Lock(void)
 {
 }
 
-void NoSoundDrv_Unlock(void)
+void NoSoundDrv_PCM_Unlock(void)
 {
+}
+
+
+int NoSoundDrv_CD_Init(void)
+{
+    return 0;
+}
+
+void NoSoundDrv_CD_Shutdown(void)
+{
+}
+
+int NoSoundDrv_CD_Play(int track, int loop)
+{
+    return 0;
+}
+
+void NoSoundDrv_CD_Stop(void)
+{
+}
+
+void NoSoundDrv_CD_Pause(int pauseon)
+{
+}
+
+int NoSoundDrv_CD_IsPlaying(void)
+{
+    return 0;
 }

@@ -124,7 +124,7 @@ int FX_Init
       }
 	
 	if (SoundCard == ASS_AutoDetect) {
-#if defined __APPLE__
+#if 0 //defined __APPLE__
 		SoundCard = ASS_CoreAudio;
 #elif defined WIN32
 		SoundCard = ASS_DirectSound;

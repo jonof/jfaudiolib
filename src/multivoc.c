@@ -139,7 +139,7 @@ static int DisableInterrupts(void)
 	if (lockdepth++ > 0) {
 		return 0;
 	}
-	SoundDriver_Lock();
+	SoundDriver_PCM_Lock();
 	return 0;
 }
 
@@ -148,7 +148,7 @@ static void RestoreInterrupts(int a)
 	if (--lockdepth > 0) {
 		return;
 	}
-	SoundDriver_Unlock();
+	SoundDriver_PCM_Unlock();
 }
 
 
@@ -1030,6 +1030,7 @@ int MV_KillAllVoices
 
    {
    VoiceNode * voice, * next;
+   int        flags;
 
    if ( !MV_Installed )
       {
@@ -1037,6 +1038,8 @@ int MV_KillAllVoices
       return( MV_Error );
       }
 
+   flags = DisableInterrupts();
+       
    // Remove all the voices from the list
    for( voice = VoiceList.next; voice != &VoiceList; voice = next )
       {
@@ -1046,6 +1049,8 @@ int MV_KillAllVoices
          MV_Kill( voice->handle );
          }
       }
+
+   RestoreInterrupts(flags);
 
    return( MV_Ok );
    }
@@ -1939,7 +1944,7 @@ int MV_StartPlayback
 //   return( MV_Ok );
 
    // Start playback
-   status = SoundDriver_BeginPlayback(MV_MixBuffer[0], MV_BufferSize,
+   status = SoundDriver_PCM_BeginPlayback(MV_MixBuffer[0], MV_BufferSize,
 												  MV_NumberOfBuffers, MV_ServiceVoc);
    if (status != MV_Ok) {
       MV_SetErrorCode(MV_DriverError);
@@ -1969,7 +1974,7 @@ void MV_StopPlayback
    int          flags;
 
    // Stop sound playback
-   SoundDriver_StopPlayback();
+   SoundDriver_PCM_StopPlayback();
 
    // Make sure all callbacks are done.
    flags = DisableInterrupts();
@@ -2825,7 +2830,7 @@ int MV_Init
 	ASS_SoundDriver = soundcard;
 
    // Initialize the sound card
-	status = SoundDriver_Init(MixRate, numchannels, samplebits, initdata);
+	status = SoundDriver_PCM_Init(MixRate, numchannels, samplebits, initdata);
 	if ( status != MV_Ok ) {
 		MV_SetErrorCode( MV_DriverError );
 	}
@@ -2918,7 +2923,7 @@ int MV_Shutdown
    MV_StopPlayback();
 
    // Shutdown the sound card
-	SoundDriver_Shutdown();
+	SoundDriver_PCM_Shutdown();
 
    // Free any voices we allocated
    free( MV_Voices );

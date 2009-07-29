@@ -25,17 +25,25 @@
 
 extern int ASS_SoundDriver;
 
-int SoundDriver_IsSupported(int driver);
+int  SoundDriver_IsSupported(int driver);
 
-int SoundDriver_GetError(void);
+int  SoundDriver_GetError(void);
 const char * SoundDriver_ErrorString( int ErrorNumber );
-int SoundDriver_Init(int mixrate, int numchannels, int samplebits, void * initdata);
-void SoundDriver_Shutdown(void);
-int SoundDriver_BeginPlayback( char *BufferStart,
+
+int  SoundDriver_PCM_Init(int mixrate, int numchannels, int samplebits, void * initdata);
+void SoundDriver_PCM_Shutdown(void);
+int  SoundDriver_PCM_BeginPlayback( char *BufferStart,
 			 int BufferSize, int NumDivisions, 
 			 void ( *CallBackFunc )( void ) );
-void SoundDriver_StopPlayback(void);
-void SoundDriver_Lock(void);
-void SoundDriver_Unlock(void);
+void SoundDriver_PCM_StopPlayback(void);
+void SoundDriver_PCM_Lock(void);
+void SoundDriver_PCM_Unlock(void);
+
+int  SoundDriver_CD_Init(void);
+void SoundDriver_CD_Shutdown(void);
+int  SoundDriver_CD_Play(int track, int loop);
+void SoundDriver_CD_Stop(void);
+void SoundDriver_CD_Pause(int pauseon);
+int  SoundDriver_CD_IsPlaying(void);
 
 #endif

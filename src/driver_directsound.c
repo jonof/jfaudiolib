@@ -293,14 +293,14 @@ static void TeardownDSound(HRESULT err)
     lpds = 0;
 }
 
-int DirectSoundDrv_Init(int mixrate, int numchannels, int samplebits, void * initdata)
+int DirectSoundDrv_PCM_Init(int mixrate, int numchannels, int samplebits, void * initdata)
 {
     HRESULT err;
     DSBUFFERDESC bufdesc;
     WAVEFORMATEX wfex;
     
     if (Initialised) {
-        DirectSoundDrv_Shutdown();
+        DirectSoundDrv_PCM_Shutdown();
     }
     
     err = DirectSoundCreate(0, &lpds, 0);
@@ -405,20 +405,20 @@ int DirectSoundDrv_Init(int mixrate, int numchannels, int samplebits, void * ini
 	return DSErr_Ok;
 }
 
-void DirectSoundDrv_Shutdown(void)
+void DirectSoundDrv_PCM_Shutdown(void)
 {
     if (!Initialised) {
         return;
     }
     
-    DirectSoundDrv_StopPlayback();
+    DirectSoundDrv_PCM_StopPlayback();
     
     TeardownDSound(DS_OK);
     
     Initialised = 0;
 }
 
-int DirectSoundDrv_BeginPlayback(char *BufferStart, int BufferSize,
+int DirectSoundDrv_PCM_BeginPlayback(char *BufferStart, int BufferSize,
 						int NumDivisions, void ( *CallBackFunc )( void ) )
 {
     HRESULT err;
@@ -428,7 +428,7 @@ int DirectSoundDrv_BeginPlayback(char *BufferStart, int BufferSize,
         return DSErr_Error;
     }
     
-    DirectSoundDrv_StopPlayback();
+    DirectSoundDrv_PCM_StopPlayback();
     
 	MixBuffer = BufferStart;
 	MixBufferSize = BufferSize;
@@ -459,7 +459,7 @@ int DirectSoundDrv_BeginPlayback(char *BufferStart, int BufferSize,
 	return DSErr_Ok;
 }
 
-void DirectSoundDrv_StopPlayback(void)
+void DirectSoundDrv_PCM_StopPlayback(void)
 {
     if (!Playing) {
         return;
@@ -471,7 +471,7 @@ void DirectSoundDrv_StopPlayback(void)
     Playing = 0;
 }
 
-void DirectSoundDrv_Lock(void)
+void DirectSoundDrv_PCM_Lock(void)
 {
     DWORD err;
     
@@ -481,7 +481,7 @@ void DirectSoundDrv_Lock(void)
     }
 }
 
-void DirectSoundDrv_Unlock(void)
+void DirectSoundDrv_PCM_Unlock(void)
 {
     ReleaseMutex(mutex);
 }

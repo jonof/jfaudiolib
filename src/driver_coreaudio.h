@@ -20,10 +20,18 @@
 
 int CoreAudioDrv_GetError(void);
 const char *CoreAudioDrv_ErrorString( int ErrorNumber );
-int CoreAudioDrv_Init(int mixrate, int numchannels, int samplebits, void * initdata);
-void CoreAudioDrv_Shutdown(void);
-int CoreAudioDrv_BeginPlayback(char *BufferStart, int BufferSize,
+
+int  CoreAudioDrv_PCM_Init(int mixrate, int numchannels, int samplebits, void * initdata);
+void CoreAudioDrv_PCM_Shutdown(void);
+int  CoreAudioDrv_PCM_BeginPlayback(char *BufferStart, int BufferSize,
              int NumDivisions, void ( *CallBackFunc )( void ) );
-void CoreAudioDrv_StopPlayback(void);
-void CoreAudioDrv_Lock(void);
-void CoreAudioDrv_Unlock(void);
+void CoreAudioDrv_PCM_StopPlayback(void);
+void CoreAudioDrv_PCM_Lock(void);
+void CoreAudioDrv_PCM_Unlock(void);
+
+int  CoreAudioDrv_CD_Init(void);
+void CoreAudioDrv_CD_Shutdown(void);
+int  CoreAudioDrv_CD_Play(int track, int loop);
+void CoreAudioDrv_CD_Stop(void);
+void CoreAudioDrv_CD_Pause(int pauseon);
+int  CoreAudioDrv_CD_IsPlaying(void);

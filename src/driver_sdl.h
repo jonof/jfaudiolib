@@ -21,10 +21,18 @@
 
 int SDLDrv_GetError(void);
 const char *SDLDrv_ErrorString( int ErrorNumber );
-int SDLDrv_Init(int mixrate, int numchannels, int samplebits, void * initdata);
-void SDLDrv_Shutdown(void);
-int SDLDrv_BeginPlayback(char *BufferStart, int BufferSize,
+
+int  SDLDrv_PCM_Init(int mixrate, int numchannels, int samplebits, void * initdata);
+void SDLDrv_PCM_Shutdown(void);
+int  SDLDrv_PCM_BeginPlayback(char *BufferStart, int BufferSize,
                  int NumDivisions, void ( *CallBackFunc )( void ) );
-void SDLDrv_StopPlayback(void);
-void SDLDrv_Lock(void);
-void SDLDrv_Unlock(void);
+void SDLDrv_PCM_StopPlayback(void);
+void SDLDrv_PCM_Lock(void);
+void SDLDrv_PCM_Unlock(void);
+
+int  SDLDrv_CD_Init(void);
+void SDLDrv_CD_Shutdown(void);
+int  SDLDrv_CD_Play(int track, int loop);
+void SDLDrv_CD_Stop(void);
+void SDLDrv_CD_Pause(int pauseon);
+int  SDLDrv_CD_IsPlaying(void);

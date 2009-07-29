@@ -56,11 +56,11 @@ static int MixBufferUsed = 0;
 static void ( *MixCallBack )( void ) = 0;
 
 static OSStatus fillInput(
-					void                         *inRefCon,
-					AudioUnitRenderActionFlags   inActionFlags,
-					const AudioTimeStamp         *inTimeStamp,
-					UInt32                       inBusNumber,
-					AudioBuffer                  *ioData)
+                    void                         *inRefCon,
+                    AudioUnitRenderActionFlags   inActionFlags,
+                    const AudioTimeStamp         *inTimeStamp,
+                    UInt32                       inBusNumber,
+                    AudioBuffer                  *ioData)
 {
 	UInt32 remaining, len;
 	char *ptr, *sptr;
@@ -70,9 +70,9 @@ static OSStatus fillInput(
 	
 	while (remaining > 0) {
 		if (MixBufferUsed == MixBufferSize) {
-			CoreAudioDrv_Lock();
+			CoreAudioDrv_PCM_Lock();
 			MixCallBack();
-			CoreAudioDrv_Unlock();
+			CoreAudioDrv_PCM_Unlock();
 			
 			MixBufferUsed = 0;
 			MixBufferCurrent++;
@@ -161,7 +161,7 @@ int CoreAudioDrv_InitMIDI()
 }
  */
 
-int CoreAudioDrv_Init(int mixrate, int numchannels, int samplebits, void * initdata)
+int CoreAudioDrv_PCM_Init(int mixrate, int numchannels, int samplebits, void * initdata)
 {
 	OSStatus result = noErr;
 	Component comp;
@@ -170,7 +170,7 @@ int CoreAudioDrv_Init(int mixrate, int numchannels, int samplebits, void * initd
 	struct AudioUnitInputCallback callback;
 	
 	if (Initialised) {
-		CoreAudioDrv_Shutdown();
+		CoreAudioDrv_PCM_Shutdown();
 	}
 	
 	if (pthread_mutex_init(&mutex, 0) < 0) {
@@ -231,11 +231,11 @@ int CoreAudioDrv_Init(int mixrate, int numchannels, int samplebits, void * initd
 	
     // Set the input format of the audio unit.
 	result = AudioUnitSetProperty(output_audio_unit,
-											kAudioUnitProperty_StreamFormat,
-											kAudioUnitScope_Input,
-											0,
-											&requestedDesc,
-											sizeof(requestedDesc));
+                        kAudioUnitProperty_StreamFormat,
+                        kAudioUnitScope_Input,
+                        0,
+                        &requestedDesc,
+                        sizeof(requestedDesc));
 	if (result != noErr) {
       ErrorCode = CAErr_AudioUnitSetProperty;
       CloseComponent(output_audio_unit);
@@ -247,18 +247,18 @@ int CoreAudioDrv_Init(int mixrate, int numchannels, int samplebits, void * initd
 	callback.inputProc = fillInput;
 	callback.inputProcRefCon = 0;
 	AudioUnitSetProperty(output_audio_unit,
-								kAudioUnitProperty_SetInputCallback,
-								kAudioUnitScope_Input,
-								0,
-								&callback,
-								sizeof(callback));
+                        kAudioUnitProperty_SetInputCallback,
+                        kAudioUnitScope_Input,
+                        0,
+                        &callback,
+                        sizeof(callback));
 	
 	Initialised = 1;
 	
 	return CAErr_Ok;
 }
 
-void CoreAudioDrv_Shutdown(void)
+void CoreAudioDrv_PCM_Shutdown(void)
 {
 	OSStatus result;
 	struct AudioUnitInputCallback callback;
@@ -268,17 +268,17 @@ void CoreAudioDrv_Shutdown(void)
 	}
 	
     // stop processing the audio unit
-	CoreAudioDrv_StopPlayback();
+	CoreAudioDrv_PCM_StopPlayback();
 	
     // Remove the input callback
 	callback.inputProc = 0;
 	callback.inputProcRefCon = 0;
 	result = AudioUnitSetProperty(output_audio_unit,
-											kAudioUnitProperty_SetInputCallback,
-											kAudioUnitScope_Input,
-											0,
-											&callback,
-											sizeof(callback));
+                                kAudioUnitProperty_SetInputCallback,
+                                kAudioUnitScope_Input,
+                                0,
+                                &callback,
+                                sizeof(callback));
 	result = CloseComponent(output_audio_unit);
 
 	pthread_mutex_destroy(&mutex);
@@ -286,8 +286,8 @@ void CoreAudioDrv_Shutdown(void)
 	Initialised = 0;
 }
 
-int CoreAudioDrv_BeginPlayback(char *BufferStart, int BufferSize,
-									  int NumDivisions, void ( *CallBackFunc )( void ) )
+int CoreAudioDrv_PCM_BeginPlayback(char *BufferStart, int BufferSize,
+                                  int NumDivisions, void ( *CallBackFunc )( void ) )
 {
 	if (!Initialised) {
 		ErrorCode = CAErr_Uninitialised;
@@ -295,7 +295,7 @@ int CoreAudioDrv_BeginPlayback(char *BufferStart, int BufferSize,
 	}
 	
 	if (Playing) {
-		CoreAudioDrv_StopPlayback();
+		CoreAudioDrv_PCM_StopPlayback();
 	}
 	
 	MixBuffer = BufferStart;
@@ -315,25 +315,55 @@ int CoreAudioDrv_BeginPlayback(char *BufferStart, int BufferSize,
 	return CAErr_Ok;
 }
 
-void CoreAudioDrv_StopPlayback(void)
+void CoreAudioDrv_PCM_StopPlayback(void)
 {
 	if (!Initialised || !Playing) {
 		return;
 	}
 	
-	CoreAudioDrv_Lock();
+	CoreAudioDrv_PCM_Lock();
 	AudioOutputUnitStop(output_audio_unit);
-	CoreAudioDrv_Unlock();
+	CoreAudioDrv_PCM_Unlock();
 	
 	Playing = 0;
 }
 
-void CoreAudioDrv_Lock(void)
+void CoreAudioDrv_PCM_Lock(void)
 {
 	pthread_mutex_lock(&mutex);
 }
 
-void CoreAudioDrv_Unlock(void)
+void CoreAudioDrv_PCM_Unlock(void)
 {
 	pthread_mutex_unlock(&mutex);
+}
+
+
+
+
+int CoreAudioDrv_CD_Init(void)
+{
+    return 0;
+}
+
+void CoreAudioDrv_CD_Shutdown(void)
+{
+}
+
+int CoreAudioDrv_CD_Play(int track, int loop)
+{
+    return 0;
+}
+
+void CoreAudioDrv_CD_Stop(void)
+{
+}
+
+void CoreAudioDrv_CD_Pause(int pauseon)
+{
+}
+
+int CoreAudioDrv_CD_IsPlaying(void)
+{
+    return 0;
 }

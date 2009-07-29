@@ -20,10 +20,11 @@
 
 int DirectSoundDrv_GetError(void);
 const char *DirectSoundDrv_ErrorString( int ErrorNumber );
-int DirectSoundDrv_Init(int mixrate, int numchannels, int samplebits, void * initdata);
-void DirectSoundDrv_Shutdown(void);
-int DirectSoundDrv_BeginPlayback(char *BufferStart, int BufferSize,
+
+int  DirectSoundDrv_PCM_Init(int mixrate, int numchannels, int samplebits, void * initdata);
+void DirectSoundDrv_PCM_Shutdown(void);
+int  DirectSoundDrv_PCM_BeginPlayback(char *BufferStart, int BufferSize,
                  int NumDivisions, void ( *CallBackFunc )( void ) );
-void DirectSoundDrv_StopPlayback(void);
-void DirectSoundDrv_Lock(void);
-void DirectSoundDrv_Unlock(void);
+void DirectSoundDrv_PCM_StopPlayback(void);
+void DirectSoundDrv_PCM_Lock(void);
+void DirectSoundDrv_PCM_Unlock(void);

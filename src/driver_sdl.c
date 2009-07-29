@@ -32,13 +32,17 @@ enum {
    SDLErr_Ok      = 0,
    SDLErr_Uninitialised,
    SDLErr_InitSubSystem,
-   SDLErr_OpenAudio
+   SDLErr_OpenAudio,
+   SDLErr_CDOpen,
+   SDLErr_CDCannotPlayTrack
 };
 
 static int ErrorCode = SDLErr_Ok;
 static int Initialised = 0;
+static int CDInitialised = 0;
 static int Playing = 0;
-static int StartedSDL = -1;
+static int StartedSDL = 0, StartedSDLInit = 0;
+static SDL_CD *CDRom = 0;
 
 static char *MixBuffer = 0;
 static int MixBufferSize = 0;
@@ -111,6 +115,14 @@ const char *SDLDrv_ErrorString( int ErrorNumber )
         case SDLErr_OpenAudio:
             ErrorString = "SDL Audio: error in OpenAudio.";
             break;
+            
+        case SDLErr_CDOpen:
+            ErrorString = "SDL CD: error opening cd device.";
+            break;
+        
+        case SDLErr_CDCannotPlayTrack:
+            ErrorString = "SDL CD: cannot play the requested track.";
+            break;
 
         default:
             ErrorString = "Unknown SDL Audio error code.";
@@ -120,14 +132,14 @@ const char *SDLDrv_ErrorString( int ErrorNumber )
     return ErrorString;
 }
 
-int SDLDrv_Init(int mixrate, int numchannels, int samplebits, void * initdata)
+int SDLDrv_PCM_Init(int mixrate, int numchannels, int samplebits, void * initdata)
 {
     Uint32 inited;
     Uint32 err = 0;
     SDL_AudioSpec spec;
 
     if (Initialised) {
-        SDLDrv_Shutdown();
+        SDLDrv_PCM_Shutdown();
     }
 
     inited = SDL_WasInit(SDL_INIT_EVERYTHING);
@@ -135,10 +147,9 @@ int SDLDrv_Init(int mixrate, int numchannels, int samplebits, void * initdata)
     if (inited == 0) {
         // nothing was initialised
         err = SDL_Init(SDL_INIT_AUDIO);
-        StartedSDL = 0;
-    } else if (inited & SDL_INIT_AUDIO) {
+        StartedSDLInit = 1;
+    } else if (!(inited & SDL_INIT_AUDIO)) {
         err = SDL_InitSubSystem(SDL_INIT_AUDIO);
-        StartedSDL = 1;
     }
 
     if (err < 0) {
@@ -146,6 +157,8 @@ int SDLDrv_Init(int mixrate, int numchannels, int samplebits, void * initdata)
         return SDLErr_Error;
     }
 
+    StartedSDL |= SDL_INIT_AUDIO;
+    
     spec.freq = mixrate;
     spec.format = (samplebits == 8) ? AUDIO_U8 : AUDIO_S16SYS;
     spec.channels = numchannels;
@@ -164,22 +177,22 @@ int SDLDrv_Init(int mixrate, int numchannels, int samplebits, void * initdata)
     return SDLErr_Ok;
 }
 
-void SDLDrv_Shutdown(void)
+void SDLDrv_PCM_Shutdown(void)
 {
     if (!Initialised) {
         return;
     }
 
-    if (StartedSDL > 0) {
-        SDL_QuitSubSystem(SDL_INIT_AUDIO);
-    } else if (StartedSDL == 0) {
+    if (StartedSDL == SDL_INIT_AUDIO && StartedSDLInit) {
         SDL_Quit();
+        StartedSDL = StartedSDLInit = 0;
+    } else if (StartedSDL & SDL_INIT_AUDIO) {
+        SDL_QuitSubSystem(SDL_INIT_AUDIO);
+        StartedSDL &= ~SDL_INIT_AUDIO;
     }
-
-    StartedSDL = -1;
 }
 
-int SDLDrv_BeginPlayback(char *BufferStart, int BufferSize,
+int SDLDrv_PCM_BeginPlayback(char *BufferStart, int BufferSize,
 						int NumDivisions, void ( *CallBackFunc )( void ) )
 {
 	if (!Initialised) {
@@ -188,7 +201,7 @@ int SDLDrv_BeginPlayback(char *BufferStart, int BufferSize,
 	}
 	
 	if (Playing) {
-		SDLDrv_StopPlayback();
+		SDLDrv_PCM_StopPlayback();
 	}
     
 	MixBuffer = BufferStart;
@@ -208,24 +221,124 @@ int SDLDrv_BeginPlayback(char *BufferStart, int BufferSize,
 	return SDLErr_Ok;
 }
 
-void SDLDrv_StopPlayback(void)
+void SDLDrv_PCM_StopPlayback(void)
 {
-	if (!Initialised || !Playing) {
-		return;
-	}
+    if (!Initialised || !Playing) {
+            return;
+    }
 
     SDL_PauseAudio(1);
 	
-	Playing = 0;
+    Playing = 0;
 }
 
-void SDLDrv_Lock(void)
+void SDLDrv_PCM_Lock(void)
 {
     SDL_LockAudio();
 }
 
-void SDLDrv_Unlock(void)
+void SDLDrv_PCM_Unlock(void)
 {
     SDL_UnlockAudio();
 }
 
+
+int  SDLDrv_CD_Init(void)
+{
+    Uint32 inited;
+    Uint32 err = 0;
+    
+    if (CDInitialised) {
+        SDLDrv_CD_Shutdown();
+    }
+    
+    inited = SDL_WasInit(SDL_INIT_EVERYTHING);
+    
+    if (inited == 0) {
+        // nothing was initialised
+        err = SDL_Init(SDL_INIT_CDROM);
+        StartedSDLInit = 1;
+    } else if (!(inited & SDL_INIT_CDROM)) {
+        err = SDL_InitSubSystem(SDL_INIT_CDROM);
+    }
+    
+    if (err < 0) {
+        ErrorCode = SDLErr_InitSubSystem;
+        return SDLErr_Error;
+    }
+    
+    StartedSDL |= SDL_INIT_CDROM;
+    
+    CDRom = SDL_CDOpen(0);
+    if (!CDRom) {
+        ErrorCode = SDLErr_CDOpen;
+        return SDLErr_Error;
+    }
+    
+    return SDLErr_Ok;
+}
+
+void SDLDrv_CD_Shutdown(void)
+{
+    if (!CDInitialised) {
+        return;
+    }
+    
+    if (CDRom) {
+        SDL_CDClose(CDRom);
+        CDRom = 0;
+    }
+    
+    if (StartedSDL == SDL_INIT_CDROM && StartedSDLInit) {
+        SDL_Quit();
+        StartedSDL = StartedSDLInit = 0;
+    } else if (StartedSDL & SDL_INIT_CDROM) {
+        SDL_QuitSubSystem(SDL_INIT_CDROM);
+        StartedSDL &= ~SDL_INIT_CDROM;
+    }
+}
+
+int SDLDrv_CD_Play(int track, int loop)
+{
+    if (!CDRom) {
+        ErrorCode = SDLErr_Uninitialised;
+        return SDLErr_Error;
+    }
+    
+    if (SDL_CDPlayTracks(CDRom, track, 0, 1, 0) < 0) {
+        ErrorCode = SDLErr_CDCannotPlayTrack;
+        return SDLErr_Error;
+    }
+    
+    return SDLErr_Ok;
+}
+
+void SDLDrv_CD_Stop(void)
+{
+    if (!CDRom) {
+        return;
+    }
+    
+    SDL_CDStop(CDRom);
+}
+
+void SDLDrv_CD_Pause(int pauseon)
+{
+    if (!CDRom) {
+        return;
+    }
+    
+    if (pauseon) {
+        SDL_CDPause(CDRom);
+    } else {
+        SDL_CDResume(CDRom);
+    }
+}
+
+int  SDLDrv_CD_IsPlaying(void)
+{
+    if (!CDRom) {
+        return 0;
+    }
+    return SDL_CDStatus(CDRom) == CD_PLAYING;
+}
