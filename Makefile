@@ -4,6 +4,7 @@ CPPFLAGS=-Iinclude -Isrc -DHAVE_VORBIS
 
 SOURCES=src/drivers.c \
         src/fx_man.c \
+	src/cd.c \
         src/multivoc.c \
         src/mix.c \
         src/mixst.c \
