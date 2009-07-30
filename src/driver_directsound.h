@@ -28,3 +28,11 @@ int  DirectSoundDrv_PCM_BeginPlayback(char *BufferStart, int BufferSize,
 void DirectSoundDrv_PCM_StopPlayback(void);
 void DirectSoundDrv_PCM_Lock(void);
 void DirectSoundDrv_PCM_Unlock(void);
+
+int  DirectSoundDrv_CD_Init(void);
+void DirectSoundDrv_CD_Shutdown(void);
+int  DirectSoundDrv_CD_Play(int track, int loop);
+void DirectSoundDrv_CD_Stop(void);
+void DirectSoundDrv_CD_Pause(int pauseon);
+int  DirectSoundDrv_CD_IsPlaying(void);
+

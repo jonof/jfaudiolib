@@ -135,6 +135,12 @@ static struct {
         DirectSoundDrv_PCM_StopPlayback,
         DirectSoundDrv_PCM_Lock,
         DirectSoundDrv_PCM_Unlock,
+        DirectSoundDrv_CD_Init,
+        DirectSoundDrv_CD_Shutdown,
+        DirectSoundDrv_CD_Play,
+        DirectSoundDrv_CD_Stop,
+        DirectSoundDrv_CD_Pause,
+        DirectSoundDrv_CD_IsPlaying,
     },
     #else
         UNSUPPORTED

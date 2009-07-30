@@ -485,3 +485,32 @@ void DirectSoundDrv_PCM_Unlock(void)
 {
     ReleaseMutex(mutex);
 }
+
+
+int DirectSoundDrv_CD_Init(void)
+{
+    return 0;
+}
+
+void DirectSoundDrv_CD_Shutdown(void)
+{
+}
+
+int DirectSoundDrv_CD_Play(int track, int loop)
+{
+    return 0;
+}
+
+void DirectSoundDrv_CD_Stop(void)
+{
+}
+
+void DirectSoundDrv_CD_Pause(int pauseon)
+{
+}
+
+int DirectSoundDrv_CD_IsPlaying(void)
+{
+    return 0;
+}
+
