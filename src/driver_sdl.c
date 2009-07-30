@@ -27,22 +27,28 @@
 #include "driver_sdl.h"
 
 enum {
-   SDLErr_Warning = -2,
-   SDLErr_Error   = -1,
-   SDLErr_Ok      = 0,
-   SDLErr_Uninitialised,
-   SDLErr_InitSubSystem,
-   SDLErr_OpenAudio,
-   SDLErr_CDOpen,
-   SDLErr_CDCannotPlayTrack
+    SDLErr_Warning = -2,
+    SDLErr_Error   = -1,
+    SDLErr_Ok      = 0,
+    SDLErr_Uninitialised,
+    SDLErr_InitSubSystem,
+    SDLErr_OpenAudio,
+    SDLErr_CDOpen,
+    SDLErr_CDCannotPlayTrack,
+    SDLErr_CDCreateSemaphore,
+    SDLErr_CDCreateThread
 };
 
 static int ErrorCode = SDLErr_Ok;
 static int Initialised = 0;
-static int CDInitialised = 0;
 static int Playing = 0;
 static int StartedSDL = 0, StartedSDLInit = 0;
+
 static SDL_CD *CDRom = 0;
+static SDL_Thread *CDWatchThread = 0;
+static SDL_sem *CDWatchKillSem = 0;
+static int CDLoop = 0;
+static int CDTrack = 0;
 
 static char *MixBuffer = 0;
 static int MixBufferSize = 0;
@@ -53,35 +59,35 @@ static void ( *MixCallBack )( void ) = 0;
 
 static void fillData(void * userdata, Uint8 * ptr, int remaining)
 {
-	int len;
-	char *sptr;
+    int len;
+    char *sptr;
 
-	while (remaining > 0) {
-		if (MixBufferUsed == MixBufferSize) {
-			MixCallBack();
-			
-			MixBufferUsed = 0;
-			MixBufferCurrent++;
-			if (MixBufferCurrent >= MixBufferCount) {
-				MixBufferCurrent -= MixBufferCount;
-			}
-		}
-		
-		while (remaining > 0 && MixBufferUsed < MixBufferSize) {
-			sptr = MixBuffer + (MixBufferCurrent * MixBufferSize) + MixBufferUsed;
-			
-			len = MixBufferSize - MixBufferUsed;
-			if (remaining < len) {
-				len = remaining;
-			}
-			
-			memcpy(ptr, sptr, len);
-			
-			ptr += len;
-			MixBufferUsed += len;
-			remaining -= len;
-		}
-	}
+    while (remaining > 0) {
+        if (MixBufferUsed == MixBufferSize) {
+            MixCallBack();
+            
+            MixBufferUsed = 0;
+            MixBufferCurrent++;
+            if (MixBufferCurrent >= MixBufferCount) {
+                MixBufferCurrent -= MixBufferCount;
+            }
+        }
+        
+        while (remaining > 0 && MixBufferUsed < MixBufferSize) {
+            sptr = MixBuffer + (MixBufferCurrent * MixBufferSize) + MixBufferUsed;
+            
+            len = MixBufferSize - MixBufferUsed;
+            if (remaining < len) {
+                len = remaining;
+            }
+            
+            memcpy(ptr, sptr, len);
+            
+            ptr += len;
+            MixBufferUsed += len;
+            remaining -= len;
+        }
+    }
 }
 
 
@@ -122,6 +128,14 @@ const char *SDLDrv_ErrorString( int ErrorNumber )
         
         case SDLErr_CDCannotPlayTrack:
             ErrorString = "SDL CD: cannot play the requested track.";
+            break;
+            
+        case SDLErr_CDCreateSemaphore:
+            ErrorString = "SDL CD: could not create looped CD playback semaphore.";
+            break;
+        
+        case SDLErr_CDCreateThread:
+            ErrorString = "SDL CD: could not create looped CD playback thread.";
             break;
 
         default:
@@ -195,36 +209,36 @@ void SDLDrv_PCM_Shutdown(void)
 int SDLDrv_PCM_BeginPlayback(char *BufferStart, int BufferSize,
 						int NumDivisions, void ( *CallBackFunc )( void ) )
 {
-	if (!Initialised) {
-		ErrorCode = SDLErr_Uninitialised;
-		return SDLErr_Error;
-	}
-	
-	if (Playing) {
-		SDLDrv_PCM_StopPlayback();
-	}
+    if (!Initialised) {
+        ErrorCode = SDLErr_Uninitialised;
+        return SDLErr_Error;
+    }
     
-	MixBuffer = BufferStart;
-	MixBufferSize = BufferSize;
-	MixBufferCount = NumDivisions;
-	MixBufferCurrent = 0;
-	MixBufferUsed = 0;
-	MixCallBack = CallBackFunc;
-	
-	// prime the buffer
-	MixCallBack();
+    if (Playing) {
+        SDLDrv_PCM_StopPlayback();
+    }
+
+    MixBuffer = BufferStart;
+    MixBufferSize = BufferSize;
+    MixBufferCount = NumDivisions;
+    MixBufferCurrent = 0;
+    MixBufferUsed = 0;
+    MixCallBack = CallBackFunc;
     
-	SDL_PauseAudio(0);
+    // prime the buffer
+    MixCallBack();
+
+    SDL_PauseAudio(0);
     
     Playing = 1;
     
-	return SDLErr_Ok;
+    return SDLErr_Ok;
 }
 
 void SDLDrv_PCM_StopPlayback(void)
 {
     if (!Initialised || !Playing) {
-            return;
+        return;
     }
 
     SDL_PauseAudio(1);
@@ -243,14 +257,49 @@ void SDLDrv_PCM_Unlock(void)
 }
 
 
-int  SDLDrv_CD_Init(void)
+static int cdWatchThread(void * v)
+{
+    CDstatus status;
+    
+    do {
+        switch (SDL_SemWaitTimeout(CDWatchKillSem, 500)) {
+            case SDL_MUTEX_TIMEDOUT:
+                // poll the status, restart if stopped
+                if (!CDLoop) {
+                    return 0;
+                }
+                
+                status = SDL_CDStatus(CDRom);
+                
+                if (status == CD_TRAYEMPTY) {
+                    return 0;
+                } else if (status == CD_STOPPED) {
+                    // play
+                    if (SDL_CDPlayTracks(CDRom, CDTrack, 0, 1, 0) < 0) {
+                        return -1;
+                    }
+                }
+                
+                break;
+            case -1:
+                return -1;
+            case 0:
+                // told to quit, so do it
+                return 0;
+        }
+    } while (1);
+    
+    return 0;
+}
+
+
+int SDLDrv_CD_Init(void)
 {
     Uint32 inited;
     Uint32 err = 0;
+    int i;
     
-    if (CDInitialised) {
-        SDLDrv_CD_Shutdown();
-    }
+    SDLDrv_CD_Shutdown();
     
     inited = SDL_WasInit(SDL_INIT_EVERYTHING);
     
@@ -269,10 +318,21 @@ int  SDLDrv_CD_Init(void)
     
     StartedSDL |= SDL_INIT_CDROM;
     
+    fprintf(stderr, "SDL_CDNumDrives: %d\n", SDL_CDNumDrives());
+    
     CDRom = SDL_CDOpen(0);
     if (!CDRom) {
         ErrorCode = SDLErr_CDOpen;
         return SDLErr_Error;
+    }
+    
+    fprintf(stderr, "SDL_CD: numtracks: %d\n", CDRom->numtracks);
+    for (i = 0; i < CDRom->numtracks; i++) {
+        fprintf(stderr, "SDL_CD: track %d - %s, %dsec\n",
+                CDRom->track[i].id,
+                CDRom->track[i].type == SDL_AUDIO_TRACK ? "audio" : "data",
+                CDRom->track[i].length / CD_FPS
+                );
     }
     
     return SDLErr_Ok;
@@ -280,9 +340,7 @@ int  SDLDrv_CD_Init(void)
 
 void SDLDrv_CD_Shutdown(void)
 {
-    if (!CDInitialised) {
-        return;
-    }
+    SDLDrv_CD_Stop();
     
     if (CDRom) {
         SDL_CDClose(CDRom);
@@ -305,9 +363,32 @@ int SDLDrv_CD_Play(int track, int loop)
         return SDLErr_Error;
     }
     
+    SDLDrv_CD_Stop();
+    
     if (SDL_CDPlayTracks(CDRom, track, 0, 1, 0) < 0) {
         ErrorCode = SDLErr_CDCannotPlayTrack;
         return SDLErr_Error;
+    }
+    
+    CDLoop = loop;
+    CDTrack = track;
+    
+    if (loop) {
+        CDWatchKillSem = SDL_CreateSemaphore(0);
+        if (!CDWatchKillSem) {
+            CDLoop = 0;
+            ErrorCode = SDLErr_CDCreateSemaphore;
+            return SDLErr_Warning;   // play, but we won't be looping
+        }
+        CDWatchThread = SDL_CreateThread(cdWatchThread, 0);
+        if (!CDWatchThread) {
+            SDL_DestroySemaphore(CDWatchKillSem);
+            CDWatchKillSem = 0;
+            
+            CDLoop = 0;
+            ErrorCode = SDLErr_CDCreateThread;
+            return SDLErr_Warning;  // play, but we won't be looping
+        }
     }
     
     return SDLErr_Ok;
@@ -319,6 +400,16 @@ void SDLDrv_CD_Stop(void)
         return;
     }
     
+    if (CDWatchKillSem) {
+        if (CDWatchThread) {
+            SDL_SemPost(CDWatchKillSem);
+            SDL_WaitThread(CDWatchThread, 0);
+        }
+        SDL_DestroySemaphore(CDWatchKillSem);
+    }
+    CDWatchKillSem = 0;
+    CDWatchThread = 0;
+            
     SDL_CDStop(CDRom);
 }
 
@@ -335,7 +426,7 @@ void SDLDrv_CD_Pause(int pauseon)
     }
 }
 
-int  SDLDrv_CD_IsPlaying(void)
+int SDLDrv_CD_IsPlaying(void)
 {
     if (!CDRom) {
         return 0;
