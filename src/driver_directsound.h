@@ -35,4 +35,5 @@ int  DirectSoundDrv_CD_Play(int track, int loop);
 void DirectSoundDrv_CD_Stop(void);
 void DirectSoundDrv_CD_Pause(int pauseon);
 int  DirectSoundDrv_CD_IsPlaying(void);
+void DirectSoundDrv_CD_SetVolume(int volume);
 

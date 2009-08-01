@@ -36,5 +36,6 @@ int  CD_Play(int track, int loop);
 void CD_Stop(void);
 void CD_Pause(int pauseon);
 int  CD_IsPlaying(void);
+void CD_SetVolume(int volume);
 
 #endif

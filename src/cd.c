@@ -118,5 +118,10 @@ int CD_IsPlaying(void)
     return SoundDriver_CD_IsPlaying();
 }
 
+void CD_SetVolume(int volume)
+{
+    SoundDriver_CD_SetVolume(volume);
+}
+
 // vim:ts=4:expandtab:
 

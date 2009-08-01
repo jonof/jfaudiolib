@@ -87,3 +87,7 @@ int NoSoundDrv_CD_IsPlaying(void)
     return 0;
 }
 
+void NoSoundDrv_CD_SetVolume(int volume)
+{
+}
+

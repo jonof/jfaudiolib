@@ -36,3 +36,5 @@ int  SDLDrv_CD_Play(int track, int loop);
 void SDLDrv_CD_Stop(void);
 void SDLDrv_CD_Pause(int pauseon);
 int  SDLDrv_CD_IsPlaying(void);
+void SDLDrv_CD_SetVolume(int volume);
+

@@ -53,6 +53,7 @@ int  SoundDriver_CD_Play(int track, int loop);
 void SoundDriver_CD_Stop(void);
 void SoundDriver_CD_Pause(int pauseon);
 int  SoundDriver_CD_IsPlaying(void);
+void SoundDriver_CD_SetVolume(int volume);
 
 // vim:ts=4:expandtab:
 

@@ -44,7 +44,7 @@ int ASS_CDSoundDriver = -1;
 int ASS_MIDISoundDriver = -1;
 
 #define UNSUPPORTED_PCM         0,0,0,0,0,0
-#define UNSUPPORTED_CD          0,0,0,0,0,0
+#define UNSUPPORTED_CD          0,0,0,0,0,0,0
 #define UNSUPPORTED_MIDI
 #define UNSUPPORTED_COMPLETELY  { 0,0, UNSUPPORTED_PCM, UNSUPPORTED_CD, },
 
@@ -65,6 +65,7 @@ static struct {
     void         (* CD_Stop)(void);
     void         (* CD_Pause)(int pauseon);
     int          (* CD_IsPlaying)(void);
+    void         (* CD_SetVolume)(int volume);
 } SoundDrivers[ASS_NumSoundCards] = {
     
     // Everyone gets the "no sound" driver
@@ -83,6 +84,7 @@ static struct {
         NoSoundDrv_CD_Stop,
         NoSoundDrv_CD_Pause,
         NoSoundDrv_CD_IsPlaying,
+        NoSoundDrv_CD_SetVolume,
     },
     
     // Simple DirectMedia Layer
@@ -102,6 +104,7 @@ static struct {
         SDLDrv_CD_Stop,
         SDLDrv_CD_Pause,
         SDLDrv_CD_IsPlaying,
+        SDLDrv_CD_SetVolume,
     },
     #else
         UNSUPPORTED_COMPLETELY
@@ -124,6 +127,7 @@ static struct {
         CoreAudioDrv_CD_Stop,
         CoreAudioDrv_CD_Pause,
         CoreAudioDrv_CD_IsPlaying,
+        CoreAudioDrv_CD_SetVolume,
     },
     #else
         UNSUPPORTED_COMPLETELY
@@ -146,6 +150,7 @@ static struct {
         DirectSoundDrv_CD_Stop,
         DirectSoundDrv_CD_Pause,
         DirectSoundDrv_CD_IsPlaying,
+        DirectSoundDrv_CD_SetVolume,
     },
     #else
         UNSUPPORTED_COMPLETELY
@@ -288,4 +293,9 @@ int SoundDriver_CD_IsPlaying(void)
     return SoundDrivers[ASS_CDSoundDriver].CD_IsPlaying();
 }
 
-// vim:ts=4:expandtab:
+void SoundDriver_CD_SetVolume(int volume)
+{
+    SoundDrivers[ASS_CDSoundDriver].CD_SetVolume(volume);
+}
+
+// vim:ts=4:sw=4:expandtab:

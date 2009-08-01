@@ -36,3 +36,5 @@ int  NoSoundDrv_CD_Play(int track, int loop);
 void NoSoundDrv_CD_Stop(void);
 void NoSoundDrv_CD_Pause(int pauseon);
 int  NoSoundDrv_CD_IsPlaying(void);
+void NoSoundDrv_CD_SetVolume(void);
+

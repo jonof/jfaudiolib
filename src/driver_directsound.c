@@ -606,5 +606,9 @@ int DirectSoundDrv_CD_IsPlaying(void)
     return (mcistatusparms.dwReturn == MCI_MODE_PLAY);
 }
 
+void DirectSoundDrv_CD_SetVolume(int volume)
+{
+}
+
 
 // vim:ts=4:sw=4:expandtab:
