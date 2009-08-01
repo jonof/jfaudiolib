@@ -50,6 +50,7 @@ enum {
 	DSErr_PlaySecondary,
 	DSErr_CreateThread,
 	DSErr_CreateMutex,
+    DSErr_NotifyWindow,
     DSErr_CDMCIOpen,
     DSErr_CDMCISetTimeFormat,
     DSErr_CDMCIPlay
@@ -73,7 +74,21 @@ static DSBPOSITIONNOTIFY notifyPositions[3] = { { 0,0 }, { 0,0 }, { 0,0 } };
 static HANDLE mixThread = 0;
 static HANDLE mutex = 0;
 
+enum {
+    UsedByNothing = 0,
+    UsedByMIDI = 1,
+    UsedByCD = 2
+};
+
+static HWND notifyWindow = 0;
+static int notifyWindowClassRegistered = 0;
+static int notifyWindowUsedBy = UsedByNothing;
+
 static UINT cdDeviceID = 0;
+static DWORD cdPausePosition = 0;
+static int cdPaused = 0;
+static int cdLoop = 0;
+static int cdPlayTrack = 0;
 
 
 static void FillBufferPortion(char * ptr, int remaining)
@@ -262,6 +277,10 @@ const char *DirectSoundDrv_ErrorString( int ErrorNumber )
         
         case DSErr_CreateMutex:
             ErrorString = "DirectSound error: failed creating mix mutex.";
+            break;
+
+        case DSErr_NotifyWindow:
+            ErrorString = "Failed creating notification window for CD/MIDI.";
             break;
 
         case DSErr_CDMCIOpen:
@@ -504,6 +523,63 @@ void DirectSoundDrv_PCM_Unlock(void)
 }
 
 
+
+static LRESULT CALLBACK notifyWindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
+{
+    switch (uMsg) {
+        case MM_MCINOTIFY:
+            if (wParam == MCI_NOTIFY_SUCCESSFUL && lParam == cdDeviceID) {
+                if (cdLoop && cdPlayTrack) {
+                    DirectSoundDrv_CD_Play(cdPlayTrack, 1);
+                }
+            }
+            break;
+        default: break;
+    }
+    return DefWindowProc(hwnd, uMsg, wParam, lParam);
+}
+
+static int openNotifyWindow(int useby)
+{
+    if (!notifyWindow) {
+        if (!notifyWindowClassRegistered) {
+            WNDCLASS wc;
+
+            memset(&wc, 0, sizeof(wc));
+            wc.lpfnWndProc = notifyWindowProc;
+            wc.hInstance = GetModuleHandle(NULL);
+            wc.lpszClassName = "JFAudiolibNotifyWindow";
+
+            if (!RegisterClass(&wc)) {
+                return 0;
+            }
+
+            notifyWindowClassRegistered = 1;
+        }
+
+        notifyWindow = CreateWindow("JFAudiolibNotifyWindow", "", WS_POPUP,
+                0, 0, 0, 0, NULL, NULL, GetModuleHandle(NULL), NULL);
+        if (!notifyWindow) {
+            return 0;
+        }
+    }
+
+    notifyWindowUsedBy |= useby;
+
+    return 1;
+}
+
+static void closeNotifyWindow(int useby)
+{
+    notifyWindowUsedBy &= ~useby;
+
+    if (!notifyWindowUsedBy && notifyWindow) {
+        DestroyWindow(notifyWindow);
+        notifyWindow = 0;
+    }
+}
+
+
 int DirectSoundDrv_CD_Init(void)
 {
     MCI_OPEN_PARMS mciopenparms;
@@ -515,7 +591,7 @@ int DirectSoundDrv_CD_Init(void)
     mciopenparms.lpstrDeviceType = "cdaudio";
     rv = mciSendCommand(0, MCI_OPEN, MCI_OPEN_TYPE, (DWORD)(LPVOID) &mciopenparms);
     if (rv) {
-        fprintf(stderr, "MCI_OPEN err %d\n", (int) rv);
+        fprintf(stderr, "Init MCI_OPEN err %d\n", (int) rv);
         ErrorCode = DSErr_CDMCIOpen;
         return DSErr_Error;
     }
@@ -525,11 +601,19 @@ int DirectSoundDrv_CD_Init(void)
     mcisetparms.dwTimeFormat = MCI_FORMAT_TMSF;
     rv = mciSendCommand(cdDeviceID, MCI_SET, MCI_SET_TIME_FORMAT, (DWORD)(LPVOID) &mcisetparms);
     if (rv) {
-        fprintf(stderr, "MCI_SET err %d\n", (int) rv);
+        fprintf(stderr, "Init MCI_SET err %d\n", (int) rv);
         mciSendCommand(cdDeviceID, MCI_CLOSE, 0, 0);
         cdDeviceID = 0;
 
         ErrorCode = DSErr_CDMCISetTimeFormat;
+        return DSErr_Error;
+    }
+
+    if (!openNotifyWindow(UsedByCD)) {
+        mciSendCommand(cdDeviceID, MCI_CLOSE, 0, 0);
+        cdDeviceID = 0;
+
+        ErrorCode = DSErr_NotifyWindow;
         return DSErr_Error;
     }
 
@@ -544,6 +628,8 @@ void DirectSoundDrv_CD_Shutdown(void)
         mciSendCommand(cdDeviceID, MCI_CLOSE, 0, 0);
     }
     cdDeviceID = 0;
+
+    closeNotifyWindow(UsedByCD);
 }
 
 int DirectSoundDrv_CD_Play(int track, int loop)
@@ -556,11 +642,16 @@ int DirectSoundDrv_CD_Play(int track, int loop)
         return DSErr_Error;
     }
 
+    cdPlayTrack = track;
+    cdLoop = loop;
+    cdPaused = 0;
+
     mciplayparms.dwFrom = MCI_MAKE_TMSF(track, 0, 0, 0);
     mciplayparms.dwTo   = MCI_MAKE_TMSF(track + 1, 0, 0, 0);
-    rv = mciSendCommand(cdDeviceID, MCI_PLAY, MCI_FROM | MCI_TO, (DWORD)(LPVOID) &mciplayparms);
+    mciplayparms.dwCallback = (DWORD) notifyWindow;
+    rv = mciSendCommand(cdDeviceID, MCI_PLAY, MCI_FROM | MCI_TO | MCI_NOTIFY, (DWORD)(LPVOID) &mciplayparms);
     if (rv) {
-        fprintf(stderr, "MCI_PLAY err %d\n", (int) rv);
+        fprintf(stderr, "Play MCI_PLAY err %d\n", (int) rv);
         ErrorCode = DSErr_CDMCIPlay;
         return DSErr_Error;
     }
@@ -577,14 +668,61 @@ void DirectSoundDrv_CD_Stop(void)
         return;
     }
 
+    cdPlayTrack = 0;
+    cdLoop = 0;
+    cdPaused = 0;
+
     rv = mciSendCommand(cdDeviceID, MCI_STOP, 0, (DWORD)(LPVOID) &mcigenparms);
     if (rv) {
-        fprintf(stderr, "MCI_STOP err %d\n", (int) rv);
+        fprintf(stderr, "Stop MCI_STOP err %d\n", (int) rv);
     }
 }
 
 void DirectSoundDrv_CD_Pause(int pauseon)
 {
+    if (!cdDeviceID) {
+        return;
+    }
+
+    if (cdPaused == pauseon) {
+        return;
+    }
+
+    if (pauseon) {
+        MCI_STATUS_PARMS mcistatusparms;
+        MCI_GENERIC_PARMS mcigenparms;
+        DWORD rv;
+
+        mcistatusparms.dwItem = MCI_STATUS_POSITION;
+        rv = mciSendCommand(cdDeviceID, MCI_STATUS, MCI_WAIT | MCI_STATUS_ITEM, (DWORD)(LPVOID) &mcistatusparms);
+        if (rv) {
+            fprintf(stderr, "Pause MCI_STATUS err %d\n", (int) rv);
+            return;
+        }
+
+        cdPausePosition = mcistatusparms.dwReturn;
+
+        rv = mciSendCommand(cdDeviceID, MCI_STOP, 0, (DWORD)(LPVOID) &mcigenparms);
+        if (rv) {
+            fprintf(stderr, "Pause MCI_STOP err %d\n", (int) rv);
+        }
+    } else {
+        MCI_PLAY_PARMS mciplayparms;
+        DWORD rv;
+
+        mciplayparms.dwFrom = cdPausePosition;
+        mciplayparms.dwTo   = MCI_MAKE_TMSF(cdPlayTrack + 1, 0, 0, 0);
+        mciplayparms.dwCallback = (DWORD) notifyWindow;
+        rv = mciSendCommand(cdDeviceID, MCI_PLAY, MCI_FROM | MCI_TO | MCI_NOTIFY, (DWORD)(LPVOID) &mciplayparms);
+        if (rv) {
+            fprintf(stderr, "Pause MCI_PLAY err %d\n", (int) rv);
+            return;
+        }
+
+        cdPausePosition = 0;
+    }
+
+    cdPaused = pauseon;
 }
 
 int DirectSoundDrv_CD_IsPlaying(void)
@@ -599,7 +737,7 @@ int DirectSoundDrv_CD_IsPlaying(void)
     mcistatusparms.dwItem = MCI_STATUS_MODE;
     rv = mciSendCommand(cdDeviceID, MCI_STATUS, MCI_WAIT | MCI_STATUS_ITEM, (DWORD)(LPVOID) &mcistatusparms);
     if (rv) {
-        fprintf(stderr, "MCI_STATUS err %d\n", (int) rv);
+        fprintf(stderr, "IsPlaying MCI_STATUS err %d\n", (int) rv);
         return 0;
     }
 
