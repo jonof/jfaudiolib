@@ -23,12 +23,20 @@
 
 #include "sndcards.h"
 
-extern int ASS_SoundDriver;
+extern int ASS_PCMSoundDriver;
+extern int ASS_CDSoundDriver;
+extern int ASS_MIDISoundDriver;
 
-int  SoundDriver_IsSupported(int driver);
+int  SoundDriver_IsPCMSupported(int driver);
+int  SoundDriver_IsCDSupported(int driver);
+int  SoundDriver_IsMIDISupported(int driver);
 
-int  SoundDriver_GetError(void);
-const char * SoundDriver_ErrorString( int ErrorNumber );
+int  SoundDriver_PCM_GetError(void);
+const char * SoundDriver_PCM_ErrorString( int ErrorNumber );
+int  SoundDriver_CD_GetError(void);
+const char * SoundDriver_CD_ErrorString( int ErrorNumber );
+int  SoundDriver_MIDI_GetError(void);
+const char * SoundDriver_MIDI_ErrorString( int ErrorNumber );
 
 int  SoundDriver_PCM_Init(int mixrate, int numchannels, int samplebits, void * initdata);
 void SoundDriver_PCM_Shutdown(void);
@@ -45,5 +53,7 @@ int  SoundDriver_CD_Play(int track, int loop);
 void SoundDriver_CD_Stop(void);
 void SoundDriver_CD_Pause(int pauseon);
 int  SoundDriver_CD_IsPlaying(void);
+
+// vim:ts=4:expandtab:
 
 #endif

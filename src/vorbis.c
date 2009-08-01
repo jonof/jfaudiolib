@@ -130,7 +130,7 @@ Function: MV_GetNextVorbisBlock
 Controls playback of OggVorbis data
 ---------------------------------------------------------------------*/
 
-playbackstatus MV_GetNextVorbisBlock
+static playbackstatus MV_GetNextVorbisBlock
 (
  VoiceNode *voice
  )

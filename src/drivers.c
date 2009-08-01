@@ -31,7 +31,7 @@
 # include "driver_sdl.h"
 #endif
 
-#ifdef __APPLE__
+#if 0 //def __APPLE__
 # include "driver_coreaudio.h"
 #endif
 
@@ -39,9 +39,14 @@
 # include "driver_directsound.h"
 #endif
 
-int ASS_SoundDriver = -1;
+int ASS_PCMSoundDriver = -1;
+int ASS_CDSoundDriver = -1;
+int ASS_MIDISoundDriver = -1;
 
-#define UNSUPPORTED { 0,0, 0,0,0,0,0,0, 0,0,0,0,0, },
+#define UNSUPPORTED_PCM         0,0,0,0,0,0
+#define UNSUPPORTED_CD          0,0,0,0,0,0
+#define UNSUPPORTED_MIDI
+#define UNSUPPORTED_COMPLETELY  { 0,0, UNSUPPORTED_PCM, UNSUPPORTED_CD, },
 
 static struct {
     int          (* GetError)(void);
@@ -99,7 +104,7 @@ static struct {
         SDLDrv_CD_IsPlaying,
     },
     #else
-        UNSUPPORTED
+        UNSUPPORTED_COMPLETELY
     #endif
     
     // OS X CoreAudio
@@ -121,7 +126,7 @@ static struct {
         CoreAudioDrv_CD_IsPlaying,
     },
     #else
-        UNSUPPORTED
+        UNSUPPORTED_COMPLETELY
     #endif
     
     // Windows DirectSound
@@ -143,94 +148,144 @@ static struct {
         DirectSoundDrv_CD_IsPlaying,
     },
     #else
-        UNSUPPORTED
+        UNSUPPORTED_COMPLETELY
     #endif
 };
 
 
-int SoundDriver_IsSupported(int driver)
+int SoundDriver_IsPCMSupported(int driver)
 {
-	return (SoundDrivers[driver].GetError != 0);
+	return (SoundDrivers[driver].PCM_Init != 0);
 }
 
-
-int SoundDriver_GetError(void)
+int SoundDriver_IsCDSupported(int driver)
 {
-	if (!SoundDriver_IsSupported(ASS_SoundDriver)) {
+	return (SoundDrivers[driver].CD_Init != 0);
+}
+
+int SoundDriver_IsMIDISupported(int driver)
+{
+	//return (SoundDrivers[driver].MIDI_Init != 0);
+    return 0;
+}
+
+int SoundDriver_PCM_GetError(void)
+{
+	if (!SoundDriver_IsPCMSupported(ASS_PCMSoundDriver)) {
 		return -1;
 	}
-	return SoundDrivers[ASS_SoundDriver].GetError();
+	return SoundDrivers[ASS_PCMSoundDriver].GetError();
 }
 
-const char * SoundDriver_ErrorString( int ErrorNumber )
+const char * SoundDriver_PCM_ErrorString( int ErrorNumber )
 {
-	if (ASS_SoundDriver < 0 || ASS_SoundDriver >= ASS_NumSoundCards) {
+	if (ASS_PCMSoundDriver < 0 || ASS_PCMSoundDriver >= ASS_NumSoundCards) {
 		return "No sound driver selected.";
 	}
-	if (!SoundDriver_IsSupported(ASS_SoundDriver)) {
+	if (!SoundDriver_IsPCMSupported(ASS_PCMSoundDriver)) {
 		return "Unsupported sound driver selected.";
 	}
-	return SoundDrivers[ASS_SoundDriver].ErrorString(ErrorNumber);
+	return SoundDrivers[ASS_PCMSoundDriver].ErrorString(ErrorNumber);
+}
+
+int SoundDriver_CD_GetError(void)
+{
+	if (!SoundDriver_IsCDSupported(ASS_CDSoundDriver)) {
+		return -1;
+	}
+	return SoundDrivers[ASS_CDSoundDriver].GetError();
+}
+
+const char * SoundDriver_CD_ErrorString( int ErrorNumber )
+{
+	if (ASS_CDSoundDriver < 0 || ASS_CDSoundDriver >= ASS_NumSoundCards) {
+		return "No sound driver selected.";
+	}
+	if (!SoundDriver_IsCDSupported(ASS_CDSoundDriver)) {
+		return "Unsupported sound driver selected.";
+	}
+	return SoundDrivers[ASS_CDSoundDriver].ErrorString(ErrorNumber);
+}
+
+int SoundDriver_MIDI_GetError(void)
+{
+	if (!SoundDriver_IsMIDISupported(ASS_MIDISoundDriver)) {
+		return -1;
+	}
+	return SoundDrivers[ASS_MIDISoundDriver].GetError();
+}
+
+const char * SoundDriver_MIDI_ErrorString( int ErrorNumber )
+{
+	if (ASS_MIDISoundDriver < 0 || ASS_MIDISoundDriver >= ASS_NumSoundCards) {
+		return "No sound driver selected.";
+	}
+	if (!SoundDriver_IsMIDISupported(ASS_MIDISoundDriver)) {
+		return "Unsupported sound driver selected.";
+	}
+	return SoundDrivers[ASS_MIDISoundDriver].ErrorString(ErrorNumber);
 }
 
 int SoundDriver_PCM_Init(int mixrate, int numchannels, int samplebits, void * initdata)
 {
-	return SoundDrivers[ASS_SoundDriver].PCM_Init(mixrate, numchannels, samplebits, initdata);
+	return SoundDrivers[ASS_PCMSoundDriver].PCM_Init(mixrate, numchannels, samplebits, initdata);
 }
 
 void SoundDriver_PCM_Shutdown(void)
 {
-	SoundDrivers[ASS_SoundDriver].PCM_Shutdown();
+	SoundDrivers[ASS_PCMSoundDriver].PCM_Shutdown();
 }
 
 int SoundDriver_PCM_BeginPlayback(char *BufferStart, int BufferSize,
 		int NumDivisions, void ( *CallBackFunc )( void ) )
 {
-	return SoundDrivers[ASS_SoundDriver].PCM_BeginPlayback(BufferStart,
+	return SoundDrivers[ASS_PCMSoundDriver].PCM_BeginPlayback(BufferStart,
 			BufferSize, NumDivisions, CallBackFunc);
 }
 
 void SoundDriver_PCM_StopPlayback(void)
 {
-	SoundDrivers[ASS_SoundDriver].PCM_StopPlayback();
+	SoundDrivers[ASS_PCMSoundDriver].PCM_StopPlayback();
 }
 
 void SoundDriver_PCM_Lock(void)
 {
-	SoundDrivers[ASS_SoundDriver].PCM_Lock();
+	SoundDrivers[ASS_PCMSoundDriver].PCM_Lock();
 }
 
 void SoundDriver_PCM_Unlock(void)
 {
-	SoundDrivers[ASS_SoundDriver].PCM_Unlock();
+	SoundDrivers[ASS_PCMSoundDriver].PCM_Unlock();
 }
 
 int  SoundDriver_CD_Init(void)
 {
-    return SoundDrivers[ASS_SoundDriver].CD_Init();
+    return SoundDrivers[ASS_CDSoundDriver].CD_Init();
 }
 
 void SoundDriver_CD_Shutdown(void)
 {
-    SoundDrivers[ASS_SoundDriver].CD_Shutdown();
+    SoundDrivers[ASS_CDSoundDriver].CD_Shutdown();
 }
 
 int  SoundDriver_CD_Play(int track, int loop)
 {
-    return SoundDrivers[ASS_SoundDriver].CD_Play(track, loop);
+    return SoundDrivers[ASS_CDSoundDriver].CD_Play(track, loop);
 }
 
 void SoundDriver_CD_Stop(void)
 {
-    SoundDrivers[ASS_SoundDriver].CD_Stop();
+    SoundDrivers[ASS_CDSoundDriver].CD_Stop();
 }
 
 void SoundDriver_CD_Pause(int pauseon)
 {
-    SoundDrivers[ASS_SoundDriver].CD_Pause(pauseon);
+    SoundDrivers[ASS_CDSoundDriver].CD_Pause(pauseon);
 }
 
 int SoundDriver_CD_IsPlaying(void)
 {
-    return SoundDrivers[ASS_SoundDriver].CD_IsPlaying();
+    return SoundDrivers[ASS_CDSoundDriver].CD_IsPlaying();
 }
+
+// vim:ts=4:expandtab:

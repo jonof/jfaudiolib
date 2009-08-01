@@ -187,7 +187,7 @@ const char *MV_ErrorString
          break;
 			
       case MV_DriverError :
-         ErrorString = SoundDriver_ErrorString(SoundDriver_GetError());
+         ErrorString = SoundDriver_PCM_ErrorString(SoundDriver_PCM_GetError());
          break;
 
       case MV_NoVoices :
@@ -348,7 +348,7 @@ void MV_PlayVoice
    Removes the voice from the play list and adds it to the free list.
 ---------------------------------------------------------------------*/
 
-void MV_StopVoice
+static void MV_StopVoice
    (
    VoiceNode *voice
    )
@@ -388,7 +388,7 @@ void MV_StopVoice
            MV_GetNextWAVBlock
            MV_SetVoiceMixMode
 ---------------------------------------------------------------------*/
-void MV_ServiceVoc
+static void MV_ServiceVoc
    (
    void
    )
@@ -396,7 +396,6 @@ void MV_ServiceVoc
    {
    VoiceNode *voice;
    VoiceNode *next;
-   char      *buffer;
 	//int        flags;
 
    // Toggle which buffer we'll mix next
@@ -515,7 +514,7 @@ void MV_ServiceVoc
    Interperate the information of a VOC format sound file.
 ---------------------------------------------------------------------*/
 
-playbackstatus MV_GetNextVOCBlock
+static playbackstatus MV_GetNextVOCBlock
    (
    VoiceNode *voice
    )
@@ -524,9 +523,9 @@ playbackstatus MV_GetNextVOCBlock
    unsigned char *ptr;
    int            blocktype;
    int            lastblocktype;
-   unsigned int   blocklength;
-   unsigned int   samplespeed;
-   unsigned int   tc;
+   unsigned int   blocklength = 0;
+   unsigned int   samplespeed = 0;
+   unsigned int   tc = 0;
    int            packtype;
    int            voicemode;
    int            done;
@@ -779,7 +778,7 @@ playbackstatus MV_GetNextVOCBlock
    Controls playback of demand fed data.
 ---------------------------------------------------------------------*/
 
-playbackstatus MV_GetNextDemandFeedBlock
+static playbackstatus MV_GetNextDemandFeedBlock
    (
    VoiceNode *voice
    )
@@ -821,7 +820,7 @@ playbackstatus MV_GetNextDemandFeedBlock
    Controls playback of demand fed data.
 ---------------------------------------------------------------------*/
 
-playbackstatus MV_GetNextRawBlock
+static playbackstatus MV_GetNextRawBlock
    (
    VoiceNode *voice
    )
@@ -858,7 +857,7 @@ playbackstatus MV_GetNextRawBlock
    Controls playback of demand fed data.
 ---------------------------------------------------------------------*/
 
-playbackstatus MV_GetNextWAVBlock
+static playbackstatus MV_GetNextWAVBlock
    (
    VoiceNode *voice
    )
@@ -895,7 +894,7 @@ playbackstatus MV_GetNextWAVBlock
    Starts recording of the waiting buffer.
 ---------------------------------------------------------------------*/
 
-static void MV_ServiceRecord
+/*static void MV_ServiceRecord
    (
    void
    )
@@ -913,7 +912,7 @@ static void MV_ServiceRecord
       {
       MV_MixPage = 0;
       }
-   }
+   }*/
 
 
 /*---------------------------------------------------------------------
@@ -922,7 +921,7 @@ static void MV_ServiceRecord
    Locates the voice with the specified handle.
 ---------------------------------------------------------------------*/
 
-VoiceNode *MV_GetVoice
+static VoiceNode *MV_GetVoice
    (
    int handle
    )
@@ -1301,7 +1300,7 @@ int MV_VoiceAvailable
    Sets the pitch for the specified voice.
 ---------------------------------------------------------------------*/
 
-void MV_SetVoicePitch
+static void MV_SetVoicePitch
    (
    VoiceNode *voice,
    unsigned int rate,
@@ -2612,7 +2611,7 @@ void MV_CreateVolumeTable
    level.
 ---------------------------------------------------------------------*/
 
-void MV_CalcVolume
+static void MV_CalcVolume
    (
    int MaxVolume
    )
@@ -2646,7 +2645,7 @@ void MV_CalcVolume
    a sound located at a specific angle and distance from the listener.
 ---------------------------------------------------------------------*/
 
-void MV_CalcPanTable
+static void MV_CalcPanTable
    (
    void
    )
@@ -2827,7 +2826,7 @@ int MV_Init
 
    MV_SetReverseStereo( FALSE );
 	
-	ASS_SoundDriver = soundcard;
+	ASS_PCMSoundDriver = soundcard;
 
    // Initialize the sound card
 	status = SoundDriver_PCM_Init(MixRate, numchannels, samplebits, initdata);

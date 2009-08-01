@@ -30,6 +30,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include "sndcards.h"
 #include "drivers.h"
 #include "multivoc.h"
@@ -78,7 +79,7 @@ const char *FX_ErrorString
          break;
 		
       case FX_SoundCardError :
-			ErrorString = SoundDriver_ErrorString(SoundDriver_GetError());
+			ErrorString = SoundDriver_PCM_ErrorString(SoundDriver_PCM_GetError());
 			break;
 
       case FX_InvalidCard :
@@ -141,7 +142,7 @@ int FX_Init
 		return status;
 	}
 	
-	if (SoundDriver_IsSupported(SoundCard) == 0) {
+	if (SoundDriver_IsPCMSupported(SoundCard) == 0) {
 		// unsupported cards fall back to no sound
 		SoundCard = ASS_NoSound;
 	}
@@ -1048,3 +1049,6 @@ int FX_PlayAuto3D( char *ptr, unsigned int length, int pitchoffset, int angle,
    
    return handle;
 }
+
+// vim:ts=3:expandtab:
+

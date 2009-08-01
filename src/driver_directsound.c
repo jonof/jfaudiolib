@@ -49,7 +49,10 @@ enum {
 	DSErr_Play,
 	DSErr_PlaySecondary,
 	DSErr_CreateThread,
-	DSErr_CreateMutex
+	DSErr_CreateMutex,
+    DSErr_CDMCIOpen,
+    DSErr_CDMCISetTimeFormat,
+    DSErr_CDMCIPlay
 };
 
 static int ErrorCode = DSErr_Ok;
@@ -69,6 +72,8 @@ static LPDIRECTSOUNDNOTIFY lpdsnotify = 0;
 static DSBPOSITIONNOTIFY notifyPositions[3] = { { 0,0 }, { 0,0 }, { 0,0 } };
 static HANDLE mixThread = 0;
 static HANDLE mutex = 0;
+
+static UINT cdDeviceID = 0;
 
 
 static void FillBufferPortion(char * ptr, int remaining)
@@ -258,7 +263,19 @@ const char *DirectSoundDrv_ErrorString( int ErrorNumber )
         case DSErr_CreateMutex:
             ErrorString = "DirectSound error: failed creating mix mutex.";
             break;
-			
+
+        case DSErr_CDMCIOpen:
+            ErrorString = "MCI error: failed opening CD audio device.";
+            break;
+
+        case DSErr_CDMCISetTimeFormat:
+            ErrorString = "MCI error: failed setting time format for CD audio device.";
+            break;
+
+        case DSErr_CDMCIPlay:
+            ErrorString = "MCI error: failed playing CD audio track.";
+            break;
+
 		default:
 			ErrorString = "Unknown DirectSound error code.";
 			break;
@@ -489,20 +506,81 @@ void DirectSoundDrv_PCM_Unlock(void)
 
 int DirectSoundDrv_CD_Init(void)
 {
-    return 0;
+    MCI_OPEN_PARMS mciopenparms;
+    MCI_SET_PARMS mcisetparms;
+    DWORD rv;
+
+    DirectSoundDrv_CD_Shutdown();
+
+    mciopenparms.lpstrDeviceType = "cdaudio";
+    rv = mciSendCommand(0, MCI_OPEN, MCI_OPEN_TYPE, (DWORD)(LPVOID) &mciopenparms);
+    if (rv) {
+        fprintf(stderr, "MCI_OPEN err %d\n", (int) rv);
+        ErrorCode = DSErr_CDMCIOpen;
+        return DSErr_Error;
+    }
+
+    cdDeviceID = mciopenparms.wDeviceID;
+
+    mcisetparms.dwTimeFormat = MCI_FORMAT_TMSF;
+    rv = mciSendCommand(cdDeviceID, MCI_SET, MCI_SET_TIME_FORMAT, (DWORD)(LPVOID) &mcisetparms);
+    if (rv) {
+        fprintf(stderr, "MCI_SET err %d\n", (int) rv);
+        mciSendCommand(cdDeviceID, MCI_CLOSE, 0, 0);
+        cdDeviceID = 0;
+
+        ErrorCode = DSErr_CDMCISetTimeFormat;
+        return DSErr_Error;
+    }
+
+    return DSErr_Ok;
 }
 
 void DirectSoundDrv_CD_Shutdown(void)
 {
+    if (cdDeviceID) {
+        DirectSoundDrv_CD_Stop();
+
+        mciSendCommand(cdDeviceID, MCI_CLOSE, 0, 0);
+    }
+    cdDeviceID = 0;
 }
 
 int DirectSoundDrv_CD_Play(int track, int loop)
 {
-    return 0;
+    MCI_PLAY_PARMS mciplayparms;
+    DWORD rv;
+
+    if (!cdDeviceID) {
+        ErrorCode = DSErr_Uninitialised;
+        return DSErr_Error;
+    }
+
+    mciplayparms.dwFrom = MCI_MAKE_TMSF(track, 0, 0, 0);
+    mciplayparms.dwTo   = MCI_MAKE_TMSF(track + 1, 0, 0, 0);
+    rv = mciSendCommand(cdDeviceID, MCI_PLAY, MCI_FROM | MCI_TO, (DWORD)(LPVOID) &mciplayparms);
+    if (rv) {
+        fprintf(stderr, "MCI_PLAY err %d\n", (int) rv);
+        ErrorCode = DSErr_CDMCIPlay;
+        return DSErr_Error;
+    }
+
+    return DSErr_Ok;
 }
 
 void DirectSoundDrv_CD_Stop(void)
 {
+    MCI_GENERIC_PARMS mcigenparms;
+    DWORD rv;
+
+    if (!cdDeviceID) {
+        return;
+    }
+
+    rv = mciSendCommand(cdDeviceID, MCI_STOP, 0, (DWORD)(LPVOID) &mcigenparms);
+    if (rv) {
+        fprintf(stderr, "MCI_STOP err %d\n", (int) rv);
+    }
 }
 
 void DirectSoundDrv_CD_Pause(int pauseon)
@@ -511,6 +589,22 @@ void DirectSoundDrv_CD_Pause(int pauseon)
 
 int DirectSoundDrv_CD_IsPlaying(void)
 {
-    return 0;
+    MCI_STATUS_PARMS mcistatusparms;
+    DWORD rv;
+
+    if (!cdDeviceID) {
+        return 0;
+    }
+
+    mcistatusparms.dwItem = MCI_STATUS_MODE;
+    rv = mciSendCommand(cdDeviceID, MCI_STATUS, MCI_WAIT | MCI_STATUS_ITEM, (DWORD)(LPVOID) &mcistatusparms);
+    if (rv) {
+        fprintf(stderr, "MCI_STATUS err %d\n", (int) rv);
+        return 0;
+    }
+
+    return (mcistatusparms.dwReturn == MCI_MODE_PLAY);
 }
 
+
+// vim:ts=4:sw=4:expandtab:

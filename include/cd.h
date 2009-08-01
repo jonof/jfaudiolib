@@ -23,10 +23,14 @@
 
 enum {
     CD_Error = -1,
-    CD_Ok
+    CD_Ok,
+    CD_InvalidCard,
+    CD_DriverError
 };
 
-int  CD_Init(void);
+int  CD_GetError(void);
+const char * CD_ErrorString(int code);
+int  CD_Init(int SoundCard);
 void CD_Shutdown(void);
 int  CD_Play(int track, int loop);
 void CD_Stop(void);

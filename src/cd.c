@@ -21,9 +21,68 @@
 #include "cd.h"
 #include "drivers.h"
 
-int CD_Init(void)
+static int ErrorCode = CD_Ok;
+
+int CD_GetError(void)
 {
-    return SoundDriver_CD_Init();
+    return ErrorCode;
+}
+
+const char * CD_ErrorString(int code)
+{
+    switch (code) {
+        case CD_Error:
+            return CD_ErrorString(ErrorCode);
+
+        case CD_Ok:
+            return "No error.";
+
+        case CD_InvalidCard:
+            return "Invalid or unsupported card.";
+
+        case CD_DriverError:
+            return SoundDriver_CD_ErrorString(SoundDriver_CD_GetError());
+
+        default:
+            return "Unknown error code.";
+    }
+}
+
+int CD_Init(int SoundCard)
+{
+    int err;
+
+	if (SoundCard == ASS_AutoDetect) {
+#if 0 //defined __APPLE__
+		SoundCard = ASS_CoreAudio;
+#elif defined WIN32
+		SoundCard = ASS_DirectSound;
+#elif defined HAVE_SDL
+		SoundCard = ASS_SDL;
+#else
+		SoundCard = ASS_NoSound;
+#endif
+	}
+	
+	if (SoundCard < 0 || SoundCard >= ASS_NumSoundCards) {
+		ErrorCode = CD_InvalidCard;
+		return CD_Error;
+	}
+	
+	if (SoundDriver_IsPCMSupported(SoundCard) == 0) {
+		// unsupported cards fall back to no sound
+		SoundCard = ASS_NoSound;
+	}
+   
+    ASS_CDSoundDriver = SoundCard;
+
+    err = SoundDriver_CD_Init();
+    if (err != CD_Ok) {
+        ErrorCode = CD_DriverError;
+        return CD_Error;
+    }
+
+    return CD_Ok;
 }
 
 void CD_Shutdown(void)
@@ -33,7 +92,15 @@ void CD_Shutdown(void)
 
 int CD_Play(int track, int loop)
 {
-    return SoundDriver_CD_Play(track, loop);
+    int err;
+    
+    err = SoundDriver_CD_Play(track, loop);
+    if (err != CD_Ok) {
+        ErrorCode = err;
+        return CD_Error;
+    }
+
+    return CD_Ok;
 }
 
 void CD_Stop(void)
@@ -50,3 +117,6 @@ int CD_IsPlaying(void)
 {
     return SoundDriver_CD_IsPlaying();
 }
+
+// vim:ts=4:expandtab:
+
