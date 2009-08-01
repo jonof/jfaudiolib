@@ -434,7 +434,7 @@ int SDLDrv_CD_IsPlaying(void)
     return SDL_CDStatus(CDRom) == CD_PLAYING;
 }
 
-void SDLDrv_CD_SetVolume(void)
+void SDLDrv_CD_SetVolume(int volume)
 {
 }
 
