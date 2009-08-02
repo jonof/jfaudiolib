@@ -48,7 +48,7 @@ enum FX_ERRORS
 
 
 const char *FX_ErrorString( int ErrorNumber );
-int   FX_Init( int SoundCard, int numvoices, int numchannels, int samplebits, unsigned mixrate, void * initdata );
+int   FX_Init( int SoundCard, int numvoices, int * numchannels, int * samplebits, unsigned * mixrate, void * initdata );
 int   FX_Shutdown( void );
 int   FX_SetCallBack( void ( *function )( unsigned int ) );
 void  FX_SetVolume( int volume );

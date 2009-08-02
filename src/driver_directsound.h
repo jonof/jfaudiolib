@@ -21,7 +21,7 @@
 int DirectSoundDrv_GetError(void);
 const char *DirectSoundDrv_ErrorString( int ErrorNumber );
 
-int  DirectSoundDrv_PCM_Init(int mixrate, int numchannels, int samplebits, void * initdata);
+int  DirectSoundDrv_PCM_Init(int * mixrate, int * numchannels, int * samplebits, void * initdata);
 void DirectSoundDrv_PCM_Shutdown(void);
 int  DirectSoundDrv_PCM_BeginPlayback(char *BufferStart, int BufferSize,
                  int NumDivisions, void ( *CallBackFunc )( void ) );

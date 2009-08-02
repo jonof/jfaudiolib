@@ -107,11 +107,11 @@ const char *FX_ErrorString
 
 int FX_Init
    (
-	int SoundCard,
+   int SoundCard,
    int numvoices,
-   int numchannels,
-   int samplebits,
-   unsigned mixrate,
+   int * numchannels,
+   int * samplebits,
+   unsigned * mixrate,
    void * initdata
    )
 

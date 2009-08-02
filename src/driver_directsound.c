@@ -329,7 +329,7 @@ static void TeardownDSound(HRESULT err)
     lpds = 0;
 }
 
-int DirectSoundDrv_PCM_Init(int mixrate, int numchannels, int samplebits, void * initdata)
+int DirectSoundDrv_PCM_Init(int * mixrate, int * numchannels, int * samplebits, void * initdata)
 {
     HRESULT err;
     DSBUFFERDESC bufdesc;
@@ -365,9 +365,9 @@ int DirectSoundDrv_PCM_Init(int mixrate, int numchannels, int samplebits, void *
     
     memset(&wfex, 0, sizeof(WAVEFORMATEX));
     wfex.wFormatTag = WAVE_FORMAT_PCM;
-    wfex.nChannels = numchannels;
-    wfex.nSamplesPerSec = mixrate;
-    wfex.wBitsPerSample = samplebits;
+    wfex.nChannels = *numchannels;
+    wfex.nSamplesPerSec = *mixrate;
+    wfex.wBitsPerSample = *samplebits;
     wfex.nBlockAlign = wfex.nChannels * wfex.wBitsPerSample / 8;
     wfex.nAvgBytesPerSec = wfex.nSamplesPerSec * wfex.nBlockAlign;
     

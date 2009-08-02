@@ -146,11 +146,12 @@ const char *SDLDrv_ErrorString( int ErrorNumber )
     return ErrorString;
 }
 
-int SDLDrv_PCM_Init(int mixrate, int numchannels, int samplebits, void * initdata)
+int SDLDrv_PCM_Init(int * mixrate, int * numchannels, int * samplebits, void * initdata)
 {
     Uint32 inited;
     Uint32 err = 0;
-    SDL_AudioSpec spec;
+    SDL_AudioSpec spec, actual;
+    char drivername[256];
 
     if (Initialised) {
         SDLDrv_PCM_Shutdown();
@@ -172,23 +173,57 @@ int SDLDrv_PCM_Init(int mixrate, int numchannels, int samplebits, void * initdat
     }
 
     StartedSDL |= SDL_INIT_AUDIO;
+
+    SDL_AudioDriverName(drivername, sizeof(drivername));
+    fprintf(stderr, "SDL_AudioDriverName: %s\n", drivername);
     
-    spec.freq = mixrate;
-    spec.format = (samplebits == 8) ? AUDIO_U8 : AUDIO_S16SYS;
-    spec.channels = numchannels;
+    spec.freq = *mixrate;
+    spec.format = (*samplebits == 8) ? AUDIO_U8 : AUDIO_S16SYS;
+    spec.channels = *numchannels;
     spec.samples = 256;
     spec.callback = fillData;
     spec.userdata = 0;
 
-    err = SDL_OpenAudio(&spec, NULL);
+    err = SDL_OpenAudio(&spec, &actual);
     if (err < 0) {
         ErrorCode = SDLErr_OpenAudio;
         return SDLErr_Error;
     }
 
-    Initialised = 1;
+    err = 0;
 
-    return SDLErr_Ok;
+    *mixrate = actual.freq;
+    if (actual.format == AUDIO_U8 || actual.format == AUDIO_S16SYS) {
+        *samplebits = actual.format & 0xff;
+    } else {
+        const char *format;
+        switch (actual.format) {
+            case AUDIO_U8: format = "AUDIO_U8"; break;
+            case AUDIO_S8: format = "AUDIO_S8"; break;
+            case AUDIO_U16LSB: format = "AUDIO_U16LSB"; break;
+            case AUDIO_S16LSB: format = "AUDIO_S16LSB"; break;
+            case AUDIO_U16MSB: format = "AUDIO_U16MSB"; break;
+            case AUDIO_S16MSB: format = "AUDIO_S16MSB"; break;
+            default: format = "?!"; break;
+        }
+        fprintf(stderr, "SDL_OpenAudio: actual.format = %s\n", format);
+        ErrorCode = SDLErr_OpenAudio;
+        err = 1;
+    }
+    if (actual.channels == 1 || actual.channels == 2) {
+        *numchannels = actual.channels;
+    } else {
+        fprintf(stderr, "SDL_OpenAudio: actual.channels = %d\n", actual.channels);
+        ErrorCode = SDLErr_OpenAudio;
+        err = 1;
+    }
+
+    if (err) {
+        return SDLErr_Error;
+    } else {
+        Initialised = 1;
+        return SDLErr_Ok;
+    }
 }
 
 void SDLDrv_PCM_Shutdown(void)

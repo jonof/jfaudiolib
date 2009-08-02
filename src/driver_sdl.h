@@ -22,7 +22,7 @@
 int SDLDrv_GetError(void);
 const char *SDLDrv_ErrorString( int ErrorNumber );
 
-int  SDLDrv_PCM_Init(int mixrate, int numchannels, int samplebits, void * initdata);
+int  SDLDrv_PCM_Init(int * mixrate, int * numchannels, int * samplebits, void * initdata);
 void SDLDrv_PCM_Shutdown(void);
 int  SDLDrv_PCM_BeginPlayback(char *BufferStart, int BufferSize,
                  int NumDivisions, void ( *CallBackFunc )( void ) );

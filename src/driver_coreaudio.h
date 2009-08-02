@@ -21,7 +21,7 @@
 int CoreAudioDrv_GetError(void);
 const char *CoreAudioDrv_ErrorString( int ErrorNumber );
 
-int  CoreAudioDrv_PCM_Init(int mixrate, int numchannels, int samplebits, void * initdata);
+int  CoreAudioDrv_PCM_Init(int * mixrate, int * numchannels, int * samplebits, void * initdata);
 void CoreAudioDrv_PCM_Shutdown(void);
 int  CoreAudioDrv_PCM_BeginPlayback(char *BufferStart, int BufferSize,
              int NumDivisions, void ( *CallBackFunc )( void ) );

@@ -2777,10 +2777,10 @@ int MV_GetReverseStereo
 int MV_Init
    (
    int soundcard,
-   int MixRate,
+   int * MixRate,
    int Voices,
-   int numchannels,
-   int samplebits,
+   int * numchannels,
+   int * samplebits,
    void * initdata
    )
 
@@ -2855,10 +2855,10 @@ int MV_Init
    MV_ReverbTable  = NULL;
 
    // Set the sampling rate
-   MV_RequestedMixRate = MixRate;
+   MV_RequestedMixRate = *MixRate;
 
    // Set Mixer to play stereo digitized sound
-   MV_SetMixMode( numchannels, samplebits );
+   MV_SetMixMode( *numchannels, *samplebits );
    MV_ReverbDelay = MV_BufferSize * 3;
 
    // Make sure we don't cross a physical page

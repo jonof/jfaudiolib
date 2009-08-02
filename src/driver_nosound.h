@@ -22,7 +22,7 @@
 int NoSoundDrv_GetError(void);
 const char *NoSoundDrv_ErrorString( int ErrorNumber );
 
-int  NoSoundDrv_PCM_Init(int mixrate, int numchannels, int samplebits, void * initdata);
+int  NoSoundDrv_PCM_Init(int * mixrate, int * numchannels, int * samplebits, void * initdata);
 void NoSoundDrv_PCM_Shutdown(void);
 int  NoSoundDrv_PCM_BeginPlayback(char *BufferStart, int BufferSize,
               int NumDivisions, void ( *CallBackFunc )( void ) );

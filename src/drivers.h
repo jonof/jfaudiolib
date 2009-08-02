@@ -38,7 +38,7 @@ const char * SoundDriver_CD_ErrorString( int ErrorNumber );
 int  SoundDriver_MIDI_GetError(void);
 const char * SoundDriver_MIDI_ErrorString( int ErrorNumber );
 
-int  SoundDriver_PCM_Init(int mixrate, int numchannels, int samplebits, void * initdata);
+int  SoundDriver_PCM_Init(int * mixrate, int * numchannels, int * samplebits, void * initdata);
 void SoundDriver_PCM_Shutdown(void);
 int  SoundDriver_PCM_BeginPlayback( char *BufferStart,
 			 int BufferSize, int NumDivisions, 

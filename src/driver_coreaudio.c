@@ -161,7 +161,7 @@ int CoreAudioDrv_InitMIDI()
 }
  */
 
-int CoreAudioDrv_PCM_Init(int mixrate, int numchannels, int samplebits, void * initdata)
+int CoreAudioDrv_PCM_Init(int * mixrate, int * numchannels, int * samplebits, void * initdata)
 {
 	OSStatus result = noErr;
 	Component comp;
@@ -181,11 +181,11 @@ int CoreAudioDrv_PCM_Init(int mixrate, int numchannels, int samplebits, void * i
    // Setup a AudioStreamBasicDescription with the requested format
 	requestedDesc.mFormatID = kAudioFormatLinearPCM;
 	requestedDesc.mFormatFlags = kLinearPCMFormatFlagIsPacked;
-	requestedDesc.mChannelsPerFrame = numchannels;
-	requestedDesc.mSampleRate = mixrate;
+	requestedDesc.mChannelsPerFrame = *numchannels;
+	requestedDesc.mSampleRate = *mixrate;
 	
-	requestedDesc.mBitsPerChannel = samplebits;
-	if (samplebits == 16) {
+	requestedDesc.mBitsPerChannel = *samplebits;
+	if (*samplebits == 16) {
 		requestedDesc.mFormatFlags |= kLinearPCMFormatFlagIsSignedInteger;
 #ifdef __POWERPC__
 		requestedDesc.mFormatFlags |= kLinearPCMFormatFlagIsBigEndian;

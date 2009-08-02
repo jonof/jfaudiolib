@@ -52,7 +52,7 @@ static struct {
     int          (* GetError)(void);
     const char * (* ErrorString)(int);
 
-    int          (* PCM_Init)(int, int, int, void *);
+    int          (* PCM_Init)(int *, int *, int *, void *);
     void         (* PCM_Shutdown)(void);
     int          (* PCM_BeginPlayback)(char *, int, int, void ( * )(void) );
     void         (* PCM_StopPlayback)(void);
@@ -231,7 +231,7 @@ const char * SoundDriver_MIDI_ErrorString( int ErrorNumber )
 	return SoundDrivers[ASS_MIDISoundDriver].ErrorString(ErrorNumber);
 }
 
-int SoundDriver_PCM_Init(int mixrate, int numchannels, int samplebits, void * initdata)
+int SoundDriver_PCM_Init(int * mixrate, int * numchannels, int * samplebits, void * initdata)
 {
 	return SoundDrivers[ASS_PCMSoundDriver].PCM_Init(mixrate, numchannels, samplebits, initdata);
 }

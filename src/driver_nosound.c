@@ -32,7 +32,7 @@ const char *NoSoundDrv_ErrorString( int ErrorNumber )
 	return "No sound, Ok.";
 }
 
-int NoSoundDrv_PCM_Init(int mixrate, int numchannels, int samplebits, void * initdata)
+int NoSoundDrv_PCM_Init(int * mixrate, int * numchannels, int * samplebits, void * initdata)
 {
 	return 0;
 }
