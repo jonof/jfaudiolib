@@ -40,14 +40,9 @@ enum MUSIC_ERRORS
    MUSIC_Warning = -2,
    MUSIC_Error   = -1,
    MUSIC_Ok      = 0,
-   MUSIC_ASSVersion,
-   MUSIC_SoundCardError,
-   MUSIC_MPU401Error,
+   MUSIC_DriverError,
    MUSIC_InvalidCard,
-   MUSIC_MidiError,
-   MUSIC_TaskManError,
-   MUSIC_FMNotDetected,
-   MUSIC_DPMI_Error
+   MUSIC_MidiError
    };
 
 typedef struct
@@ -62,7 +57,7 @@ typedef struct
 #define MUSIC_LoopSong ( 1 == 1 )
 #define MUSIC_PlayOnce ( !MUSIC_LoopSong )
 
-char *MUSIC_ErrorString( int ErrorNumber );
+const char *MUSIC_ErrorString( int ErrorNumber );
 int   MUSIC_Init( int SoundCard, int Address );
 int   MUSIC_Shutdown( void );
 void  MUSIC_SetMaxFMMidiChannel( int channel );
@@ -75,7 +70,7 @@ int   MUSIC_SongPlaying( void );
 void  MUSIC_Continue( void );
 void  MUSIC_Pause( void );
 int   MUSIC_StopSong( void );
-int   MUSIC_PlaySong( unsigned char *song, int loopflag );
+int   MUSIC_PlaySong( unsigned char *song, unsigned int length, int loopflag );
 void  MUSIC_SetContext( int context );
 int   MUSIC_GetContext( void );
 void  MUSIC_SetSongTick( unsigned long PositionInTicks );

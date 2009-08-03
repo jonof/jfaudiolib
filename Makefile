@@ -4,12 +4,14 @@ CPPFLAGS=-Iinclude -Isrc -DHAVE_VORBIS
 
 SOURCES=src/drivers.c \
         src/fx_man.c \
-	src/cd.c \
+        src/cd.c \
         src/multivoc.c \
         src/mix.c \
         src/mixst.c \
         src/pitch.c \
         src/vorbis.c \
+        src/music.c \
+		src/midi.c \
         src/driver_nosound.c
 
 ifneq (,$(findstring MINGW,$(shell uname -s)))

@@ -180,7 +180,7 @@ int SDLDrv_PCM_Init(int * mixrate, int * numchannels, int * samplebits, void * i
     spec.freq = *mixrate;
     spec.format = (*samplebits == 8) ? AUDIO_U8 : AUDIO_S16SYS;
     spec.channels = *numchannels;
-    spec.samples = 256;
+    spec.samples = 512;
     spec.callback = fillData;
     spec.userdata = 0;
 
