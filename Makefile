@@ -18,8 +18,8 @@ ifneq (,$(findstring MINGW,$(shell uname -s)))
  CPPFLAGS+= -I/z/sdks/directx/dx7/include -Ithird-party/mingw32/include
  SOURCES+= src/driver_directsound.c
 else
- CPPFLAGS+= -DHAVE_SDL
- SOURCES+= src/driver_sdl.c
+ CPPFLAGS+= -DHAVE_SDL -DHAVE_FLUIDSYNTH
+ SOURCES+= src/driver_sdl.c src/driver_fluidsynth.c
 endif
 
 OBJECTS=$(SOURCES:%.c=%.o)

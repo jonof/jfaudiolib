@@ -39,14 +39,18 @@
 # include "driver_directsound.h"
 #endif
 
+#ifdef HAVE_FLUIDSYNTH
+# include "driver_fluidsynth.h"
+#endif
+
 int ASS_PCMSoundDriver = -1;
 int ASS_CDSoundDriver = -1;
 int ASS_MIDISoundDriver = -1;
 
 #define UNSUPPORTED_PCM         0,0,0,0,0,0
 #define UNSUPPORTED_CD          0,0,0,0,0,0,0
-#define UNSUPPORTED_MIDI
-#define UNSUPPORTED_COMPLETELY  { 0,0, UNSUPPORTED_PCM, UNSUPPORTED_CD, },
+#define UNSUPPORTED_MIDI        0,0
+#define UNSUPPORTED_COMPLETELY  { 0,0, UNSUPPORTED_PCM, UNSUPPORTED_CD, UNSUPPORTED_MIDI },
 
 static struct {
     int          (* GetError)(void);
@@ -66,6 +70,9 @@ static struct {
     void         (* CD_Pause)(int pauseon);
     int          (* CD_IsPlaying)(void);
     void         (* CD_SetVolume)(int volume);
+
+    int          (* MIDI_Init)(midifuncs *);
+    void         (* MIDI_Shutdown)(void);
 } SoundDrivers[ASS_NumSoundCards] = {
     
     // Everyone gets the "no sound" driver
@@ -85,7 +92,9 @@ static struct {
         NoSoundDrv_CD_Pause,
         NoSoundDrv_CD_IsPlaying,
         NoSoundDrv_CD_SetVolume,
-    },
+        NoSoundDrv_MIDI_Init,
+        NoSoundDrv_MIDI_Shutdown,
+   },
     
     // Simple DirectMedia Layer
     #ifdef HAVE_SDL
@@ -105,6 +114,7 @@ static struct {
         SDLDrv_CD_Pause,
         SDLDrv_CD_IsPlaying,
         SDLDrv_CD_SetVolume,
+        UNSUPPORTED_MIDI,
     },
     #else
         UNSUPPORTED_COMPLETELY
@@ -121,13 +131,8 @@ static struct {
         CoreAudioDrv_PCM_StopPlayback,
         CoreAudioDrv_PCM_Lock,
         CoreAudioDrv_PCM_Unlock,
-        CoreAudioDrv_CD_Init,
-        CoreAudioDrv_CD_Shutdown,
-        CoreAudioDrv_CD_Play,
-        CoreAudioDrv_CD_Stop,
-        CoreAudioDrv_CD_Pause,
-        CoreAudioDrv_CD_IsPlaying,
-        CoreAudioDrv_CD_SetVolume,
+        UNSUPPORTED_CD,
+        UNSUPPORTED_MIDI,
     },
     #else
         UNSUPPORTED_COMPLETELY
@@ -151,7 +156,25 @@ static struct {
         DirectSoundDrv_CD_Pause,
         DirectSoundDrv_CD_IsPlaying,
         DirectSoundDrv_CD_SetVolume,
+        DirectSoundDrv_MIDI_Init,
+        DirectSoundDrv_MIDI_Shutdown,
     },
+    #else
+        UNSUPPORTED_COMPLETELY
+    #endif
+
+    // FluidSynth MIDI synthesiser
+    #ifdef HAVE_FLUIDSYNTH
+    {
+        FluidSynthMIDIDrv_GetError,
+        FluidSynthMIDIDrv_ErrorString,
+
+        UNSUPPORTED_PCM,
+        UNSUPPORTED_CD,
+
+        FluidSynthMIDIDrv_MIDI_Init,
+        FluidSynthMIDIDrv_MIDI_Shutdown,
+    }
     #else
         UNSUPPORTED_COMPLETELY
     #endif
@@ -170,8 +193,7 @@ int SoundDriver_IsCDSupported(int driver)
 
 int SoundDriver_IsMIDISupported(int driver)
 {
-	//return (SoundDrivers[driver].MIDI_Init != 0);
-    return 0;
+	return (SoundDrivers[driver].MIDI_Init != 0);
 }
 
 int SoundDriver_PCM_GetError(void)
@@ -296,6 +318,16 @@ int SoundDriver_CD_IsPlaying(void)
 void SoundDriver_CD_SetVolume(int volume)
 {
     SoundDrivers[ASS_CDSoundDriver].CD_SetVolume(volume);
+}
+
+int  SoundDriver_MIDI_Init(midifuncs *funcs)
+{
+    return SoundDrivers[ASS_MIDISoundDriver].MIDI_Init(funcs);
+}
+
+void SoundDriver_MIDI_Shutdown(void)
+{
+    SoundDrivers[ASS_MIDISoundDriver].MIDI_Shutdown();
 }
 
 // vim:ts=4:sw=4:expandtab:

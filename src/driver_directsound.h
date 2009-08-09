@@ -37,3 +37,5 @@ void DirectSoundDrv_CD_Pause(int pauseon);
 int  DirectSoundDrv_CD_IsPlaying(void);
 void DirectSoundDrv_CD_SetVolume(int volume);
 
+int  DirectSoundDrv_MIDI_Init(midifuncs *);
+void DirectSoundDrv_MIDI_Shutdown(void);

@@ -22,6 +22,9 @@
  * Stub driver for no output
  */
 
+#include "midifuncs.h"
+#include <string.h>
+
 int NoSoundDrv_GetError(void)
 {
 	return 0;
@@ -91,3 +94,12 @@ void NoSoundDrv_CD_SetVolume(int volume)
 {
 }
 
+int NoSoundDrv_MIDI_Init(midifuncs *funcs)
+{
+    memset(funcs, 0, sizeof(midifuncs));
+    return 0;
+}
+
+void NoSoundDrv_MIDI_Shutdown(void)
+{
+}

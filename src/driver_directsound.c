@@ -30,6 +30,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 
+#include "midifuncs.h"
 #include "driver_directsound.h"
 
 enum {
@@ -748,5 +749,14 @@ void DirectSoundDrv_CD_SetVolume(int volume)
 {
 }
 
+int DirectSoundDrv_MIDI_Init(midifuncs * funcs)
+{
+    memset(funcs, 0, sizeof(midifuncs));
+    return 0;
+}
+
+void DirectSoundDrv_MIDI_Shutdown(void)
+{
+}
 
 // vim:ts=4:sw=4:expandtab:

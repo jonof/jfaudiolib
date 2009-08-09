@@ -22,6 +22,7 @@
 #define DRIVERS_H
 
 #include "sndcards.h"
+#include "midifuncs.h"
 
 extern int ASS_PCMSoundDriver;
 extern int ASS_CDSoundDriver;
@@ -55,7 +56,7 @@ void SoundDriver_CD_Pause(int pauseon);
 int  SoundDriver_CD_IsPlaying(void);
 void SoundDriver_CD_SetVolume(int volume);
 
-int  SoundDriver_MIDI_Init(void);
+int  SoundDriver_MIDI_Init(midifuncs *);
 void SoundDriver_MIDI_Shutdown(void);
 
 // vim:ts=4:expandtab:

@@ -31,6 +31,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #ifndef __MIDI_H
 #define __MIDI_H
 
+#include "midifuncs.h"
+
 enum MIDI_Errors
    {
    MIDI_Warning = -2,
@@ -41,8 +43,7 @@ enum MIDI_Errors
    MIDI_UnknownMidiFormat,
    MIDI_NoTracks,
    MIDI_InvalidTrack,
-   MIDI_NoMemory,
-   MIDI_DPMI_Error
+   MIDI_NoMemory
    };
 
 
@@ -52,21 +53,6 @@ enum MIDI_Errors
 #define MIDI_MaxVolume 255
 
 extern char MIDI_PatchMap[ 128 ];
-
-typedef struct
-   {
-   void ( *NoteOff )( int channel, int key, int velocity );
-   void ( *NoteOn )( int channel, int key, int velocity );
-   void ( *PolyAftertouch )( int channel, int key, int pressure );
-   void ( *ControlChange )( int channel, int number, int value );
-   void ( *ProgramChange )( int channel, int program );
-   void ( *ChannelAftertouch )( int channel, int pressure );
-   void ( *PitchBend )( int channel, int lsb, int msb );
-   void ( *ReleasePatches )( void );
-   void ( *LoadPatch )( int number );
-   void ( *SetVolume )( int volume );
-   int  ( *GetVolume )( void );
-   } midifuncs;
 
 void MIDI_RerouteMidiChannel( int channel, int ( *function )( int event, int c1, int c2 ) );
 int  MIDI_AllNotesOff( void );

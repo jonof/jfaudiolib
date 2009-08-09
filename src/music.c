@@ -53,8 +53,6 @@ static midifuncs MUSIC_MidiFunctions;
 //static int       MUSIC_EndingFadeVolume;
 //static task     *MUSIC_FadeTask = NULL;
 
-int MUSIC_InitMidi( int card, midifuncs *Funcs, int Address );
-
 #define MUSIC_SetErrorCode( status ) \
    MUSIC_ErrorCode = ( status );
 
@@ -134,13 +132,14 @@ int MUSIC_Init
 
    ASS_MIDISoundDriver = SoundCard;
    
-   status = SoundDriver_MIDI_Init();
-   //status = MUSIC_InitMidi( SoundCard, &MUSIC_MidiFunctions, Address );
+   status = SoundDriver_MIDI_Init(&MUSIC_MidiFunctions);
    if (status != MUSIC_Ok)
       {
       MUSIC_ErrorCode = MUSIC_DriverError;
       return MUSIC_Error;
       }
+
+   MIDI_SetMidiFuncs( &MUSIC_MidiFunctions );
 
    return MUSIC_Ok;
    }
@@ -486,70 +485,6 @@ void MUSIC_GetSongLength
    {
    MIDI_GetSongLength( pos );
    }
-
-
-/*int MUSIC_InitMidi
-   (
-   int        card,
-   midifuncs *Funcs,
-   int        Address
-   )
-
-   {
-   int status;
-
-   status = MUSIC_Ok;
-
-   if ( ( card == WaveBlaster ) || ( card == SoundCanvas ) ||
-      ( card == GenMidi ) )
-      {
-      // Setup WaveBlaster Daughterboard clone
-      // (ie. SoundCanvas DB, TurtleBeach Rio)
-      BLASTER_SetupWaveBlaster();
-      }
-
-   if ( card == SoundScape )
-      {
-      Address = SOUNDSCAPE_GetMIDIPort();
-      if ( Address < SOUNDSCAPE_Ok )
-         {
-         MUSIC_SetErrorCode( MUSIC_SoundCardError );
-         return( MUSIC_Error );
-         }
-      }
-
-   if ( MPU_Init( Address ) != MPU_Ok )
-      {
-      MUSIC_SetErrorCode( MUSIC_MPU401Error );
-      return( MUSIC_Error );
-      }
-
-   Funcs->NoteOff           = MPU_NoteOff;
-   Funcs->NoteOn            = MPU_NoteOn;
-   Funcs->PolyAftertouch    = MPU_PolyAftertouch;
-   Funcs->ControlChange     = MPU_ControlChange;
-   Funcs->ProgramChange     = MPU_ProgramChange;
-   Funcs->ChannelAftertouch = MPU_ChannelAftertouch;
-   Funcs->PitchBend         = MPU_PitchBend;
-   Funcs->ReleasePatches    = NULL;
-   Funcs->LoadPatch         = NULL;
-   Funcs->SetVolume         = NULL;
-   Funcs->GetVolume         = NULL;
-
-   if ( card == WaveBlaster )
-      {
-      if ( BLASTER_CardHasMixer() )
-         {
-         BLASTER_SaveMidiVolume();
-         Funcs->SetVolume = BLASTER_SetMidiVolume;
-         Funcs->GetVolume = BLASTER_GetMidiVolume;
-         }
-      }
-
-   MIDI_SetMidiFuncs( Funcs );
-
-   return( status );
-   }*/
 
 
 /*---------------------------------------------------------------------
