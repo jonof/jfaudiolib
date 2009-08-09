@@ -29,6 +29,7 @@
 #include <stdio.h>
 #include <pthread.h>
 #include <sys/select.h>
+#include <math.h>
 
 enum {
    FSMIDIErr_Warning = -2,
@@ -57,10 +58,14 @@ static fluid_event_t * fluidevent = 0;
 static short synthseqid = -1;
 
 static pthread_t thread;
-static int threadSleepInterval = 0;
 static int threadRunning = 0;
 static volatile int threadQuit = 0;
 static void (* threadService)(void) = 0;
+
+static unsigned int threadTimer = 0;
+static unsigned int threadQueueTimer = 0;
+static int threadQueueTicks = 0;
+#define THREAD_QUEUE_INTERVAL 20    // 1/20 sec
 
 
 int FluidSynthMIDIDrv_GetError(void)
@@ -131,8 +136,8 @@ static inline void sequence_event(void)
 {
     int result = 0;
 
-    fluid_sequencer_send_now(fluidsequencer, fluidevent);
-    //result = fluid_sequencer_send_at(fluidsequencer, fluidevent, timestamp, 1);
+    //fluid_sequencer_send_now(fluidsequencer, fluidevent);
+    result = fluid_sequencer_send_at(fluidsequencer, fluidevent, threadTimer, 1);
     if (result < 0) {
         fprintf(stderr, "fluidsynth could not queue event\n");
     }
@@ -181,15 +186,41 @@ static void Func_PitchBend( int channel, int lsb, int msb )
 static void * threadProc(void * parm)
 {
     struct timeval tv;
+    int sleepAmount = 1000000 / THREAD_QUEUE_INTERVAL;
+    unsigned int sequenceTime;
+
+    // prime the pump
+    threadTimer = fluid_sequencer_get_tick(fluidsequencer);
+    threadQueueTimer = threadTimer + threadQueueTicks;
+    while (threadTimer < threadQueueTimer) {
+        if (threadService) {
+            threadService();
+        }
+        threadTimer++;
+    }
     
     while (!threadQuit) {
         tv.tv_sec = 0;
-        tv.tv_usec = threadSleepInterval;
+        tv.tv_usec = sleepAmount;
 
         select(0, NULL, NULL, NULL, &tv);
 
-        if (threadService) {
-            threadService();
+        sequenceTime = fluid_sequencer_get_tick(fluidsequencer);
+
+        sleepAmount = 1000000 / THREAD_QUEUE_INTERVAL;
+        if ((int)(threadTimer - sequenceTime) > threadQueueTicks) {
+            // we're running ahead, so sleep for half the usual
+            // amount and try again
+            sleepAmount /= 2;
+            continue;
+        }
+
+        threadQueueTimer = sequenceTime + threadQueueTicks;
+        while (threadTimer < threadQueueTimer) {
+            if (threadService) {
+                threadService();
+            }
+            threadTimer++;
         }
     }
 
@@ -208,7 +239,11 @@ int FluidSynthMIDIDrv_MIDI_Init(midifuncs *funcs)
         ErrorCode = FSMIDIErr_NewFluidSettings;
         return FSMIDIErr_Error;
     }
-    
+
+    //fluid_settings_setint(fluidsettings, "synth.polyphony", 1024);
+    //fluid_settings_setstr(fluidsettings, "synth.reverb.active", "no");
+    //fluid_settings_setstr(fluidsettings, "synth.chorus.active", "no");
+        
     fluidsynth = new_fluid_synth(fluidsettings);
     if (!fluidsettings) {
         FluidSynthMIDIDrv_MIDI_Shutdown();
@@ -324,17 +359,12 @@ void FluidSynthMIDIDrv_MIDI_HaltPlayback(void)
     threadRunning = 0;
 }
 
-unsigned int FluidSynthMIDIDrv_MIDI_GetTick(void)
-{
-    return fluid_sequencer_get_tick(fluidsequencer);
-}
-
 void FluidSynthMIDIDrv_MIDI_SetTempo(int tempo, int division)
 {
     double tps;
 
     tps = ( (double) tempo * (double) division ) / 60.0;
     fluid_sequencer_set_time_scale(fluidsequencer, tps);
-    
-    threadSleepInterval = (int)(1000000.0 / tps);
+
+    threadQueueTicks = (int) ceil(tps / (double) THREAD_QUEUE_INTERVAL);
 }

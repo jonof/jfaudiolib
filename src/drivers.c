@@ -49,7 +49,7 @@ int ASS_MIDISoundDriver = -1;
 
 #define UNSUPPORTED_PCM         0,0,0,0,0,0
 #define UNSUPPORTED_CD          0,0,0,0,0,0,0
-#define UNSUPPORTED_MIDI        0,0,0,0,0,0
+#define UNSUPPORTED_MIDI        0,0,0,0,0
 #define UNSUPPORTED_COMPLETELY  { 0,0, UNSUPPORTED_PCM, UNSUPPORTED_CD, UNSUPPORTED_MIDI },
 
 static struct {
@@ -75,7 +75,6 @@ static struct {
     void         (* MIDI_Shutdown)(void);
     int          (* MIDI_StartPlayback)(void (*service)(void));
     void         (* MIDI_HaltPlayback)(void);
-    unsigned int (* MIDI_GetTick)(void);
     void         (* MIDI_SetTempo)(int tempo, int division);
 } SoundDrivers[ASS_NumSoundCards] = {
     
@@ -100,7 +99,6 @@ static struct {
         NoSoundDrv_MIDI_Shutdown,
         NoSoundDrv_MIDI_StartPlayback,
         NoSoundDrv_MIDI_HaltPlayback,
-        NoSoundDrv_MIDI_GetTick,
         NoSoundDrv_MIDI_SetTempo,
    },
     
@@ -168,7 +166,6 @@ static struct {
         DirectSoundDrv_MIDI_Shutdown,
         DirectSoundDrv_MIDI_StartPlayback,
         DirectSoundDrv_MIDI_HaltPlayback,
-        DirectSoundDrv_MIDI_GetTick,
         DirectSoundDrv_MIDI_SetTempo,
     },
     #else
@@ -188,7 +185,6 @@ static struct {
         FluidSynthMIDIDrv_MIDI_Shutdown,
         FluidSynthMIDIDrv_MIDI_StartPlayback,
         FluidSynthMIDIDrv_MIDI_HaltPlayback,
-        FluidSynthMIDIDrv_MIDI_GetTick,
         FluidSynthMIDIDrv_MIDI_SetTempo,
     }
     #else
@@ -354,11 +350,6 @@ int  SoundDriver_MIDI_StartPlayback(void (*service)(void))
 void SoundDriver_MIDI_HaltPlayback(void)
 {
     SoundDrivers[ASS_MIDISoundDriver].MIDI_HaltPlayback();
-}
-
-unsigned int SoundDriver_MIDI_GetTick(void)
-{
-    return SoundDrivers[ASS_MIDISoundDriver].MIDI_GetTick();
 }
 
 void SoundDriver_MIDI_SetTempo(int tempo, int division)
