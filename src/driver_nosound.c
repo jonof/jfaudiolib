@@ -103,3 +103,21 @@ int NoSoundDrv_MIDI_Init(midifuncs *funcs)
 void NoSoundDrv_MIDI_Shutdown(void)
 {
 }
+
+int  NoSoundDrv_MIDI_StartPlayback(void (*service)(void))
+{
+    return 0;
+}
+
+void NoSoundDrv_MIDI_HaltPlayback(void)
+{
+}
+
+unsigned int NoSoundDrv_MIDI_GetTick(void)
+{
+    return 0;
+}
+
+void NoSoundDrv_MIDI_SetTempo(int tempo, int division)
+{
+}

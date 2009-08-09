@@ -42,7 +42,8 @@ enum {
 static int ErrorCode = SDLErr_Ok;
 static int Initialised = 0;
 static int Playing = 0;
-static int StartedSDL = 0, StartedSDLInit = 0;
+static int StartedSDL = 0;      // SDL services in use (1 = sound, 2 = CDA)
+static int StartedSDLInit = 0;  // SDL services we initialised (0x80000000 means we used SDL_Init)
 
 static SDL_CD *CDRom = 0;
 static SDL_Thread *CDWatchThread = 0;
@@ -162,9 +163,10 @@ int SDLDrv_PCM_Init(int * mixrate, int * numchannels, int * samplebits, void * i
     if (inited == 0) {
         // nothing was initialised
         err = SDL_Init(SDL_INIT_AUDIO);
-        StartedSDLInit = 1;
+        StartedSDLInit |= 0x80000000 + SDL_INIT_AUDIO;
     } else if (!(inited & SDL_INIT_AUDIO)) {
         err = SDL_InitSubSystem(SDL_INIT_AUDIO);
+        StartedSDLInit |= SDL_INIT_AUDIO;
     }
 
     if (err < 0) {
@@ -183,6 +185,8 @@ int SDLDrv_PCM_Init(int * mixrate, int * numchannels, int * samplebits, void * i
     spec.samples = 512;
     spec.callback = fillData;
     spec.userdata = 0;
+
+    memset(&actual, 0, sizeof(actual));
 
     err = SDL_OpenAudio(&spec, &actual);
     if (err < 0) {
@@ -232,13 +236,17 @@ void SDLDrv_PCM_Shutdown(void)
         return;
     }
 
-    if (StartedSDL == SDL_INIT_AUDIO && StartedSDLInit) {
-        SDL_Quit();
-        StartedSDL = StartedSDLInit = 0;
-    } else if (StartedSDL & SDL_INIT_AUDIO) {
+    if (StartedSDLInit & SDL_INIT_AUDIO) {
         SDL_QuitSubSystem(SDL_INIT_AUDIO);
-        StartedSDL &= ~SDL_INIT_AUDIO;
+        StartedSDLInit &= ~SDL_INIT_AUDIO;
     }
+
+    if (StartedSDLInit == 0x80000000) {
+        SDL_Quit();
+        StartedSDLInit = 0;
+    }
+
+    StartedSDL &= ~SDL_INIT_AUDIO;
 }
 
 int SDLDrv_PCM_BeginPlayback(char *BufferStart, int BufferSize,
@@ -341,9 +349,10 @@ int SDLDrv_CD_Init(void)
     if (inited == 0) {
         // nothing was initialised
         err = SDL_Init(SDL_INIT_CDROM);
-        StartedSDLInit = 1;
+        StartedSDLInit |= 0x80000000 + SDL_INIT_CDROM;
     } else if (!(inited & SDL_INIT_CDROM)) {
         err = SDL_InitSubSystem(SDL_INIT_CDROM);
+        StartedSDLInit |= SDL_INIT_CDROM;
     }
     
     if (err < 0) {
@@ -382,13 +391,17 @@ void SDLDrv_CD_Shutdown(void)
         CDRom = 0;
     }
     
-    if (StartedSDL == SDL_INIT_CDROM && StartedSDLInit) {
-        SDL_Quit();
-        StartedSDL = StartedSDLInit = 0;
-    } else if (StartedSDL & SDL_INIT_CDROM) {
+    if (StartedSDLInit & SDL_INIT_CDROM) {
         SDL_QuitSubSystem(SDL_INIT_CDROM);
-        StartedSDL &= ~SDL_INIT_CDROM;
+        StartedSDLInit &= ~SDL_INIT_CDROM;
     }
+
+    if (StartedSDLInit == 0x80000000) {
+        SDL_Quit();
+        StartedSDLInit = 0;
+    }
+
+    StartedSDL &= ~SDL_INIT_CDROM;
 }
 
 int SDLDrv_CD_Play(int track, int loop)

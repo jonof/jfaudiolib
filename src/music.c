@@ -124,7 +124,24 @@ int MUSIC_Init
       MIDI_PatchMap[ i ] = i;
       }
 
-   if (!SoundDriver_IsMIDISupported(SoundCard))
+	if (SoundCard == ASS_AutoDetect) {
+#if 0 //defined __APPLE__
+		SoundCard = ASS_CoreAudio;
+#elif defined WIN32
+		SoundCard = ASS_DirectSound;
+#elif defined HAVE_FLUIDSYNTH
+		SoundCard = ASS_FluidSynthMIDI;
+#else
+		SoundCard = ASS_NoSound;
+#endif
+	}
+	
+	if (SoundCard < 0 || SoundCard >= ASS_NumSoundCards) {
+		MUSIC_ErrorCode = MUSIC_InvalidCard;
+		return MUSIC_Error;
+	}
+
+    if (!SoundDriver_IsMIDISupported(SoundCard))
       {
       MUSIC_ErrorCode = MUSIC_InvalidCard;
       return MUSIC_Error;

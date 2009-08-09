@@ -27,6 +27,8 @@
 #include <fluidsynth.h>
 #include <string.h>
 #include <stdio.h>
+#include <pthread.h>
+#include <sys/select.h>
 
 enum {
    FSMIDIErr_Warning = -2,
@@ -39,16 +41,27 @@ enum {
    FSMIDIErr_NewFluidSequencer,
    FSMIDIErr_RegisterFluidSynth,
    FSMIDIErr_BadSoundFont,
-   FSMIDIErr_NewFluidEvent
+   FSMIDIErr_NewFluidEvent,
+   FSMIDIErr_PlayThread
 };
 
 static int ErrorCode = FSMIDIErr_Ok;
+static char *soundFontName = "/usr/share/sounds/sf2/SGM-V2.01.sf2";
+//static char *soundFontName = "/usr/share/sounds/sf2/FluidR3_GM.sf2";
+
 static fluid_settings_t * fluidsettings = 0;
 static fluid_synth_t * fluidsynth = 0;
 static fluid_audio_driver_t * fluidaudiodriver = 0;
 static fluid_sequencer_t * fluidsequencer = 0;
 static fluid_event_t * fluidevent = 0;
 static short synthseqid = -1;
+
+static pthread_t thread;
+static int threadSleepInterval = 0;
+static int threadRunning = 0;
+static volatile int threadQuit = 0;
+static void (* threadService)(void) = 0;
+
 
 int FluidSynthMIDIDrv_GetError(void)
 {
@@ -100,6 +113,10 @@ const char *FluidSynthMIDIDrv_ErrorString( int ErrorNumber )
 
         case FSMIDIErr_NewFluidEvent:
             ErrorString = "Failed creating new fluid event.";
+            break;
+
+        case FSMIDIErr_PlayThread:
+            ErrorString = "Failed creating playback thread.";
             break;
 
         default:
@@ -161,6 +178,24 @@ static void Func_PitchBend( int channel, int lsb, int msb )
     sequence_event();
 }
 
+static void * threadProc(void * parm)
+{
+    struct timeval tv;
+    
+    while (!threadQuit) {
+        tv.tv_sec = 0;
+        tv.tv_usec = threadSleepInterval;
+
+        select(0, NULL, NULL, NULL, &tv);
+
+        if (threadService) {
+            threadService();
+        }
+    }
+
+    return NULL;
+}
+
 int FluidSynthMIDIDrv_MIDI_Init(midifuncs *funcs)
 {
     int result;
@@ -209,7 +244,7 @@ int FluidSynthMIDIDrv_MIDI_Init(midifuncs *funcs)
         return FSMIDIErr_Error;
     }
 
-    result = fluid_synth_sfload(fluidsynth, "/usr/share/sounds/sf2/SGM-V2.01.sf2", 1);
+    result = fluid_synth_sfload(fluidsynth, soundFontName, 1);
     if (result < 0) {
         FluidSynthMIDIDrv_MIDI_Shutdown();
         ErrorCode = FSMIDIErr_BadSoundFont;
@@ -255,13 +290,38 @@ void FluidSynthMIDIDrv_MIDI_Shutdown(void)
     fluidsettings = 0;
 }
 
-int  FluidSynthMIDIDrv_MIDI_StartPlayback(void (*service)(void))
+int FluidSynthMIDIDrv_MIDI_StartPlayback(void (*service)(void))
 {
+    FluidSynthMIDIDrv_MIDI_HaltPlayback();
+
+    threadService = service;
+    threadQuit = 0;
+
+    if (pthread_create(&thread, NULL, threadProc, NULL)) {
+        fprintf(stderr, "fluidsynth pthread_create returned error\n");
+        return FSMIDIErr_PlayThread;
+    }
+
+    threadRunning = 1;
+
     return 0;
 }
 
 void FluidSynthMIDIDrv_MIDI_HaltPlayback(void)
 {
+    void * ret;
+    
+    if (!threadRunning) {
+        return;
+    }
+
+    threadQuit = 1;
+
+    if (pthread_join(thread, &ret)) {
+        fprintf(stderr, "fluidsynth pthread_join returned error\n");
+    }
+
+    threadRunning = 0;
 }
 
 unsigned int FluidSynthMIDIDrv_MIDI_GetTick(void)
@@ -271,7 +331,10 @@ unsigned int FluidSynthMIDIDrv_MIDI_GetTick(void)
 
 void FluidSynthMIDIDrv_MIDI_SetTempo(int tempo, int division)
 {
-    fluid_sequencer_set_time_scale(fluidsequencer,
-        ( (double) tempo * (double) division ) / 60.0);
-    //JBF: save the sleep interval for the service thread
+    double tps;
+
+    tps = ( (double) tempo * (double) division ) / 60.0;
+    fluid_sequencer_set_time_scale(fluidsequencer, tps);
+    
+    threadSleepInterval = (int)(1000000.0 / tps);
 }
