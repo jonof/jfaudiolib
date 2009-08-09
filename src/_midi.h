@@ -157,8 +157,6 @@ static void _MIDI_MetaEvent( track *Track );
 static void _MIDI_SysEx( track *Track );
 static int  _MIDI_InterpretControllerInfo( track *Track, int TimeSet,
    int channel, int c1, int c2 );
-//static
-   void _MIDI_ServiceRoutine( task *Task );
 static int  _MIDI_SendControlChange( int channel, int c1, int c2 );
 static void _MIDI_SetChannelVolume( int channel, int volume );
 static void _MIDI_SendChannelVolumes( void );

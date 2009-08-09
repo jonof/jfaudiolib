@@ -66,7 +66,7 @@ static int _MIDI_SongActive = FALSE;
 static int _MIDI_SongLoaded = FALSE;
 static int _MIDI_Loop = FALSE;
 
-static task *_MIDI_PlayRoutine = NULL;
+//static task *_MIDI_PlayRoutine = NULL;
 
 static int  _MIDI_Division;
 static int  _MIDI_Tick    = 0;
@@ -542,7 +542,7 @@ static void test
 */
 static void _MIDI_ServiceRoutine
    (
-   task *Task
+   void
    )
 
    {
@@ -1172,9 +1172,9 @@ void MIDI_StopSong
    {
    if ( _MIDI_SongLoaded )
       {
-      TS_Terminate( _MIDI_PlayRoutine );
+//      TS_Terminate( _MIDI_PlayRoutine );
 
-      _MIDI_PlayRoutine = NULL;
+//      _MIDI_PlayRoutine = NULL;
       _MIDI_SongActive = FALSE;
       _MIDI_SongLoaded = FALSE;
 
@@ -1186,7 +1186,7 @@ void MIDI_StopSong
          _MIDI_Funcs->ReleasePatches();
          }
 
-      USRHOOKS_FreeMem( _MIDI_TrackPtr );
+      free( _MIDI_TrackPtr );
 
       _MIDI_TrackPtr     = NULL;
       _MIDI_NumTracks    = 0;
@@ -1219,7 +1219,6 @@ int MIDI_PlaySong
    long   tracklength;
    track *CurrentTrack;
    unsigned char *ptr;
-   int    status;
 
    if ( _MIDI_SongLoaded )
       {
@@ -1264,8 +1263,8 @@ int MIDI_PlaySong
       }
 
    _MIDI_TrackMemSize = _MIDI_NumTracks  * sizeof( track );
-   status = USRHOOKS_GetMem( &_MIDI_TrackPtr, _MIDI_TrackMemSize );
-   if ( status != USRHOOKS_Ok )
+   _MIDI_TrackPtr = (track *) malloc(_MIDI_TrackMemSize);
+   if ( !_MIDI_TrackPtr )
       {
       return( MIDI_NoMemory );
       }
@@ -1276,7 +1275,7 @@ int MIDI_PlaySong
       {
       if ( *( unsigned long * )ptr != MIDI_TRACK_SIGNATURE )
          {
-         USRHOOKS_FreeMem( _MIDI_TrackPtr );
+         free( _MIDI_TrackPtr );
 
          _MIDI_TrackPtr = NULL;
          _MIDI_TrackMemSize = 0;
@@ -1312,10 +1311,10 @@ int MIDI_PlaySong
 
    Reset = FALSE;
 
-   _MIDI_PlayRoutine = TS_ScheduleTask( _MIDI_ServiceRoutine, 100, 1, NULL );
+//   _MIDI_PlayRoutine = TS_ScheduleTask( _MIDI_ServiceRoutine, 100, 1, NULL );
 //   _MIDI_PlayRoutine = TS_ScheduleTask( test, 100, 1, NULL );
    MIDI_SetTempo( 120 );
-   TS_Dispatch();
+//   TS_Dispatch();
 
    _MIDI_SongLoaded = TRUE;
    _MIDI_SongActive = TRUE;
@@ -1340,9 +1339,9 @@ void MIDI_SetTempo
 
    MIDI_Tempo = tempo;
    tickspersecond = ( tempo * _MIDI_Division ) / 60;
-   if ( _MIDI_PlayRoutine != NULL )
+   //if ( _MIDI_PlayRoutine != NULL )
       {
-      TS_SetTaskRate( _MIDI_PlayRoutine, tickspersecond );
+      //TS_SetTaskRate( _MIDI_PlayRoutine, tickspersecond );
 //      TS_SetTaskRate( _MIDI_PlayRoutine, tickspersecond / 4 );
       }
    _MIDI_FPSecondsPerTick = ( 1 << TIME_PRECISION ) / tickspersecond;
@@ -1383,8 +1382,8 @@ static int _MIDI_ProcessNextTick
    track *Track;
    int   tracknum;
    int   status;
-   int   c1;
-   int   c2;
+   int   c1 = 0;
+   int   c2 = 0;
    int   TimeSet = FALSE;
 
    Track = _MIDI_TrackPtr;
