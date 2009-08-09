@@ -23,3 +23,7 @@ const char *FluidSynthMIDIDrv_ErrorString( int ErrorNumber );
 
 int  FluidSynthMIDIDrv_MIDI_Init(midifuncs *);
 void FluidSynthMIDIDrv_MIDI_Shutdown(void);
+int  FluidSynthMIDIDrv_MIDI_StartPlayback(void (*service)(void));
+void FluidSynthMIDIDrv_MIDI_HaltPlayback(void);
+unsigned int FluidSynthMIDIDrv_MIDI_GetTick(void);
+void FluidSynthMIDIDrv_MIDI_SetTempo(int tempo, int division);

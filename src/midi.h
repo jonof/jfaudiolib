@@ -43,7 +43,8 @@ enum MIDI_Errors
    MIDI_UnknownMidiFormat,
    MIDI_NoTracks,
    MIDI_InvalidTrack,
-   MIDI_NoMemory
+   MIDI_NoMemory,
+   MIDI_DriverError
    };
 
 

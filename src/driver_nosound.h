@@ -40,3 +40,7 @@ void NoSoundDrv_CD_SetVolume(int volume);
 
 int  NoSoundDrv_MIDI_Init(midifuncs *);
 void NoSoundDrv_MIDI_Shutdown(void);
+int  NoSoundDrv_MIDI_StartPlayback(void (*service)(void));
+void NoSoundDrv_MIDI_HaltPlayback(void);
+unsigned int NoSoundDrv_MIDI_GetTick(void);
+void NoSoundDrv_MIDI_SetTempo(int tempo, int division);

@@ -338,32 +338,3 @@ void CoreAudioDrv_PCM_Unlock(void)
 	pthread_mutex_unlock(&mutex);
 }
 
-
-
-
-int CoreAudioDrv_CD_Init(void)
-{
-    return 0;
-}
-
-void CoreAudioDrv_CD_Shutdown(void)
-{
-}
-
-int CoreAudioDrv_CD_Play(int track, int loop)
-{
-    return 0;
-}
-
-void CoreAudioDrv_CD_Stop(void)
-{
-}
-
-void CoreAudioDrv_CD_Pause(int pauseon)
-{
-}
-
-int CoreAudioDrv_CD_IsPlaying(void)
-{
-    return 0;
-}

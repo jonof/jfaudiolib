@@ -28,10 +28,3 @@ int  CoreAudioDrv_PCM_BeginPlayback(char *BufferStart, int BufferSize,
 void CoreAudioDrv_PCM_StopPlayback(void);
 void CoreAudioDrv_PCM_Lock(void);
 void CoreAudioDrv_PCM_Unlock(void);
-
-int  CoreAudioDrv_CD_Init(void);
-void CoreAudioDrv_CD_Shutdown(void);
-int  CoreAudioDrv_CD_Play(int track, int loop);
-void CoreAudioDrv_CD_Stop(void);
-void CoreAudioDrv_CD_Pause(int pauseon);
-int  CoreAudioDrv_CD_IsPlaying(void);

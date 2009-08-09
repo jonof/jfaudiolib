@@ -39,3 +39,7 @@ void DirectSoundDrv_CD_SetVolume(int volume);
 
 int  DirectSoundDrv_MIDI_Init(midifuncs *);
 void DirectSoundDrv_MIDI_Shutdown(void);
+int  DirectSoundDrv_MIDI_StartPlayback(void (*service)(void));
+void DirectSoundDrv_MIDI_HaltPlayback(void);
+unsigned int DirectSoundDrv_MIDI_GetTick(void);
+void DirectSoundDrv_MIDI_SetTempo(int tempo, int division);

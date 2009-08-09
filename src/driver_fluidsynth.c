@@ -254,3 +254,24 @@ void FluidSynthMIDIDrv_MIDI_Shutdown(void)
     fluidsynth = 0;
     fluidsettings = 0;
 }
+
+int  FluidSynthMIDIDrv_MIDI_StartPlayback(void (*service)(void))
+{
+    return 0;
+}
+
+void FluidSynthMIDIDrv_MIDI_HaltPlayback(void)
+{
+}
+
+unsigned int FluidSynthMIDIDrv_MIDI_GetTick(void)
+{
+    return fluid_sequencer_get_tick(fluidsequencer);
+}
+
+void FluidSynthMIDIDrv_MIDI_SetTempo(int tempo, int division)
+{
+    fluid_sequencer_set_time_scale(fluidsequencer,
+        ( (double) tempo * (double) division ) / 60.0);
+    //JBF: save the sleep interval for the service thread
+}

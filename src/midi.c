@@ -32,6 +32,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include <time.h>
 #include <string.h>
 #include "sndcards.h"
+#include "drivers.h"
 #include "ll_man.h"
 #include "music.h"
 #include "_midi.h"
@@ -65,8 +66,6 @@ static int    _MIDI_NumTracks;
 static int _MIDI_SongActive = FALSE;
 static int _MIDI_SongLoaded = FALSE;
 static int _MIDI_Loop = FALSE;
-
-//static task *_MIDI_PlayRoutine = NULL;
 
 static int  _MIDI_Division;
 static int  _MIDI_Tick    = 0;
@@ -552,8 +551,8 @@ static void _MIDI_ServiceRoutine
    track *Track;
    int   tracknum;
    int   status;
-   int   c1;
-   int   c2;
+   int   c1 = 0;
+   int   c2 = 0;
    int   TimeSet = FALSE;
 
    if ( !_MIDI_SongActive )
@@ -1172,9 +1171,8 @@ void MIDI_StopSong
    {
    if ( _MIDI_SongLoaded )
       {
-//      TS_Terminate( _MIDI_PlayRoutine );
+      SoundDriver_MIDI_HaltPlayback();
 
-//      _MIDI_PlayRoutine = NULL;
       _MIDI_SongActive = FALSE;
       _MIDI_SongLoaded = FALSE;
 
@@ -1311,10 +1309,11 @@ int MIDI_PlaySong
 
    Reset = FALSE;
 
-//   _MIDI_PlayRoutine = TS_ScheduleTask( _MIDI_ServiceRoutine, 100, 1, NULL );
-//   _MIDI_PlayRoutine = TS_ScheduleTask( test, 100, 1, NULL );
+    if (SoundDriver_MIDI_StartPlayback(_MIDI_ServiceRoutine) != MIDI_Ok) {
+        return MIDI_DriverError;
+    }
+
    MIDI_SetTempo( 120 );
-//   TS_Dispatch();
 
    _MIDI_SongLoaded = TRUE;
    _MIDI_SongActive = TRUE;
@@ -1338,12 +1337,9 @@ void MIDI_SetTempo
    long tickspersecond;
 
    MIDI_Tempo = tempo;
+   SoundDriver_MIDI_SetTempo(tempo, _MIDI_Division);
+
    tickspersecond = ( tempo * _MIDI_Division ) / 60;
-   //if ( _MIDI_PlayRoutine != NULL )
-      {
-      //TS_SetTaskRate( _MIDI_PlayRoutine, tickspersecond );
-//      TS_SetTaskRate( _MIDI_PlayRoutine, tickspersecond / 4 );
-      }
    _MIDI_FPSecondsPerTick = ( 1 << TIME_PRECISION ) / tickspersecond;
    }
 

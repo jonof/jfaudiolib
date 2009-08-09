@@ -58,6 +58,10 @@ void SoundDriver_CD_SetVolume(int volume);
 
 int  SoundDriver_MIDI_Init(midifuncs *);
 void SoundDriver_MIDI_Shutdown(void);
+int  SoundDriver_MIDI_StartPlayback(void (*service)(void));
+void SoundDriver_MIDI_HaltPlayback(void);
+unsigned int SoundDriver_MIDI_GetTick(void);
+void SoundDriver_MIDI_SetTempo(int tempo, int division);
 
 // vim:ts=4:expandtab:
 
