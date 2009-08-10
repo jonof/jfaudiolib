@@ -39,6 +39,7 @@ typedef enum
    ASS_SDL,
    ASS_CoreAudio,
    ASS_DirectSound,
+   ASS_WinMM,
    ASS_FluidSynthMIDI,
    ASS_NumSoundCards,
 	ASS_AutoDetect = -2

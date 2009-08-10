@@ -128,7 +128,7 @@ int MUSIC_Init
 #if 0 //defined __APPLE__
 		SoundCard = ASS_CoreAudio;
 #elif defined WIN32
-		SoundCard = ASS_DirectSound;
+		SoundCard = ASS_WinMM;
 #elif defined HAVE_FLUIDSYNTH
 		SoundCard = ASS_FluidSynthMIDI;
 #else

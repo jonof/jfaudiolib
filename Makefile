@@ -11,12 +11,12 @@ SOURCES=src/drivers.c \
         src/pitch.c \
         src/vorbis.c \
         src/music.c \
-		src/midi.c \
+        src/midi.c \
         src/driver_nosound.c
 
 ifneq (,$(findstring MINGW,$(shell uname -s)))
  CPPFLAGS+= -I/z/sdks/directx/dx7/include -Ithird-party/mingw32/include
- SOURCES+= src/driver_directsound.c
+ SOURCES+= src/driver_directsound.c src/driver_winmm.c
 else
  CPPFLAGS+= -DHAVE_SDL -DHAVE_FLUIDSYNTH
  SOURCES+= src/driver_sdl.c src/driver_fluidsynth.c

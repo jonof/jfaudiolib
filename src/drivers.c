@@ -37,6 +37,7 @@
 
 #ifdef WIN32
 # include "driver_directsound.h"
+# include "driver_winmm.h"
 #endif
 
 #ifdef HAVE_FLUIDSYNTH
@@ -155,18 +156,33 @@ static struct {
         DirectSoundDrv_PCM_StopPlayback,
         DirectSoundDrv_PCM_Lock,
         DirectSoundDrv_PCM_Unlock,
-        DirectSoundDrv_CD_Init,
-        DirectSoundDrv_CD_Shutdown,
-        DirectSoundDrv_CD_Play,
-        DirectSoundDrv_CD_Stop,
-        DirectSoundDrv_CD_Pause,
-        DirectSoundDrv_CD_IsPlaying,
-        DirectSoundDrv_CD_SetVolume,
-        DirectSoundDrv_MIDI_Init,
-        DirectSoundDrv_MIDI_Shutdown,
-        DirectSoundDrv_MIDI_StartPlayback,
-        DirectSoundDrv_MIDI_HaltPlayback,
-        DirectSoundDrv_MIDI_SetTempo,
+        UNSUPPORTED_CD,
+        UNSUPPORTED_MIDI,
+    },
+    #else
+        UNSUPPORTED_COMPLETELY
+    #endif
+
+    // Windows MultiMedia system
+    #ifdef WIN32
+    {
+        WinMMDrv_GetError,
+        WinMMDrv_ErrorString,
+
+        UNSUPPORTED_PCM,
+
+        WinMMDrv_CD_Init,
+        WinMMDrv_CD_Shutdown,
+        WinMMDrv_CD_Play,
+        WinMMDrv_CD_Stop,
+        WinMMDrv_CD_Pause,
+        WinMMDrv_CD_IsPlaying,
+        WinMMDrv_CD_SetVolume,
+        WinMMDrv_MIDI_Init,
+        WinMMDrv_MIDI_Shutdown,
+        WinMMDrv_MIDI_StartPlayback,
+        WinMMDrv_MIDI_HaltPlayback,
+        WinMMDrv_MIDI_SetTempo,
     },
     #else
         UNSUPPORTED_COMPLETELY

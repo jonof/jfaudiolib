@@ -18,14 +18,20 @@
  
  */
 
-int DirectSoundDrv_GetError(void);
-const char *DirectSoundDrv_ErrorString( int ErrorNumber );
+int WinMMDrv_GetError(void);
+const char *WinMMDrv_ErrorString( int ErrorNumber );
 
-int  DirectSoundDrv_PCM_Init(int * mixrate, int * numchannels, int * samplebits, void * initdata);
-void DirectSoundDrv_PCM_Shutdown(void);
-int  DirectSoundDrv_PCM_BeginPlayback(char *BufferStart, int BufferSize,
-                 int NumDivisions, void ( *CallBackFunc )( void ) );
-void DirectSoundDrv_PCM_StopPlayback(void);
-void DirectSoundDrv_PCM_Lock(void);
-void DirectSoundDrv_PCM_Unlock(void);
+int  WinMMDrv_CD_Init(void);
+void WinMMDrv_CD_Shutdown(void);
+int  WinMMDrv_CD_Play(int track, int loop);
+void WinMMDrv_CD_Stop(void);
+void WinMMDrv_CD_Pause(int pauseon);
+int  WinMMDrv_CD_IsPlaying(void);
+void WinMMDrv_CD_SetVolume(int volume);
 
+int  WinMMDrv_MIDI_Init(midifuncs *);
+void WinMMDrv_MIDI_Shutdown(void);
+int  WinMMDrv_MIDI_StartPlayback(void (*service)(void));
+void WinMMDrv_MIDI_HaltPlayback(void);
+unsigned int WinMMDrv_MIDI_GetTick(void);
+void WinMMDrv_MIDI_SetTempo(int tempo, int division);
