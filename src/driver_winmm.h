@@ -33,5 +33,4 @@ int  WinMMDrv_MIDI_Init(midifuncs *);
 void WinMMDrv_MIDI_Shutdown(void);
 int  WinMMDrv_MIDI_StartPlayback(void (*service)(void));
 void WinMMDrv_MIDI_HaltPlayback(void);
-unsigned int WinMMDrv_MIDI_GetTick(void);
 void WinMMDrv_MIDI_SetTempo(int tempo, int division);

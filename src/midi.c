@@ -1309,11 +1309,11 @@ int MIDI_PlaySong
 
    Reset = FALSE;
 
+   MIDI_SetTempo( 120 );
+
     if (SoundDriver_MIDI_StartPlayback(_MIDI_ServiceRoutine) != MIDI_Ok) {
         return MIDI_DriverError;
     }
-
-   MIDI_SetTempo( 120 );
 
    _MIDI_SongLoaded = TRUE;
    _MIDI_SongActive = TRUE;
