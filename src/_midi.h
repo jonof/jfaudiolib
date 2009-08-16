@@ -51,6 +51,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #define MIDI_PAN                   10
 #define MIDI_DETUNE                94
 #define MIDI_RHYTHM_CHANNEL        9
+#define MIDI_BANK_SELECT_MSB       0
+#define MIDI_BANK_SELECT_LSB       32
 #define MIDI_RPN_MSB               100
 #define MIDI_RPN_LSB               101
 #define MIDI_DATAENTRY_MSB         6
@@ -70,8 +72,13 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #define MIDI_SYSEX_CONTINUE        0xF7
 #define MIDI_META_EVENT            0xFF
 #define MIDI_END_OF_TRACK          0x2F
+#define MIDI_HOLD1                 0x40
+#define MIDI_SUSTENUTO             0x42
 #define MIDI_TEMPO_CHANGE          0x51
 #define MIDI_TIME_SIGNATURE        0x58
+#define MIDI_REVERB                0x5b
+#define MIDI_CHORUS                0x5d
+#define MIDI_ALL_SOUNDS_OFF        0x78
 #define MIDI_RESET_ALL_CONTROLLERS 0x79
 #define MIDI_ALL_NOTES_OFF         0x7b
 #define MIDI_MONO_MODE_ON          0x7E
@@ -158,6 +165,7 @@ static void _MIDI_SysEx( track *Track );
 static int  _MIDI_InterpretControllerInfo( track *Track, int TimeSet,
    int channel, int c1, int c2 );
 static int  _MIDI_SendControlChange( int channel, int c1, int c2 );
+static int  _MIDI_SendProgramChange( int channel, int c1 );
 static void _MIDI_SetChannelVolume( int channel, int volume );
 static void _MIDI_SendChannelVolumes( void );
 static int  _MIDI_ProcessNextTick( void );

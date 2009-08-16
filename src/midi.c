@@ -766,6 +766,47 @@ static int _MIDI_SendControlChange
 
 
 /*---------------------------------------------------------------------
+   Function: _MIDI_SendProgramChange
+
+   Sends a program change to the proper device
+---------------------------------------------------------------------*/
+
+static int _MIDI_SendProgramChange
+   (
+   int channel,
+   int c1
+   )
+
+   {
+   int status;
+
+   if ( _MIDI_RerouteFunctions[ channel ] != NULL )
+      {
+      status = _MIDI_RerouteFunctions[ channel ]( 0xC0 + channel,
+         c1, 0 );
+      if ( status == MIDI_DONT_PLAY )
+         {
+         return( MIDI_Ok );
+         }
+      }
+
+   if ( _MIDI_Funcs == NULL )
+      {
+      return( MIDI_Error );
+      }
+
+   if ( _MIDI_Funcs->ProgramChange == NULL )
+      {
+      return( MIDI_Error );
+      }
+
+   _MIDI_Funcs->ProgramChange( channel, c1 );
+
+   return( MIDI_Ok );
+   }
+
+
+/*---------------------------------------------------------------------
    Function: MIDI_RerouteMidiChannel
 
    Sets callback function to reroute MIDI commands from specified
@@ -804,9 +845,10 @@ int MIDI_AllNotesOff
 
    for( channel = 0; channel < NUM_MIDI_CHANNELS; channel++ )
       {
-      _MIDI_SendControlChange( channel, 0x40, 0 );
+      _MIDI_SendControlChange( channel, MIDI_HOLD1, 0 );
+      _MIDI_SendControlChange( channel, MIDI_SUSTENUTO, 0 );   // TURRICAN's recommendation
       _MIDI_SendControlChange( channel, MIDI_ALL_NOTES_OFF, 0 );
-      _MIDI_SendControlChange( channel, 0x78, 0 );
+      _MIDI_SendControlChange( channel, MIDI_ALL_SOUNDS_OFF, 0 );
       }
 
    SoundDriver_MIDI_Unlock();
@@ -966,7 +1008,7 @@ int MIDI_Reset
 
    MIDI_AllNotesOff();
 
-   //JBF: delay for 1/24th second
+   ASS_Sleep(1000 / 20);
    
    SoundDriver_MIDI_Lock();
 
@@ -978,6 +1020,12 @@ int MIDI_Reset
       _MIDI_SendControlChange( channel, MIDI_DATAENTRY_MSB, 2 ); /* Pitch Bend Sensitivity MSB */
       _MIDI_SendControlChange( channel, MIDI_DATAENTRY_LSB, 0 ); /* Pitch Bend Sensitivity LSB */
       _MIDI_ChannelVolume[ channel ] = GENMIDI_DefaultVolume;
+      _MIDI_SendControlChange( channel, MIDI_PAN, 64 );  // begin TURRICAN's recommendation
+      _MIDI_SendControlChange( channel, MIDI_REVERB, 40 );
+      _MIDI_SendControlChange( channel, MIDI_CHORUS, 0 );
+      _MIDI_SendControlChange( channel, MIDI_BANK_SELECT_MSB, 0 );
+      _MIDI_SendControlChange( channel, MIDI_BANK_SELECT_LSB, 0 );
+      _MIDI_SendProgramChange( channel, 0 ); // end TURRICAN's recommendation
       }
 
    _MIDI_SendChannelVolumes();

@@ -12,7 +12,8 @@ SOURCES=src/drivers.c \
         src/vorbis.c \
         src/music.c \
         src/midi.c \
-        src/driver_nosound.c
+        src/driver_nosound.c \
+	src/asssys.c
 
 ifneq (,$(findstring MINGW,$(shell uname -s)))
  CPPFLAGS+= -I/z/sdks/directx/dx7/include -Ithird-party/mingw32/include
