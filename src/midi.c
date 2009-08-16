@@ -38,6 +38,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "music.h"
 #include "_midi.h"
 #include "midi.h"
+#include "asssys.h"
 
 #define TRUE  ( 1 == 1 )
 #define FALSE ( !TRUE )
@@ -315,7 +316,10 @@ static void _MIDI_MetaEvent
 
       case MIDI_TEMPO_CHANGE :
          tempo = 60000000L / _MIDI_ReadNumber( Track->pos, 3 );
-         MIDI_SetTempo( tempo );
+         if (_MIDI_SongLoaded)
+            {
+            MIDI_SetTempo( tempo );
+            }
          break;
 
       case MIDI_TIME_SIGNATURE :

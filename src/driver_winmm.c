@@ -444,6 +444,32 @@ static void gc_buffers(void)
     }
 }
 
+// frees all buffers
+static void free_buffers(void)
+{
+    MidiBuffer *node, *next;
+
+    while (!LL_ListEmpty(&activeMidiBuffers, next, prev)) {
+        // wait for Windows to finish with all the buffers queued
+        Sleep(10);
+    }
+
+    // free all the completed buffers
+    gc_buffers();
+    LL_Reset( (MidiBuffer*) &completedMidiBuffers, next, prev );
+
+    // free all the spare buffers
+    for ( node = spareMidiBuffers.next; node != &spareMidiBuffers; node = next ) {
+        next = node->next;
+
+        LL_Remove( node, next, prev );
+
+        free(node->hdr);
+        free(node);
+    }
+    LL_Reset( (MidiBuffer*) &spareMidiBuffers, next, prev );
+}
+
 static MIDIHDR * new_header(int length, unsigned char ** data)
 {
     MIDIHDR * ptr;
@@ -680,7 +706,6 @@ int WinMMDrv_MIDI_Init(midifuncs * funcs)
 void WinMMDrv_MIDI_Shutdown(void)
 {
     MMRESULT rv;
-    MidiBuffer *node, *next;
 
     if (!midiInstalled) {
         return;
@@ -689,30 +714,12 @@ void WinMMDrv_MIDI_Shutdown(void)
     WinMMDrv_MIDI_HaltPlayback();
 
     if (midiStream) {
-        rv = midiStreamStop(midiStream);
+        /*rv = midiStreamStop(midiStream);
         if (rv != MMSYSERR_NOERROR) {
             fprintf(stderr, "WinMM MIDI_Shutdown midiStreamStop err %d\n", (int) rv);
-        }
+        }*/
 
-        while (!LL_ListEmpty(&activeMidiBuffers, next, prev)) {
-            // let Windows return us all the active buffers
-            Sleep(10);
-        }
-
-        // free all the completed buffers
-        gc_buffers();
-        LL_Reset( (MidiBuffer*) &completedMidiBuffers, next, prev );
-
-        // free all the spare buffers
-        for ( node = spareMidiBuffers.next; node != &spareMidiBuffers; node = next ) {
-            next = node->next;
-
-            LL_Remove( node, next, prev );
-
-            free(node->hdr);
-            free(node);
-        }
-        LL_Reset( (MidiBuffer*) &spareMidiBuffers, next, prev );
+        free_buffers();
 
         rv = midiStreamClose(midiStream);
         if (rv != MMSYSERR_NOERROR) {
@@ -890,7 +897,8 @@ void WinMMDrv_MIDI_SetTempo(int tempo, int division)
         if (midiPlaying) {
             WinMMDrv_MIDI_HaltPlayback();
 
-            midiStreamStop(midiStream);
+            //midiStreamStop(midiStream);
+            free_buffers();
             midiStreamClose(midiStream);
             midiStream = 0;
 
@@ -919,7 +927,7 @@ void WinMMDrv_MIDI_SetTempo(int tempo, int division)
         if (midiPlaying) {
             midiPlaying = FALSE;
             
-            if (WinMMDrv_MIDI_StartPlayback(midiThreadService) != WinMMErr_Ok) {;
+            if (WinMMDrv_MIDI_StartPlayback(midiThreadService) != WinMMErr_Ok) {
                 return;
             }
         }
@@ -929,6 +937,9 @@ void WinMMDrv_MIDI_SetTempo(int tempo, int division)
 
     midiThreadQueueTicks = (int) ceil( ( ( (double) tempo * (double) division ) / 60.0 ) /
             (double) THREAD_QUEUE_INTERVAL );
+    if (midiThreadQueueTicks <= 0) {
+        midiThreadQueueTicks = 1;
+    }
 }
 
 void WinMMDrv_MIDI_Lock(void)
