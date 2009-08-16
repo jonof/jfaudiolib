@@ -50,7 +50,7 @@ int ASS_MIDISoundDriver = -1;
 
 #define UNSUPPORTED_PCM         0,0,0,0,0,0
 #define UNSUPPORTED_CD          0,0,0,0,0,0,0
-#define UNSUPPORTED_MIDI        0,0,0,0,0
+#define UNSUPPORTED_MIDI        0,0,0,0,0,0,0
 #define UNSUPPORTED_COMPLETELY  { 0,0, UNSUPPORTED_PCM, UNSUPPORTED_CD, UNSUPPORTED_MIDI },
 
 static struct {
@@ -77,6 +77,8 @@ static struct {
     int          (* MIDI_StartPlayback)(void (*service)(void));
     void         (* MIDI_HaltPlayback)(void);
     void         (* MIDI_SetTempo)(int tempo, int division);
+    void         (* MIDI_Lock)(void);
+    void         (* MIDI_Unlock)(void);
 } SoundDrivers[ASS_NumSoundCards] = {
     
     // Everyone gets the "no sound" driver
@@ -101,6 +103,8 @@ static struct {
         NoSoundDrv_MIDI_StartPlayback,
         NoSoundDrv_MIDI_HaltPlayback,
         NoSoundDrv_MIDI_SetTempo,
+        NoSoundDrv_MIDI_Lock,
+        NoSoundDrv_MIDI_Unlock,
    },
     
     // Simple DirectMedia Layer
@@ -183,6 +187,8 @@ static struct {
         WinMMDrv_MIDI_StartPlayback,
         WinMMDrv_MIDI_HaltPlayback,
         WinMMDrv_MIDI_SetTempo,
+        WinMMDrv_MIDI_Lock,
+        WinMMDrv_MIDI_Unlock,
     },
     #else
         UNSUPPORTED_COMPLETELY
@@ -202,6 +208,8 @@ static struct {
         FluidSynthMIDIDrv_MIDI_StartPlayback,
         FluidSynthMIDIDrv_MIDI_HaltPlayback,
         FluidSynthMIDIDrv_MIDI_SetTempo,
+        FluidSynthMIDIDrv_MIDI_Lock,
+        FluidSynthMIDIDrv_MIDI_Unlock,
     }
     #else
         UNSUPPORTED_COMPLETELY
@@ -373,5 +381,14 @@ void SoundDriver_MIDI_SetTempo(int tempo, int division)
     SoundDrivers[ASS_MIDISoundDriver].MIDI_SetTempo(tempo, division);
 }
 
+void SoundDriver_MIDI_Lock(void)
+{
+	SoundDrivers[ASS_MIDISoundDriver].MIDI_Lock();
+}
+
+void SoundDriver_MIDI_Unlock(void)
+{
+	SoundDrivers[ASS_MIDISoundDriver].MIDI_Unlock();
+}
 
 // vim:ts=4:sw=4:expandtab:

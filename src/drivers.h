@@ -61,6 +61,8 @@ void SoundDriver_MIDI_Shutdown(void);
 int  SoundDriver_MIDI_StartPlayback(void (*service)(void));
 void SoundDriver_MIDI_HaltPlayback(void);
 void SoundDriver_MIDI_SetTempo(int tempo, int division);
+void SoundDriver_MIDI_Lock(void);
+void SoundDriver_MIDI_Unlock(void);
 
 // vim:ts=4:expandtab:
 

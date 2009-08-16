@@ -31,6 +31,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include <stdlib.h>
 #include <time.h>
 #include <string.h>
+#include <stdio.h>
 #include "sndcards.h"
 #include "drivers.h"
 #include "ll_man.h"
@@ -40,6 +41,24 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 #define TRUE  ( 1 == 1 )
 #define FALSE ( !TRUE )
+
+#ifdef __POWERPC__
+#define LITTLE16 SWAP16
+#define LITTLE32 SWAP32
+#else
+#define LITTLE16
+#define LITTLE32
+#endif
+
+static inline unsigned short SWAP16(unsigned short s)
+{
+	return (s >> 8) | (s << 8);
+}
+
+static inline unsigned int SWAP32(unsigned int s)
+{
+	return (s >> 24) | (s << 24) | ((s&0xff00) << 8) | ((s & 0xff0000) >> 8);
+}
 
 #define min(x,y) ((x) < (y) ? (x) : (y))
 #define max(x,y) ((x) > (y) ? (x) : (y))
@@ -781,12 +800,16 @@ int MIDI_AllNotesOff
    {
    int channel;
 
+   SoundDriver_MIDI_Lock();
+
    for( channel = 0; channel < NUM_MIDI_CHANNELS; channel++ )
       {
       _MIDI_SendControlChange( channel, 0x40, 0 );
       _MIDI_SendControlChange( channel, MIDI_ALL_NOTES_OFF, 0 );
       _MIDI_SendControlChange( channel, 0x78, 0 );
       }
+
+   SoundDriver_MIDI_Unlock();
 
    return( MIDI_Ok );
    }
@@ -873,7 +896,10 @@ void MIDI_SetUserChannelVolume
    if ( ( channel >= 0 ) && ( channel < NUM_MIDI_CHANNELS ) )
       {
       _MIDI_UserChannelVolume[ channel ] = volume;
+
+      SoundDriver_MIDI_Lock();
       _MIDI_SetChannelVolume( channel, _MIDI_ChannelVolume[ channel ] );
+      SoundDriver_MIDI_Unlock();
       }
    }
 
@@ -897,7 +923,9 @@ void MIDI_ResetUserChannelVolume
       _MIDI_UserChannelVolume[ channel ] = 256;
       }
 
+   SoundDriver_MIDI_Lock();
    _MIDI_SendChannelVolumes();
+   SoundDriver_MIDI_Unlock();
    }
 
 
@@ -939,6 +967,8 @@ int MIDI_Reset
    MIDI_AllNotesOff();
 
    //JBF: delay for 1/24th second
+   
+   SoundDriver_MIDI_Lock();
 
    for( channel = 0; channel < NUM_MIDI_CHANNELS; channel++ )
       {
@@ -951,6 +981,8 @@ int MIDI_Reset
       }
 
    _MIDI_SendChannelVolumes();
+
+   SoundDriver_MIDI_Unlock();
 
    Reset = TRUE;
 
@@ -982,6 +1014,8 @@ int MIDI_SetVolume
 
    _MIDI_TotalVolume = volume;
 
+   SoundDriver_MIDI_Lock();
+
    if ( _MIDI_Funcs->SetVolume )
       {
       _MIDI_Funcs->SetVolume( volume );
@@ -998,6 +1032,8 @@ int MIDI_SetVolume
       {
       _MIDI_SendChannelVolumes();
       }
+
+   SoundDriver_MIDI_Unlock();
 
    return( MIDI_Ok );
    }
@@ -1022,6 +1058,8 @@ int MIDI_GetVolume
       return( MIDI_NullMidiModule );
       }
 
+   SoundDriver_MIDI_Lock();
+
    if ( _MIDI_Funcs->GetVolume )
       {
       volume = _MIDI_Funcs->GetVolume();
@@ -1030,6 +1068,8 @@ int MIDI_GetVolume
       {
       volume = _MIDI_TotalVolume;
       }
+
+   SoundDriver_MIDI_Unlock();
 
    return( volume );
    }
@@ -1177,12 +1217,17 @@ void MIDI_StopSong
       _MIDI_SongLoaded = FALSE;
 
       MIDI_Reset();
+      
+      SoundDriver_MIDI_Lock();
+
       _MIDI_ResetTracks();
 
       if ( _MIDI_Funcs->ReleasePatches )
          {
          _MIDI_Funcs->ReleasePatches();
          }
+
+      SoundDriver_MIDI_Unlock();
 
       free( _MIDI_TrackPtr );
 
@@ -1230,7 +1275,7 @@ int MIDI_PlaySong
       return( MIDI_NullMidiModule );
       }
 
-   if ( *( unsigned long * )song != MIDI_HEADER_SIGNATURE )
+   if ( *( unsigned int * )song != LITTLE32(MIDI_HEADER_SIGNATURE) )
       {
       return( MIDI_InvalidMidiFile );
       }
@@ -1271,7 +1316,7 @@ int MIDI_PlaySong
    numtracks    = _MIDI_NumTracks;
    while( numtracks-- )
       {
-      if ( *( unsigned long * )ptr != MIDI_TRACK_SIGNATURE )
+      if ( *( unsigned int * )ptr != LITTLE32(MIDI_TRACK_SIGNATURE) )
          {
          free( _MIDI_TrackPtr );
 
@@ -1531,10 +1576,14 @@ void MIDI_SetSongTick
 
    if ( PositionInTicks < _MIDI_PositionInTicks )
       {
+      SoundDriver_MIDI_Lock();
       _MIDI_ResetTracks();
+      SoundDriver_MIDI_Unlock();
+
       MIDI_Reset();
       }
 
+   SoundDriver_MIDI_Lock();
    while( _MIDI_PositionInTicks < PositionInTicks )
       {
       if ( _MIDI_ProcessNextTick() )
@@ -1546,11 +1595,13 @@ void MIDI_SetSongTick
          _MIDI_ResetTracks();
          if ( !_MIDI_Loop )
             {
+            SoundDriver_MIDI_Unlock();
             return;
             }
          break;
          }
       }
+   SoundDriver_MIDI_Unlock();
 
    MIDI_SetVolume( _MIDI_TotalVolume );
    MIDI_ContinueSong();
@@ -1586,10 +1637,14 @@ void MIDI_SetSongTime
 
    if ( newtime < _MIDI_Time )
       {
+      SoundDriver_MIDI_Lock();
       _MIDI_ResetTracks();
+      SoundDriver_MIDI_Unlock();
+
       MIDI_Reset();
       }
 
+   SoundDriver_MIDI_Lock();
    while( _MIDI_Time < newtime )
       {
       if ( _MIDI_ProcessNextTick() )
@@ -1601,11 +1656,13 @@ void MIDI_SetSongTime
          _MIDI_ResetTracks();
          if ( !_MIDI_Loop )
             {
+            SoundDriver_MIDI_Unlock();
             return;
             }
          break;
          }
       }
+   SoundDriver_MIDI_Unlock();
 
    MIDI_SetVolume( _MIDI_TotalVolume );
    MIDI_ContinueSong();
@@ -1639,10 +1696,14 @@ void MIDI_SetSongPosition
 
    if ( pos < RELATIVE_BEAT( _MIDI_Measure, _MIDI_Beat, _MIDI_Tick ) )
       {
+      SoundDriver_MIDI_Lock();
       _MIDI_ResetTracks();
+      SoundDriver_MIDI_Unlock();
+
       MIDI_Reset();
       }
 
+   SoundDriver_MIDI_Lock();
    while( RELATIVE_BEAT( _MIDI_Measure, _MIDI_Beat, _MIDI_Tick ) < pos )
       {
       if ( _MIDI_ProcessNextTick() )
@@ -1654,11 +1715,13 @@ void MIDI_SetSongPosition
          _MIDI_ResetTracks();
          if ( !_MIDI_Loop )
             {
+            SoundDriver_MIDI_Unlock();
             return;
             }
          break;
          }
       }
+   SoundDriver_MIDI_Unlock();
 
    MIDI_SetVolume( _MIDI_TotalVolume );
    MIDI_ContinueSong();
@@ -2064,3 +2127,4 @@ void MIDI_LoadTimbres
    _MIDI_ResetTracks();
    }
 
+// vim:ts=3:sw=3:expandtab:

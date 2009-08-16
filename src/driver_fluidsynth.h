@@ -27,3 +27,5 @@ int  FluidSynthMIDIDrv_MIDI_StartPlayback(void (*service)(void));
 void FluidSynthMIDIDrv_MIDI_HaltPlayback(void);
 unsigned int FluidSynthMIDIDrv_MIDI_GetTick(void);
 void FluidSynthMIDIDrv_MIDI_SetTempo(int tempo, int division);
+void FluidSynthMIDIDrv_MIDI_Lock(void);
+void FluidSynthMIDIDrv_MIDI_Unlock(void);

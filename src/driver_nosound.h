@@ -44,3 +44,6 @@ int  NoSoundDrv_MIDI_StartPlayback(void (*service)(void));
 void NoSoundDrv_MIDI_HaltPlayback(void);
 unsigned int NoSoundDrv_MIDI_GetTick(void);
 void NoSoundDrv_MIDI_SetTempo(int tempo, int division);
+void NoSoundDrv_MIDI_Lock(void);
+void NoSoundDrv_MIDI_Unlock(void);
+

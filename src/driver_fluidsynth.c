@@ -368,3 +368,12 @@ void FluidSynthMIDIDrv_MIDI_SetTempo(int tempo, int division)
 
     threadQueueTicks = (int) ceil(tps / (double) THREAD_QUEUE_INTERVAL);
 }
+
+void FluidSynthMIDIDrv_MIDI_Lock(void)
+{
+}
+
+void FluidSynthMIDIDrv_MIDI_Unlock(void)
+{
+}
+
