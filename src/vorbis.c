@@ -22,6 +22,8 @@
  * OggVorbis source support for MultiVoc
  */
 
+#ifdef HAVE_VORBIS
+
 #ifdef __APPLE__
 # include <vorbis/vorbisfile.h>
 #else
@@ -424,3 +426,4 @@ void MV_ReleaseVorbisVoice( VoiceNode * voice )
    voice->extra = 0;
 }
 
+#endif //HAVE_VORBIS

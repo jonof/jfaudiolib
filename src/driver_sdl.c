@@ -23,7 +23,7 @@
  */
 
 
-#include <SDL/SDL.h>
+#include <SDL.h>
 #include "driver_sdl.h"
 
 enum {

@@ -25,7 +25,7 @@
 #include "midifuncs.h"
 #include "driver_alsa.h"
 #include <pthread.h>
-#include <alsa/asoundlib.h>
+#include <asoundlib.h>
 #include <unistd.h>
 #include <math.h>
 

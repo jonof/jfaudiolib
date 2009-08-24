@@ -1,0 +1,29 @@
+JFAUDIOLIB_HAVE_SDL=0
+JFAUDIOLIB_HAVE_ALSA=0
+JFAUDIOLIB_HAVE_FLUIDSYNTH=0
+JFAUDIOLIB_HAVE_VORBIS=0
+JFAUDIOLIB_USE_SDLMIXER=0
+
+JFAUDIOLIB=libjfaudiolib.a
+JFAUDIOLIB_LDFLAGS=
+
+ifneq (,$(findstring MINGW,$(shell uname -s)))
+ JFAUDIOLIB_HAVE_VORBIS=1
+else
+ ifeq (yes,$(shell pkg-config --exists vorbisfile && echo yes))
+  JFAUDIOLIB_HAVE_VORBIS=1
+  JFAUDIOLIB_LDFLAGS+= $(shell pkg-config --libs vorbisfile)
+ endif
+ ifeq (yes,$(shell pkg-config --exists sdl && echo yes))
+  JFAUDIOLIB_HAVE_SDL=1
+  JFAUDIOLIB_LDFLAGS+= $(shell pkg-config --libs sdl)
+ endif
+ ifeq (yes,$(shell pkg-config --exists alsa && echo yes))
+  JFAUDIOLIB_HAVE_ALSA=1
+  JFAUDIOLIB_LDFLAGS+= $(shell pkg-config --libs alsa)
+ endif
+ ifeq (yes,$(shell pkg-config --exists fluidsynth && echo yes))
+  JFAUDIOLIB_HAVE_FLUIDSYNTH=1
+  JFAUDIOLIB_LDFLAGS+= $(shell pkg-config --libs fluidsynth)
+ endif
+endif

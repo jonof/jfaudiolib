@@ -979,8 +979,10 @@ int FX_PlayAuto( char *ptr, unsigned int length, int pitchoffset, int vol,
       handle = MV_PlayVOC(ptr, length, pitchoffset, vol, left, right, priority, callbackval);
    } else if (!memcmp("RIFF", ptr, 4) && !memcmp("WAVE", ptr + 8, 4)) {
       handle = MV_PlayWAV(ptr, length, pitchoffset, vol, left, right, priority, callbackval);
+   #ifdef HAVE_VORBIS
    } else if (!memcmp("OggS", ptr, 4)) {
       handle = MV_PlayVorbis(ptr, length, pitchoffset, vol, left, right, priority, callbackval);
+   #endif
    }
    
    if ( handle < MV_Ok )
@@ -1009,9 +1011,11 @@ int FX_PlayLoopedAuto( char *ptr, unsigned int length, int loopstart, int loopen
    } else if (!memcmp("RIFF", ptr, 4) && !memcmp("WAVE", ptr + 8, 4)) {
       handle = MV_PlayLoopedWAV(ptr, length, loopstart, loopend, pitchoffset,
                               vol, left, right, priority, callbackval);
+   #ifdef HAVE_VORBIS
    } else if (!memcmp("OggS", ptr, 4)) {
       handle = MV_PlayLoopedVorbis(ptr, length, loopstart, loopend, pitchoffset,
                               vol, left, right, priority, callbackval);
+   #endif
    }
    
    if ( handle < MV_Ok )
@@ -1037,8 +1041,10 @@ int FX_PlayAuto3D( char *ptr, unsigned int length, int pitchoffset, int angle,
       handle = MV_PlayVOC3D(ptr, length, pitchoffset, angle, distance, priority, callbackval);
    } else if (!memcmp("RIFF", ptr, 4) && !memcmp("WAVE", ptr + 8, 4)) {
       handle = MV_PlayWAV3D(ptr, length, pitchoffset, angle, distance, priority, callbackval);
+   #ifdef HAVE_VORBIS
    } else if (!memcmp("OggS", ptr, 4)) {
       handle = MV_PlayVorbis3D(ptr, length, pitchoffset, angle, distance, priority, callbackval);
+   #endif
    }
    
    if ( handle < MV_Ok )

@@ -364,10 +364,12 @@ static void MV_StopVoice
 
    RestoreInterrupts( flags );
    
+   #ifdef HAVE_VORBIS
    if (voice->wavetype == Vorbis)
       {
       MV_ReleaseVorbisVoice(voice);
       }
+   #endif
    }
 
 
