@@ -380,6 +380,8 @@ void ALSADrv_MIDI_HaltPlayback(void)
         fprintf(stderr, "ALSA could not drain output: err %d\n", result);
     }
 
+    snd_seq_sync_output_queue(seq);
+
     //queueRunning = 0;
     threadRunning = 0;
 }
