@@ -321,15 +321,17 @@ int ALSADrv_MIDI_StartPlayback(void (*service)(void))
     threadService = service;
     threadQuit = 0;
 
-    result = snd_seq_start_queue(seq, seq_queue, NULL);
-    if (result < 0) {
-        fprintf(stderr, "ALSA snd_seq_start_queue err %d\n", result);
-        return ALSAErr_StartQueue;
-    }
+    if (!queueRunning) {
+        result = snd_seq_start_queue(seq, seq_queue, NULL);
+        if (result < 0) {
+            fprintf(stderr, "ALSA snd_seq_start_queue err %d\n", result);
+            return ALSAErr_StartQueue;
+        }
 
-    while ((result = snd_seq_drain_output(seq)) > 0) ;
-    if (result < 0) {
-        fprintf(stderr, "ALSA could not drain output: err %d\n", result);
+        while ((result = snd_seq_drain_output(seq)) > 0) ;
+        if (result < 0) {
+            fprintf(stderr, "ALSA could not drain output: err %d\n", result);
+        }
     }
 
     queueRunning = 1;
@@ -368,7 +370,7 @@ void ALSADrv_MIDI_HaltPlayback(void)
     }
 
     if (queueRunning) {
-        snd_seq_stop_queue(seq, seq_queue, NULL);
+        //snd_seq_stop_queue(seq, seq_queue, NULL);
     }
 
     while ((result = snd_seq_drain_output(seq)) > 0) ;
