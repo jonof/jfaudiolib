@@ -154,25 +154,22 @@ int SDLDrv_PCM_Init(int * mixrate, int * numchannels, int * samplebits, void * i
     SDL_AudioSpec spec, actual;
     char drivername[256] = "(error)";
 
-    memset(&spec, 0, sizeof(spec));
-    memset(&actual, 0, sizeof(actual));
-
     if (Initialised) {
         SDLDrv_PCM_Shutdown();
     }
 
     inited = SDL_WasInit(SDL_INIT_EVERYTHING);
-    fprintf(stderr, "inited = %x\n", inited);
+    //fprintf(stderr, "inited = %x\n", inited);
 
     if (inited == 0) {
         // nothing was initialised
         err = SDL_Init(SDL_INIT_AUDIO);
         StartedSDLInit |= 0x80000000 + SDL_INIT_AUDIO;
-        fprintf(stderr, "called SDL_Init\n");
+        //fprintf(stderr, "called SDL_Init\n");
     } else if (!(inited & SDL_INIT_AUDIO)) {
         err = SDL_InitSubSystem(SDL_INIT_AUDIO);
         StartedSDLInit |= SDL_INIT_AUDIO;
-        fprintf(stderr, "called SDL_InitSubSystem\n");
+        //fprintf(stderr, "called SDL_InitSubSystem\n");
     }
 
     if (err < 0) {
@@ -184,7 +181,7 @@ int SDLDrv_PCM_Init(int * mixrate, int * numchannels, int * samplebits, void * i
 
     SDL_AudioDriverName(drivername, sizeof(drivername));
     fprintf(stderr, "SDL_AudioDriverName: %s\n", drivername);
-    
+
     spec.freq = *mixrate;
     spec.format = (*samplebits == 8) ? AUDIO_U8 : AUDIO_S16SYS;
     spec.channels = *numchannels;
@@ -196,6 +193,13 @@ int SDLDrv_PCM_Init(int * mixrate, int * numchannels, int * samplebits, void * i
 
     err = SDL_OpenAudio(&spec, &actual);
     if (err < 0) {
+        ErrorCode = SDLErr_OpenAudio;
+        return SDLErr_Error;
+    }
+
+    if (actual.freq == 0 || actual.channels == 0) {
+        // hack for when SDL said it opened the audio, but clearly didn't
+        SDL_CloseAudio();
         ErrorCode = SDLErr_OpenAudio;
         return SDLErr_Error;
     }
@@ -229,6 +233,7 @@ int SDLDrv_PCM_Init(int * mixrate, int * numchannels, int * samplebits, void * i
     }
 
     if (err) {
+        SDL_CloseAudio();
         return SDLErr_Error;
     } else {
         Initialised = 1;
