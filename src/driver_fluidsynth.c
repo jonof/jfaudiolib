@@ -19,7 +19,7 @@
  */
 
 /**
- * Stub driver for no output
+ * FluidSynth MIDI synthesiser output
  */
 
 #include "midifuncs.h"
@@ -32,21 +32,21 @@
 #include <math.h>
 
 enum {
-   FSMIDIErr_Warning = -2,
-   FSMIDIErr_Error   = -1,
-   FSMIDIErr_Ok      = 0,
-   FSMIDIErr_Uninitialised,
-   FSMIDIErr_NewFluidSettings,
-   FSMIDIErr_NewFluidSynth,
-   FSMIDIErr_NewFluidAudioDriver,
-   FSMIDIErr_NewFluidSequencer,
-   FSMIDIErr_RegisterFluidSynth,
-   FSMIDIErr_BadSoundFont,
-   FSMIDIErr_NewFluidEvent,
-   FSMIDIErr_PlayThread
+   FSynthErr_Warning = -2,
+   FSynthErr_Error   = -1,
+   FSynthErr_Ok      = 0,
+   FSynthErr_Uninitialised,
+   FSynthErr_NewFluidSettings,
+   FSynthErr_NewFluidSynth,
+   FSynthErr_NewFluidAudioDriver,
+   FSynthErr_NewFluidSequencer,
+   FSynthErr_RegisterFluidSynth,
+   FSynthErr_BadSoundFont,
+   FSynthErr_NewFluidEvent,
+   FSynthErr_PlayThread
 };
 
-static int ErrorCode = FSMIDIErr_Ok;
+static int ErrorCode = FSynthErr_Ok;
 static char *soundFontName = "/usr/share/sounds/sf2/SGM-V2.01.sf2";
 //static char *soundFontName = "/usr/share/sounds/sf2/FluidR3_GM.sf2";
 
@@ -68,59 +68,59 @@ static int threadQueueTicks = 0;
 #define THREAD_QUEUE_INTERVAL 20    // 1/20 sec
 
 
-int FluidSynthMIDIDrv_GetError(void)
+int FluidSynthDrv_GetError(void)
 {
 	return ErrorCode;
 }
 
-const char *FluidSynthMIDIDrv_ErrorString( int ErrorNumber )
+const char *FluidSynthDrv_ErrorString( int ErrorNumber )
 {
 	const char *ErrorString;
 	
     switch( ErrorNumber )
 	{
-        case FSMIDIErr_Warning :
-        case FSMIDIErr_Error :
-            ErrorString = FluidSynthMIDIDrv_ErrorString( ErrorCode );
+        case FSynthErr_Warning :
+        case FSynthErr_Error :
+            ErrorString = FluidSynthDrv_ErrorString( ErrorCode );
             break;
 
-        case FSMIDIErr_Ok :
+        case FSynthErr_Ok :
             ErrorString = "FluidSynth ok.";
             break;
 			
-		case FSMIDIErr_Uninitialised:
+		case FSynthErr_Uninitialised:
 			ErrorString = "FluidSynth uninitialised.";
 			break;
 
-        case FSMIDIErr_NewFluidSettings:
+        case FSynthErr_NewFluidSettings:
             ErrorString = "Failed creating new fluid settings.";
             break;
 
-        case FSMIDIErr_NewFluidSynth:
+        case FSynthErr_NewFluidSynth:
             ErrorString = "Failed creating new fluid synth.";
             break;
 
-        case FSMIDIErr_NewFluidAudioDriver:
+        case FSynthErr_NewFluidAudioDriver:
             ErrorString = "Failed creating new fluid audio driver.";
             break;
 
-        case FSMIDIErr_NewFluidSequencer:
+        case FSynthErr_NewFluidSequencer:
             ErrorString = "Failed creating new fluid sequencer.";
             break;
 
-        case FSMIDIErr_RegisterFluidSynth:
+        case FSynthErr_RegisterFluidSynth:
             ErrorString = "Failed registering fluid synth with sequencer.";
             break;
 
-        case FSMIDIErr_BadSoundFont:
+        case FSynthErr_BadSoundFont:
             ErrorString = "Invalid or non-existent SoundFont.";
             break;
 
-        case FSMIDIErr_NewFluidEvent:
+        case FSynthErr_NewFluidEvent:
             ErrorString = "Failed creating new fluid event.";
             break;
 
-        case FSMIDIErr_PlayThread:
+        case FSynthErr_PlayThread:
             ErrorString = "Failed creating playback thread.";
             break;
 
@@ -227,17 +227,17 @@ static void * threadProc(void * parm)
     return NULL;
 }
 
-int FluidSynthMIDIDrv_MIDI_Init(midifuncs *funcs)
+int FluidSynthDrv_MIDI_Init(midifuncs *funcs)
 {
     int result;
     
-    FluidSynthMIDIDrv_MIDI_Shutdown();
+    FluidSynthDrv_MIDI_Shutdown();
     memset(funcs, 0, sizeof(midifuncs));
 
     fluidsettings = new_fluid_settings();
     if (!fluidsettings) {
-        ErrorCode = FSMIDIErr_NewFluidSettings;
-        return FSMIDIErr_Error;
+        ErrorCode = FSynthErr_NewFluidSettings;
+        return FSynthErr_Error;
     }
 
     //fluid_settings_setint(fluidsettings, "synth.polyphony", 1024);
@@ -246,44 +246,44 @@ int FluidSynthMIDIDrv_MIDI_Init(midifuncs *funcs)
         
     fluidsynth = new_fluid_synth(fluidsettings);
     if (!fluidsettings) {
-        FluidSynthMIDIDrv_MIDI_Shutdown();
-        ErrorCode = FSMIDIErr_NewFluidSynth;
-        return FSMIDIErr_Error;
+        FluidSynthDrv_MIDI_Shutdown();
+        ErrorCode = FSynthErr_NewFluidSynth;
+        return FSynthErr_Error;
     }
     
     fluidaudiodriver = new_fluid_audio_driver(fluidsettings, fluidsynth);
     if (!fluidsettings) {
-        FluidSynthMIDIDrv_MIDI_Shutdown();
-        ErrorCode = FSMIDIErr_NewFluidAudioDriver;
-        return FSMIDIErr_Error;
+        FluidSynthDrv_MIDI_Shutdown();
+        ErrorCode = FSynthErr_NewFluidAudioDriver;
+        return FSynthErr_Error;
     }
     
     fluidsequencer = new_fluid_sequencer();
     if (!fluidsettings) {
-        FluidSynthMIDIDrv_MIDI_Shutdown();
-        ErrorCode = FSMIDIErr_NewFluidSequencer;
-        return FSMIDIErr_Error;
+        FluidSynthDrv_MIDI_Shutdown();
+        ErrorCode = FSynthErr_NewFluidSequencer;
+        return FSynthErr_Error;
     }
 
     fluidevent = new_fluid_event();
     if (!fluidevent) {
-        FluidSynthMIDIDrv_MIDI_Shutdown();
-        ErrorCode = FSMIDIErr_NewFluidEvent;
-        return FSMIDIErr_Error;
+        FluidSynthDrv_MIDI_Shutdown();
+        ErrorCode = FSynthErr_NewFluidEvent;
+        return FSynthErr_Error;
     }
 
     synthseqid = fluid_sequencer_register_fluidsynth(fluidsequencer, fluidsynth);
     if (synthseqid < 0) {
-        FluidSynthMIDIDrv_MIDI_Shutdown();
-        ErrorCode = FSMIDIErr_RegisterFluidSynth;
-        return FSMIDIErr_Error;
+        FluidSynthDrv_MIDI_Shutdown();
+        ErrorCode = FSynthErr_RegisterFluidSynth;
+        return FSynthErr_Error;
     }
 
     result = fluid_synth_sfload(fluidsynth, soundFontName, 1);
     if (result < 0) {
-        FluidSynthMIDIDrv_MIDI_Shutdown();
-        ErrorCode = FSMIDIErr_BadSoundFont;
-        return FSMIDIErr_Error;
+        FluidSynthDrv_MIDI_Shutdown();
+        ErrorCode = FSynthErr_BadSoundFont;
+        return FSynthErr_Error;
     }
 
     fluid_event_set_source(fluidevent, -1);
@@ -297,10 +297,10 @@ int FluidSynthMIDIDrv_MIDI_Init(midifuncs *funcs)
     funcs->ChannelAftertouch = Func_ChannelAftertouch;
     funcs->PitchBend = Func_PitchBend;
     
-    return FSMIDIErr_Ok;
+    return FSynthErr_Ok;
 }
 
-void FluidSynthMIDIDrv_MIDI_Shutdown(void)
+void FluidSynthDrv_MIDI_Shutdown(void)
 {
     if (fluidevent) {
         delete_fluid_event(fluidevent);
@@ -325,16 +325,16 @@ void FluidSynthMIDIDrv_MIDI_Shutdown(void)
     fluidsettings = 0;
 }
 
-int FluidSynthMIDIDrv_MIDI_StartPlayback(void (*service)(void))
+int FluidSynthDrv_MIDI_StartPlayback(void (*service)(void))
 {
-    FluidSynthMIDIDrv_MIDI_HaltPlayback();
+    FluidSynthDrv_MIDI_HaltPlayback();
 
     threadService = service;
     threadQuit = 0;
 
     if (pthread_create(&thread, NULL, threadProc, NULL)) {
         fprintf(stderr, "fluidsynth pthread_create returned error\n");
-        return FSMIDIErr_PlayThread;
+        return FSynthErr_PlayThread;
     }
 
     threadRunning = 1;
@@ -342,7 +342,7 @@ int FluidSynthMIDIDrv_MIDI_StartPlayback(void (*service)(void))
     return 0;
 }
 
-void FluidSynthMIDIDrv_MIDI_HaltPlayback(void)
+void FluidSynthDrv_MIDI_HaltPlayback(void)
 {
     void * ret;
     
@@ -359,7 +359,7 @@ void FluidSynthMIDIDrv_MIDI_HaltPlayback(void)
     threadRunning = 0;
 }
 
-void FluidSynthMIDIDrv_MIDI_SetTempo(int tempo, int division)
+void FluidSynthDrv_MIDI_SetTempo(int tempo, int division)
 {
     double tps;
 
@@ -369,11 +369,11 @@ void FluidSynthMIDIDrv_MIDI_SetTempo(int tempo, int division)
     threadQueueTicks = (int) ceil(tps / (double) THREAD_QUEUE_INTERVAL);
 }
 
-void FluidSynthMIDIDrv_MIDI_Lock(void)
+void FluidSynthDrv_MIDI_Lock(void)
 {
 }
 
-void FluidSynthMIDIDrv_MIDI_Unlock(void)
+void FluidSynthDrv_MIDI_Unlock(void)
 {
 }
 

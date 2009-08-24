@@ -152,21 +152,27 @@ int SDLDrv_PCM_Init(int * mixrate, int * numchannels, int * samplebits, void * i
     Uint32 inited;
     Uint32 err = 0;
     SDL_AudioSpec spec, actual;
-    char drivername[256];
+    char drivername[256] = "(error)";
+
+    memset(&spec, 0, sizeof(spec));
+    memset(&actual, 0, sizeof(actual));
 
     if (Initialised) {
         SDLDrv_PCM_Shutdown();
     }
 
     inited = SDL_WasInit(SDL_INIT_EVERYTHING);
+    fprintf(stderr, "inited = %x\n", inited);
 
     if (inited == 0) {
         // nothing was initialised
         err = SDL_Init(SDL_INIT_AUDIO);
         StartedSDLInit |= 0x80000000 + SDL_INIT_AUDIO;
+        fprintf(stderr, "called SDL_Init\n");
     } else if (!(inited & SDL_INIT_AUDIO)) {
         err = SDL_InitSubSystem(SDL_INIT_AUDIO);
         StartedSDLInit |= SDL_INIT_AUDIO;
+        fprintf(stderr, "called SDL_InitSubSystem\n");
     }
 
     if (err < 0) {

@@ -40,7 +40,8 @@ typedef enum
    ASS_CoreAudio,
    ASS_DirectSound,
    ASS_WinMM,
-   ASS_FluidSynthMIDI,
+   ASS_FluidSynth,
+   ASS_ALSA,
    ASS_NumSoundCards,
 	ASS_AutoDetect = -2
    } soundcardnames;

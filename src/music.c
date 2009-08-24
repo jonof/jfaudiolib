@@ -129,8 +129,10 @@ int MUSIC_Init
 		SoundCard = ASS_CoreAudio;
 #elif defined WIN32
 		SoundCard = ASS_WinMM;
+#elif defined HAVE_ALSA
+        SoundCard = ASS_ALSA;
 #elif defined HAVE_FLUIDSYNTH
-		SoundCard = ASS_FluidSynthMIDI;
+		SoundCard = ASS_FluidSynth;
 #else
 		SoundCard = ASS_NoSound;
 #endif

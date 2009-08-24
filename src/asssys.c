@@ -24,6 +24,7 @@
 # define WIN32_LEAN_AND_MEAN
 # include <windows.h>
 #else
+# include <stddef.h>
 # include <sys/select.h>
 #endif
 

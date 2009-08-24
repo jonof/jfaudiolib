@@ -18,14 +18,14 @@
  
  */
 
-int FluidSynthDrv_GetError(void);
-const char *FluidSynthDrv_ErrorString( int ErrorNumber );
+int ALSADrv_GetError(void);
+const char *ALSADrv_ErrorString( int ErrorNumber );
 
-int  FluidSynthDrv_MIDI_Init(midifuncs *);
-void FluidSynthDrv_MIDI_Shutdown(void);
-int  FluidSynthDrv_MIDI_StartPlayback(void (*service)(void));
-void FluidSynthDrv_MIDI_HaltPlayback(void);
-unsigned int FluidSynthDrv_MIDI_GetTick(void);
-void FluidSynthDrv_MIDI_SetTempo(int tempo, int division);
-void FluidSynthDrv_MIDI_Lock(void);
-void FluidSynthDrv_MIDI_Unlock(void);
+int  ALSADrv_MIDI_Init(midifuncs *);
+void ALSADrv_MIDI_Shutdown(void);
+int  ALSADrv_MIDI_StartPlayback(void (*service)(void));
+void ALSADrv_MIDI_HaltPlayback(void);
+unsigned int ALSADrv_MIDI_GetTick(void);
+void ALSADrv_MIDI_SetTempo(int tempo, int division);
+void ALSADrv_MIDI_Lock(void);
+void ALSADrv_MIDI_Unlock(void);

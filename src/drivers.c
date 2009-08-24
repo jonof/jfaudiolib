@@ -44,6 +44,10 @@
 # include "driver_fluidsynth.h"
 #endif
 
+#ifdef HAVE_ALSA
+# include "driver_alsa.h"
+#endif
+
 int ASS_PCMSoundDriver = -1;
 int ASS_CDSoundDriver = -1;
 int ASS_MIDISoundDriver = -1;
@@ -197,20 +201,41 @@ static struct {
     // FluidSynth MIDI synthesiser
     #ifdef HAVE_FLUIDSYNTH
     {
-        FluidSynthMIDIDrv_GetError,
-        FluidSynthMIDIDrv_ErrorString,
+        FluidSynthDrv_GetError,
+        FluidSynthDrv_ErrorString,
 
         UNSUPPORTED_PCM,
         UNSUPPORTED_CD,
 
-        FluidSynthMIDIDrv_MIDI_Init,
-        FluidSynthMIDIDrv_MIDI_Shutdown,
-        FluidSynthMIDIDrv_MIDI_StartPlayback,
-        FluidSynthMIDIDrv_MIDI_HaltPlayback,
-        FluidSynthMIDIDrv_MIDI_SetTempo,
-        FluidSynthMIDIDrv_MIDI_Lock,
-        FluidSynthMIDIDrv_MIDI_Unlock,
-    }
+        FluidSynthDrv_MIDI_Init,
+        FluidSynthDrv_MIDI_Shutdown,
+        FluidSynthDrv_MIDI_StartPlayback,
+        FluidSynthDrv_MIDI_HaltPlayback,
+        FluidSynthDrv_MIDI_SetTempo,
+        FluidSynthDrv_MIDI_Lock,
+        FluidSynthDrv_MIDI_Unlock,
+    },
+    #else
+        UNSUPPORTED_COMPLETELY
+    #endif
+
+    // ALSA MIDI synthesiser
+    #ifdef HAVE_ALSA
+    {
+        ALSADrv_GetError,
+        ALSADrv_ErrorString,
+
+        UNSUPPORTED_PCM,
+        UNSUPPORTED_CD,
+
+        ALSADrv_MIDI_Init,
+        ALSADrv_MIDI_Shutdown,
+        ALSADrv_MIDI_StartPlayback,
+        ALSADrv_MIDI_HaltPlayback,
+        ALSADrv_MIDI_SetTempo,
+        ALSADrv_MIDI_Lock,
+        ALSADrv_MIDI_Unlock,
+    },
     #else
         UNSUPPORTED_COMPLETELY
     #endif
