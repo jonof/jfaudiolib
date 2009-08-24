@@ -298,6 +298,8 @@ int ALSADrv_MIDI_Init(midifuncs *funcs)
 
 void ALSADrv_MIDI_Shutdown(void)
 {
+    ALSADrv_MIDI_HaltPlayback();
+    
     if (seq_queue >= 0) {
         snd_seq_free_queue(seq, seq_queue);
     }
@@ -378,7 +380,7 @@ void ALSADrv_MIDI_HaltPlayback(void)
         fprintf(stderr, "ALSA could not drain output: err %d\n", result);
     }
 
-    queueRunning = 0;
+    //queueRunning = 0;
     threadRunning = 0;
 }
 
