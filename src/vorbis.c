@@ -51,7 +51,6 @@ typedef struct {
    OggVorbis_File vf;
    
    char block[0x8000];
-   int blockused;
    int lastbitstream;
 } vorbis_data;
 
@@ -144,17 +143,6 @@ static playbackstatus MV_GetNextVorbisBlock
 
    voice->Playing = TRUE;
    
-   if ( voice->BlockLength > 0 )
-      {
-      voice->position    -= voice->length;
-      voice->sound       += voice->length >> 16;
-      voice->length       = min( voice->BlockLength, 0x8000 );
-      voice->BlockLength -= voice->length;
-      voice->length     <<= 16;
-
-      return( KeepPlaying );
-      }
-
    bytesread = 0;
    do {
       bytes = ov_read(&vd->vf, vd->block + bytesread, sizeof(vd->block) - bytesread, 0, 2, 1, &bitstream);
@@ -205,16 +193,13 @@ static playbackstatus MV_GetNextVorbisBlock
       MV_SetVoiceMixMode( voice );
    }
    vd->lastbitstream = bitstream;
-
-   vd->blockused = bytesread;
+   
    bytesread /= 2 * voice->channels;
    
    voice->position    = 0;
    voice->sound       = vd->block;
-   voice->BlockLength = bytesread;
-   voice->length      = min( voice->BlockLength, 0x8000 );
-   voice->BlockLength -= voice->length;
-   voice->length     <<= 16;
+   voice->BlockLength = 0;
+   voice->length      = bytesread << 16;
    
    return( KeepPlaying );
 }
@@ -345,7 +330,6 @@ int MV_PlayLoopedVorbis
    vd->ptr = ptr;
    vd->pos = 0;
    vd->length = ptrlength;
-   vd->blockused = 0;
    vd->lastbitstream = -1;
    
    status = ov_open_callbacks((void *) vd, &vd->vf, 0, 0, vorbis_callbacks);
@@ -403,6 +387,8 @@ int MV_PlayLoopedVorbis
    
    voice->SamplingRate = vi->rate;
    voice->RateScale    = ( voice->SamplingRate * voice->PitchScale ) / MV_MixRate;
+   voice->FixedPointBufferSize = ( voice->RateScale * MixBufferSize ) -
+      voice->RateScale;
    MV_SetVoiceMixMode( voice );
 
    MV_SetVoiceVolume( voice, vol, left, right );
