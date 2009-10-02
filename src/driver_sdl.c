@@ -22,8 +22,11 @@
  * libSDL output driver for MultiVoc
  */
 
-
-#include <SDL.h>
+#ifdef __APPLE__
+# include <SDL/SDL.h>
+#else
+# include <SDL.h>
+#endif
 #include "driver_sdl.h"
 
 enum {

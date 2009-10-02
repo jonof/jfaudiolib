@@ -3,7 +3,7 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 42;
+	objectVersion = 44;
 	objects = {
 
 /* Begin PBXBuildFile section */
@@ -23,6 +23,8 @@
 		AB2E9E751011E66100DD2F1F /* music.h in Headers */ = {isa = PBXBuildFile; fileRef = AB2E9E721011E66100DD2F1F /* music.h */; };
 		AB2E9E761011E66100DD2F1F /* sndcards.h in Headers */ = {isa = PBXBuildFile; fileRef = AB2E9E731011E66100DD2F1F /* sndcards.h */; };
 		AB2EA17710121AA900DD2F1F /* mix.c in Sources */ = {isa = PBXBuildFile; fileRef = AB2EA17610121AA900DD2F1F /* mix.c */; };
+		AB32F97210762A7900A9BAFF /* asssys.c in Sources */ = {isa = PBXBuildFile; fileRef = AB32F97010762A7900A9BAFF /* asssys.c */; };
+		AB32F97310762A7900A9BAFF /* asssys.h in Headers */ = {isa = PBXBuildFile; fileRef = AB32F97110762A7900A9BAFF /* asssys.h */; };
 		AB8C5612101A077700B42306 /* mixst.c in Sources */ = {isa = PBXBuildFile; fileRef = AB8C5611101A077700B42306 /* mixst.c */; };
 		AB8C5828101B6B7100B42306 /* ogg.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = AB8C5826101B6B7100B42306 /* ogg.framework */; };
 		AB8C5829101B6B7100B42306 /* vorbis.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = AB8C5827101B6B7100B42306 /* vorbis.framework */; };
@@ -57,6 +59,8 @@
 		AB2E9E721011E66100DD2F1F /* music.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = music.h; sourceTree = "<group>"; };
 		AB2E9E731011E66100DD2F1F /* sndcards.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = sndcards.h; sourceTree = "<group>"; };
 		AB2EA17610121AA900DD2F1F /* mix.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = mix.c; sourceTree = "<group>"; };
+		AB32F97010762A7900A9BAFF /* asssys.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = asssys.c; sourceTree = "<group>"; };
+		AB32F97110762A7900A9BAFF /* asssys.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = asssys.h; sourceTree = "<group>"; };
 		AB8C5611101A077700B42306 /* mixst.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = mixst.c; sourceTree = "<group>"; };
 		AB8C5826101B6B7100B42306 /* ogg.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = ogg.framework; path = "third-party/ogg.framework"; sourceTree = "<group>"; };
 		AB8C5827101B6B7100B42306 /* vorbis.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = vorbis.framework; path = "third-party/vorbis.framework"; sourceTree = "<group>"; };
@@ -110,6 +114,8 @@
 			children = (
 				ABFBB51E102EBD4100D48B58 /* _midi.h */,
 				AB2E9E4D1011E65900DD2F1F /* _multivc.h */,
+				AB32F97010762A7900A9BAFF /* asssys.c */,
+				AB32F97110762A7900A9BAFF /* asssys.h */,
 				ABBD3F17101FFBD900F32F37 /* cd.c */,
 				AB2E9E521011E65900DD2F1F /* driver_nosound.c */,
 				AB2E9E531011E65900DD2F1F /* driver_nosound.h */,
@@ -178,6 +184,7 @@
 				ABFBB523102EBD4100D48B58 /* _midi.h in Headers */,
 				ABFBB525102EBD4100D48B58 /* midi.h in Headers */,
 				ABFBB526102EBD4100D48B58 /* midifuncs.h in Headers */,
+				AB32F97310762A7900A9BAFF /* asssys.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -207,6 +214,7 @@
 		AB2E9E321011E60300DD2F1F /* Project object */ = {
 			isa = PBXProject;
 			buildConfigurationList = AB2E9E331011E60300DD2F1F /* Build configuration list for PBXProject "jfaudiolib" */;
+			compatibilityVersion = "Xcode 3.0";
 			hasScannedForEncodings = 0;
 			mainGroup = AB2E9E301011E60300DD2F1F;
 			productRefGroup = AB2E9E431011E61700DD2F1F /* Products */;
@@ -235,6 +243,7 @@
 				ABBD3FD9102081C500F32F37 /* driver_sdl.c in Sources */,
 				ABFBB524102EBD4100D48B58 /* midi.c in Sources */,
 				ABFBB527102EBD4100D48B58 /* music.c in Sources */,
+				AB32F97210762A7900A9BAFF /* asssys.c in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -251,6 +260,7 @@
 				COPY_PHASE_STRIP = NO;
 				FRAMEWORK_SEARCH_PATHS = "third-party";
 				GCC_PREPROCESSOR_DEFINITIONS = (
+					HAVE_VORBIS,
 					HAVE_SDL,
 					__MACOSX__,
 				);
@@ -273,6 +283,7 @@
 				COPY_PHASE_STRIP = YES;
 				FRAMEWORK_SEARCH_PATHS = "third-party";
 				GCC_PREPROCESSOR_DEFINITIONS = (
+					HAVE_VORBIS,
 					HAVE_SDL,
 					__MACOSX__,
 				);

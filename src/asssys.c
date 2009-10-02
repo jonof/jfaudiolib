@@ -24,8 +24,9 @@
 # define WIN32_LEAN_AND_MEAN
 # include <windows.h>
 #else
-# include <stddef.h>
-# include <sys/select.h>
+# include <sys/types.h>
+# include <sys/time.h>
+# include <unistd.h>
 #endif
 
 void ASS_Sleep(int msec)
