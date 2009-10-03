@@ -311,7 +311,7 @@ static void MV_Mix
             return;
             }
 
-         if ( length > (MV_Bits / 2 - 1) )
+         if ( length > (MV_Bits / 8 - 1) )
             {
             // Get the position of the last sample in the buffer
             FixedPointBufferSize = voice->RateScale * ( length - voice->channels );
