@@ -138,8 +138,8 @@ static playbackstatus MV_GetNextVorbisBlock
 
 {
    vorbis_data * vd = (vorbis_data *) voice->extra;
-   int bytes, bytesread;
-   int bitstream, err;
+   int bytes = 0, bytesread = 0;
+   int bitstream = 0, err = 0;
 
    voice->Playing = TRUE;
    
@@ -158,7 +158,7 @@ static playbackstatus MV_GetNextVorbisBlock
             }
          } else {
            break;
-	 }
+         }
       } else if (bytes < 0) {
          fprintf(stderr, "MV_GetNextVorbisBlock ov_read: err %d\n", bytes);
          voice->Playing = FALSE;
@@ -190,6 +190,8 @@ static playbackstatus MV_GetNextVorbisBlock
       voice->channels = vi->channels;
       voice->SamplingRate = vi->rate;
       voice->RateScale    = ( voice->SamplingRate * voice->PitchScale ) / MV_MixRate;
+      voice->FixedPointBufferSize = ( voice->RateScale * MixBufferSize ) -
+         voice->RateScale;
       MV_SetVoiceMixMode( voice );
    }
    vd->lastbitstream = bitstream;
