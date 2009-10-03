@@ -51,7 +51,7 @@
 			isa = PBXContainerItemProxy;
 			containerPortal = AB2E9E321011E60300DD2F1F /* Project object */;
 			proxyType = 1;
-			remoteGlobalIDString = AB2E9E411011E61600DD2F1F /* jfaudiolib */;
+			remoteGlobalIDString = AB2E9E411011E61600DD2F1F;
 			remoteInfo = jfaudiolib;
 		};
 /* End PBXContainerItemProxy section */
