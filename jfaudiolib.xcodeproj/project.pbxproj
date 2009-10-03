@@ -25,6 +25,11 @@
 		AB2EA17710121AA900DD2F1F /* mix.c in Sources */ = {isa = PBXBuildFile; fileRef = AB2EA17610121AA900DD2F1F /* mix.c */; };
 		AB32F97210762A7900A9BAFF /* asssys.c in Sources */ = {isa = PBXBuildFile; fileRef = AB32F97010762A7900A9BAFF /* asssys.c */; };
 		AB32F97310762A7900A9BAFF /* asssys.h in Headers */ = {isa = PBXBuildFile; fileRef = AB32F97110762A7900A9BAFF /* asssys.h */; };
+		AB32FA87107710D100A9BAFF /* ogg.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = AB8C5826101B6B7100B42306 /* ogg.framework */; };
+		AB32FA8B107710D400A9BAFF /* vorbis.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = AB8C5827101B6B7100B42306 /* vorbis.framework */; };
+		AB32FA8C107710E500A9BAFF /* SDL.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = ABBD3FDB102081FA00F32F37 /* SDL.framework */; };
+		AB32FA8F1077111D00A9BAFF /* test.c in Sources */ = {isa = PBXBuildFile; fileRef = AB32FA8E1077111D00A9BAFF /* test.c */; };
+		AB32FA9A107712B700A9BAFF /* libjfaudiolib.a in Frameworks */ = {isa = PBXBuildFile; fileRef = AB2E9E421011E61700DD2F1F /* libjfaudiolib.a */; };
 		AB8C5612101A077700B42306 /* mixst.c in Sources */ = {isa = PBXBuildFile; fileRef = AB8C5611101A077700B42306 /* mixst.c */; };
 		AB8C5828101B6B7100B42306 /* ogg.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = AB8C5826101B6B7100B42306 /* ogg.framework */; };
 		AB8C5829101B6B7100B42306 /* vorbis.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = AB8C5827101B6B7100B42306 /* vorbis.framework */; };
@@ -40,6 +45,16 @@
 		ABFBB526102EBD4100D48B58 /* midifuncs.h in Headers */ = {isa = PBXBuildFile; fileRef = ABFBB521102EBD4100D48B58 /* midifuncs.h */; };
 		ABFBB527102EBD4100D48B58 /* music.c in Sources */ = {isa = PBXBuildFile; fileRef = ABFBB522102EBD4100D48B58 /* music.c */; };
 /* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		AB32FA911077122E00A9BAFF /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = AB2E9E321011E60300DD2F1F /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = AB2E9E411011E61600DD2F1F /* jfaudiolib */;
+			remoteInfo = jfaudiolib;
+		};
+/* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
 		AB2E9E421011E61700DD2F1F /* libjfaudiolib.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libjfaudiolib.a; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -61,6 +76,8 @@
 		AB2EA17610121AA900DD2F1F /* mix.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = mix.c; sourceTree = "<group>"; };
 		AB32F97010762A7900A9BAFF /* asssys.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = asssys.c; sourceTree = "<group>"; };
 		AB32F97110762A7900A9BAFF /* asssys.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = asssys.h; sourceTree = "<group>"; };
+		AB32FA7F1077102D00A9BAFF /* test */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = test; sourceTree = BUILT_PRODUCTS_DIR; };
+		AB32FA8E1077111D00A9BAFF /* test.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = test.c; sourceTree = "<group>"; };
 		AB8C5611101A077700B42306 /* mixst.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = mixst.c; sourceTree = "<group>"; };
 		AB8C5826101B6B7100B42306 /* ogg.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = ogg.framework; path = "third-party/ogg.framework"; sourceTree = "<group>"; };
 		AB8C5827101B6B7100B42306 /* vorbis.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = vorbis.framework; path = "third-party/vorbis.framework"; sourceTree = "<group>"; };
@@ -88,6 +105,17 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		AB32FA7D1077102D00A9BAFF /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				AB32FA9A107712B700A9BAFF /* libjfaudiolib.a in Frameworks */,
+				AB32FA87107710D100A9BAFF /* ogg.framework in Frameworks */,
+				AB32FA8B107710D400A9BAFF /* vorbis.framework in Frameworks */,
+				AB32FA8C107710E500A9BAFF /* SDL.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
@@ -105,6 +133,7 @@
 			isa = PBXGroup;
 			children = (
 				AB2E9E421011E61700DD2F1F /* libjfaudiolib.a */,
+				AB32FA7F1077102D00A9BAFF /* test */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -137,6 +166,7 @@
 				AB2E9E5D1011E65900DD2F1F /* pitch.c */,
 				AB2E9E5E1011E65900DD2F1F /* pitch.h */,
 				AB8C5867101B6D7500B42306 /* vorbis.c */,
+				AB32FA8E1077111D00A9BAFF /* test.c */,
 			);
 			path = src;
 			sourceTree = "<group>";
@@ -208,6 +238,23 @@
 			productReference = AB2E9E421011E61700DD2F1F /* libjfaudiolib.a */;
 			productType = "com.apple.product-type.library.static";
 		};
+		AB32FA7E1077102D00A9BAFF /* test */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = AB32FA861077107900A9BAFF /* Build configuration list for PBXNativeTarget "test" */;
+			buildPhases = (
+				AB32FA7C1077102D00A9BAFF /* Sources */,
+				AB32FA7D1077102D00A9BAFF /* Frameworks */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				AB32FA921077122E00A9BAFF /* PBXTargetDependency */,
+			);
+			name = test;
+			productName = test;
+			productReference = AB32FA7F1077102D00A9BAFF /* test */;
+			productType = "com.apple.product-type.tool";
+		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
@@ -222,6 +269,7 @@
 			projectRoot = "";
 			targets = (
 				AB2E9E411011E61600DD2F1F /* jfaudiolib */,
+				AB32FA7E1077102D00A9BAFF /* test */,
 			);
 		};
 /* End PBXProject section */
@@ -247,7 +295,23 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		AB32FA7C1077102D00A9BAFF /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				AB32FA8F1077111D00A9BAFF /* test.c in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		AB32FA921077122E00A9BAFF /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = AB2E9E411011E61600DD2F1F /* jfaudiolib */;
+			targetProxy = AB32FA911077122E00A9BAFF /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
 
 /* Begin XCBuildConfiguration section */
 		AB2E9E341011E60300DD2F1F /* Debug */ = {
@@ -259,6 +323,7 @@
 				);
 				COPY_PHASE_STRIP = NO;
 				FRAMEWORK_SEARCH_PATHS = "third-party";
+				GCC_OPTIMIZATION_LEVEL = 0;
 				GCC_PREPROCESSOR_DEFINITIONS = (
 					HAVE_VORBIS,
 					HAVE_SDL,
@@ -300,7 +365,6 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				COPY_PHASE_STRIP = NO;
-				FRAMEWORK_SEARCH_PATHS = "$(inherited)";
 				GCC_DYNAMIC_NO_PIC = NO;
 				GCC_ENABLE_FIX_AND_CONTINUE = YES;
 				GCC_GENERATE_DEBUGGING_SYMBOLS = YES;
@@ -324,6 +388,35 @@
 			};
 			name = Release;
 		};
+		AB32FA841077102F00A9BAFF /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				COPY_PHASE_STRIP = NO;
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(inherited)",
+					"\"$(SRCROOT)/third-party\"",
+				);
+				PREBINDING = NO;
+				PRODUCT_NAME = test;
+				ZERO_LINK = YES;
+			};
+			name = Debug;
+		};
+		AB32FA851077102F00A9BAFF /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				COPY_PHASE_STRIP = YES;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(inherited)",
+					"\"$(SRCROOT)/third-party\"",
+				);
+				PREBINDING = NO;
+				PRODUCT_NAME = test;
+				ZERO_LINK = NO;
+			};
+			name = Release;
+		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
@@ -341,6 +434,15 @@
 			buildConfigurations = (
 				AB2E9E451011E61900DD2F1F /* Debug */,
 				AB2E9E461011E61900DD2F1F /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		AB32FA861077107900A9BAFF /* Build configuration list for PBXNativeTarget "test" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				AB32FA841077102F00A9BAFF /* Debug */,
+				AB32FA851077102F00A9BAFF /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;

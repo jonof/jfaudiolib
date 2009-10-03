@@ -36,8 +36,8 @@ void ASS_Sleep(int msec)
 #else
 	struct timeval tv;
 
-	tv.tv_sec = 0;
-	tv.tv_usec = msec * 1000;
+	tv.tv_sec = msec / 1000;
+	tv.tv_usec = msec % 1000;
 	select(0, NULL, NULL, NULL, &tv);
 #endif
 }
