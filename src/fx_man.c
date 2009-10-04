@@ -111,7 +111,7 @@ int FX_Init
    int numvoices,
    int * numchannels,
    int * samplebits,
-   unsigned * mixrate,
+   int * mixrate,
    void * initdata
    )
 
