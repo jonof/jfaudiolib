@@ -56,7 +56,7 @@ int CD_Init(int SoundCard)
 #if 0 //defined __APPLE__
 		SoundCard = ASS_CoreAudio;
 #elif defined WIN32
-		SoundCard = ASS_DirectSound;
+		SoundCard = ASS_WinMM;
 #elif defined HAVE_SDL
 		SoundCard = ASS_SDL;
 #else
@@ -69,7 +69,7 @@ int CD_Init(int SoundCard)
 		return CD_Error;
 	}
 	
-	if (SoundDriver_IsPCMSupported(SoundCard) == 0) {
+	if (SoundDriver_IsCDSupported(SoundCard) == 0) {
 		// unsupported cards fall back to no sound
 		SoundCard = ASS_NoSound;
 	}
