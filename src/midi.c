@@ -856,7 +856,7 @@ int MIDI_AllNotesOff
    for( channel = 0; channel < NUM_MIDI_CHANNELS; channel++ )
       {
       _MIDI_SendControlChange( channel, MIDI_HOLD1, 0 );
-      _MIDI_SendControlChange( channel, MIDI_SUSTENUTO, 0 );   // TURRICAN's recommendation
+      _MIDI_SendControlChange( channel, MIDI_SOSTENUTO, 0 );   // TURRICAN's recommendation
       _MIDI_SendControlChange( channel, MIDI_ALL_NOTES_OFF, 0 );
       _MIDI_SendControlChange( channel, MIDI_ALL_SOUNDS_OFF, 0 );
       }
