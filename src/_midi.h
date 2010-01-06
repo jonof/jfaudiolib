@@ -34,9 +34,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #define RELATIVE_BEAT( measure, beat, tick ) \
    ( ( tick ) + ( ( beat ) << 9 ) + ( ( measure ) << 16 ) )
 
-//Bobby Prince thinks this may be 100
-//#define GENMIDI_DefaultVolume 100
-#define GENMIDI_DefaultVolume 90
+#define GENMIDI_DefaultVolume 100
 
 #define MAX_FORMAT            1
 
