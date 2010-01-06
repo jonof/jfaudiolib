@@ -481,6 +481,9 @@ static MIDIHDR * new_header(int length, unsigned char ** data)
         datalen = 12;
     } else {
         datalen = 12 + length;
+        if ((datalen & 3) > 0) {
+            datalen += 4 - (datalen & 3);
+        }
     }
 
     if (length <= 3 && !LL_ListEmpty(&spareMidiBuffers, next, prev)) {
@@ -635,6 +638,16 @@ static void Func_PitchBend( int channel, int lsb, int msb )
     sequence_event(hdr);
 }
 
+static void Func_SysEx( unsigned char * data, int length )
+{
+    MIDIHDR * hdr;
+    unsigned char * wdata;
+    
+    hdr = new_header(length, &wdata);
+    memcpy(wdata, data, length);
+    sequence_event(hdr);
+}
+
 static void CALLBACK midiCallbackProc(HMIDIOUT handle, UINT uMsg, DWORD dwInstance, DWORD dwParam1, DWORD dwParam2)
 {
 	switch (uMsg) {
@@ -697,6 +710,7 @@ int WinMMDrv_MIDI_Init(midifuncs * funcs)
     funcs->ProgramChange = Func_ProgramChange;
     funcs->ChannelAftertouch = Func_ChannelAftertouch;
     funcs->PitchBend = Func_PitchBend;
+    funcs->SysEx = Func_SysEx;
 
     midiInstalled = TRUE;
     

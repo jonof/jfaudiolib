@@ -282,6 +282,12 @@ static void _MIDI_SysEx
    int length;
 
    length = _MIDI_ReadDelta( Track );
+   
+   if (_MIDI_Funcs->SysEx)
+      {
+      _MIDI_Funcs->SysEx(Track->pos, length);
+      }
+   
    Track->pos += length;
    }
 
