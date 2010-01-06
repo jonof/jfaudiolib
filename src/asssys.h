@@ -21,6 +21,6 @@
 #ifndef __ASSSYS_H
 #define __ASSSYS_H
 
-void ASS_Delay(int msec);
+void ASS_Sleep(int msec);
 
 #endif

@@ -33,7 +33,7 @@ typedef struct
    void ( *LoadPatch )( int number );
    void ( *SetVolume )( int volume );
    int  ( *GetVolume )( void );
-   void ( *SysEx )( unsigned char * data, int length );
+   void ( *SysEx )( const unsigned char * data, int length );
    } midifuncs;
 
 #endif

@@ -123,6 +123,12 @@ int MIDI_Tempo = 120;
 
 char MIDI_PatchMap[ 128 ];
 
+static const char _GSResetSysex[] =
+    {
+    0xF0, 0x41, 0x10, 0x42, 0x12, 0x40,
+    0x00, 0x7F, 0x00, 0x41, 0xF7
+    };
+
 
 /*---------------------------------------------------------------------
    Function: _MIDI_ReadNumber
@@ -283,11 +289,20 @@ static void _MIDI_SysEx
 
    length = _MIDI_ReadDelta( Track );
    
-   if (_MIDI_Funcs->SysEx)
+   if (_MIDI_Funcs->SysEx && _MIDI_SongLoaded)
       {
-      _MIDI_Funcs->SysEx(Track->pos, length);
+      unsigned char msg[ length + 1 ];
+      
+      msg[0] = MIDI_SYSEX;
+      memcpy(&msg[1], Track->pos, length);
+
+      // only send a sysex if it's not a GS reset
+      if (memcmp(msg, _GSResetSysex, sizeof(_GSResetSysex)))
+         {
+         _MIDI_Funcs->SysEx(msg, length + 1);
+         }
       }
-   
+
    Track->pos += length;
    }
 
@@ -1018,7 +1033,7 @@ int MIDI_Reset
 
    MIDI_AllNotesOff();
 
-   ASS_Sleep(1000 / 20);
+   ASS_Sleep(50);
    
    SoundDriver_MIDI_Lock();
 
@@ -1038,6 +1053,7 @@ int MIDI_Reset
       _MIDI_SendProgramChange( channel, 0 ); // end TURRICAN's recommendation
       }
 
+   _MIDI_SendGSReset();
    _MIDI_SendChannelVolumes();
 
    SoundDriver_MIDI_Unlock();
@@ -2184,5 +2200,21 @@ void MIDI_LoadTimbres
 
    _MIDI_ResetTracks();
    }
+
+
+/*---------------------------------------------------------------------
+   Function: _MIDI_SendGSReset
+
+   Sends a GS Reset sysex message.
+---------------------------------------------------------------------*/
+   
+static void _MIDI_SendGSReset(void)
+{
+    if (_MIDI_Funcs->SysEx)
+       {
+       _MIDI_Funcs->SysEx(_GSResetSysex, sizeof(_GSResetSysex));
+       ASS_Sleep(50);
+       }
+}
 
 // vim:ts=3:sw=3:expandtab:

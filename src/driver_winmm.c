@@ -638,7 +638,7 @@ static void Func_PitchBend( int channel, int lsb, int msb )
     sequence_event(hdr);
 }
 
-static void Func_SysEx( unsigned char * data, int length )
+static void Func_SysEx( const unsigned char * data, int length )
 {
     MIDIHDR * hdr;
     unsigned char * wdata;
