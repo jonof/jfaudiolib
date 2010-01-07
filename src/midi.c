@@ -123,7 +123,7 @@ int MIDI_Tempo = 120;
 
 char MIDI_PatchMap[ 128 ];
 
-static const char _GSResetSysex[] =
+static const unsigned char _GSResetSysex[] =
     {
     0xF0, 0x41, 0x10, 0x42, 0x12, 0x40,
     0x00, 0x7F, 0x00, 0x41, 0xF7
@@ -567,22 +567,6 @@ static int _MIDI_InterpretControllerInfo
 
    Task that interperates the MIDI data.
 ---------------------------------------------------------------------*/
-// NOTE: We have to use a stack frame here because of a strange bug
-// that occurs with Watcom.  This means that we cannot access Task!
-//Turned off to test if it works with Watcom 10a
-//#pragma aux _MIDI_ServiceRoutine frame;
-/*
-static void test
-   (
-   task *Task
-   )
-   {
-   _MIDI_ServiceRoutine( Task );
-   _MIDI_ServiceRoutine( Task );
-   _MIDI_ServiceRoutine( Task );
-   _MIDI_ServiceRoutine( Task );
-   }
-*/
 static void _MIDI_ServiceRoutine
    (
    void
@@ -1292,16 +1276,12 @@ void MIDI_StopSong
 
       MIDI_Reset();
       
-      SoundDriver_MIDI_Lock();
-
       _MIDI_ResetTracks();
 
       if ( _MIDI_Funcs->ReleasePatches )
          {
          _MIDI_Funcs->ReleasePatches();
          }
-
-      SoundDriver_MIDI_Unlock();
 
       free( _MIDI_TrackPtr );
 
