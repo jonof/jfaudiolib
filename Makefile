@@ -1,8 +1,12 @@
-CC=gcc
-CFLAGS=-g -O2 -Wall
-CPPFLAGS=-Iinclude -Isrc
+ifeq (0,$(RELEASE))
+ OPTLEVEL=-O0
+else
+ OPTLEVEL=-O2
+endif
 
-USE_SDLMIXER=1
+CC=gcc
+CFLAGS=-g $(OPTLEVEL) -Wall
+CPPFLAGS=-Iinclude -Isrc
 
 SOURCES=src/drivers.c \
         src/fx_man.c \
@@ -29,9 +33,11 @@ ifneq (,$(findstring MINGW,$(shell uname -s)))
 else
  ifeq (1,$(JFAUDIOLIB_HAVE_SDL))
   CPPFLAGS+= -DHAVE_SDL $(shell pkg-config --cflags sdl)
-  SOURCES+= src/driver_sdl.c
-  ifeq (1,$(USE_SDLMIXER))
+  ifeq (1,$(JFAUDIOLIB_USE_SDLMIXER))
    CPPFLAGS+= -DUSE_SDLMIXER
+   SOURCES+= src/driver_sdlmixer.c
+  else
+   SOURCES+= src/driver_sdl.c
   endif
  endif
  ifeq (1,$(JFAUDIOLIB_HAVE_ALSA))
