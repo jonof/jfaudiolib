@@ -4,6 +4,8 @@ else
  OPTLEVEL=-O2
 endif
 
+DXROOT ?= $(HOME)/sdks/directx/dx7
+
 CC=gcc
 CFLAGS=-g $(OPTLEVEL) -Wall
 CPPFLAGS=-Iinclude -Isrc
@@ -28,7 +30,7 @@ ifeq (1,$(JFAUDIOLIB_HAVE_SDL))
 endif
 
 ifneq (,$(findstring MINGW,$(shell uname -s)))
- CPPFLAGS+= -I/z/sdks/directx/dx7/include -Ithird-party/mingw32/include
+ CPPFLAGS+= -I$(DXROOT)/include -Ithird-party/mingw32/include
  SOURCES+= src/driver_directsound.c src/driver_winmm.c
 else
  ifeq (1,$(JFAUDIOLIB_HAVE_SDL))

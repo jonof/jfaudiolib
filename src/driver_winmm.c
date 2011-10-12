@@ -36,6 +36,10 @@
 #include "driver_winmm.h"
 #include "linklist.h"
 
+#ifdef _MSC_VER
+#define inline _inline
+#endif
+
 enum {
    WinMMErr_Warning = -2,
    WinMMErr_Error   = -1,
@@ -528,7 +532,7 @@ static void midi_flush_current_buffer(void)
 
         currentMidiBuffer->hdr.dwBufferLength = currentMidiBuffer->hdr.dwBytesRecorded - 12;
         currentMidiBuffer->hdr.dwBytesRecorded = 0;
-        currentMidiBuffer->hdr.lpData = &evt->dwParms[0];
+        currentMidiBuffer->hdr.lpData = (LPSTR) &evt->dwParms[0];
         
         if (currentMidiBuffer->hdr.dwBufferLength > 0) {
             needsPrepare = TRUE;

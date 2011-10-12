@@ -49,6 +49,10 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #define LITTLE32
 #endif
 
+#ifdef _MSC_VER
+#define inline _inline
+#endif
+
 static inline unsigned short SWAP16(unsigned short s)
 {
 	return (s >> 8) | (s << 8);

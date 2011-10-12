@@ -51,6 +51,11 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #define LITTLE32
 #endif
 
+#ifdef _MSC_VER
+#define inline _inline
+#define alloca _alloca
+#endif
+
 static inline unsigned short SWAP16(unsigned short s)
 {
 	return (s >> 8) | (s << 8);
@@ -291,7 +296,9 @@ static void _MIDI_SysEx
    
    if (_MIDI_Funcs->SysEx && _MIDI_SongLoaded)
       {
-      unsigned char msg[ length + 1 ];
+      unsigned char *msg;
+      
+      msg = (unsigned char *)alloca(length + 1);
       
       msg[0] = MIDI_SYSEX;
       memcpy(&msg[1], Track->pos, length);

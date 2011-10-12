@@ -1,0 +1,33 @@
+DXROOT=$(USERPROFILE)\sdks\directx\dx7
+
+CC=cl
+CFLAGS=/MD /J /nologo /G6 /O2
+CPPFLAGS=/Iinclude /Isrc /Isrc\msvc "/I$(DXROOT)\include"
+
+SOURCES=src\drivers.c \
+        src\fx_man.c \
+        src\cd.c \
+        src\multivoc.c \
+        src\mix.c \
+        src\mixst.c \
+        src\pitch.c \
+        src\vorbis.c \
+        src\music.c \
+        src\midi.c \
+        src\driver_nosound.c \
+        src\driver_directsound.c \
+        src\driver_winmm.c \
+        src\asssys.c
+		
+!include Makefile.msvcshared
+
+OBJECTS=$(SOURCES:.c=.obj)
+
+$(JFAUDIOLIB): $(OBJECTS)
+	lib /out:$@ /nologo $**
+
+{src}.c{src}.obj:
+	$(CC) /c $(CPPFLAGS) $(CFLAGS) /Fo$@ $<
+ 
+clean:
+	-del /q $(OBJECTS) $(JFAUDIOLIB)
