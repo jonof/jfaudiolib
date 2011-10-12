@@ -1,3 +1,7 @@
+-include Makefile.user
+
+DXROOT ?= $(HOME)/sdks/directx/dx7
+
 ifeq (0,$(RELEASE))
  OPTLEVEL=-O0
 else
