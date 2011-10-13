@@ -26,6 +26,9 @@ OBJECTS=$(SOURCES:.c=.obj)
 $(JFAUDIOLIB): $(OBJECTS)
 	lib /out:$@ /nologo $**
 
+test.exe: src\test.obj $(JFAUDIOLIB)
+    link /out:$@ /nologo "/libpath:$(DXROOT)\lib" $** winmm.lib user32.lib dsound.lib dxguid.lib
+
 {src}.c{src}.obj:
 	$(CC) /c $(CPPFLAGS) $(CFLAGS) /Fo$@ $<
  

@@ -35,7 +35,7 @@
 # include "driver_coreaudio.h"
 #endif
 
-#ifdef WIN32
+#ifdef _WIN32
 # include "driver_directsound.h"
 # include "driver_winmm.h"
 #endif
@@ -154,7 +154,7 @@ static struct {
     #endif
     
     // Windows DirectSound
-    #ifdef WIN32
+    #ifdef _WIN32
     {
         DirectSoundDrv_GetError,
         DirectSoundDrv_ErrorString,
@@ -172,7 +172,7 @@ static struct {
     #endif
 
     // Windows MultiMedia system
-    #ifdef WIN32
+    #ifdef _WIN32
     {
         WinMMDrv_GetError,
         WinMMDrv_ErrorString,

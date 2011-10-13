@@ -5,7 +5,17 @@
 #include "sndcards.h"
 #include "asssys.h"
 
-void playsong(void);
+void playsong(const char *);
+
+#ifdef _WIN32
+#define WIN32_LEAN_AND_MEAN
+#include <windows.h>
+
+void * win_gethwnd()
+{
+    return (void *) GetForegroundWindow();
+}
+#endif
 
 int main(int argc, char ** argv)
 {
@@ -16,9 +26,14 @@ int main(int argc, char ** argv)
    unsigned MixRate = 32000;
    void * initdata = 0;
    int voice = FX_Error;
+   const char * song = "test.ogg";
    
-#ifdef WIN32
-   initdata = (void *) win_gethwnd();
+   if (argc > 1) {
+      song = argv[1];
+   }
+   
+#ifdef _WIN32
+   initdata = win_gethwnd();
 #endif
    
    status = FX_Init( ASS_AutoDetect, NumVoices, &NumChannels, &NumBits, &MixRate, initdata );
@@ -29,23 +44,23 @@ int main(int argc, char ** argv)
    
    fprintf(stdout, "Format is %dHz %d-bit %d-channel\n", MixRate, NumBits, NumChannels);
    
-   playsong();
+   playsong(song);
    
    FX_Shutdown();
    
    return 0;
 }
 
-void playsong(void)
+void playsong(const char * song)
 {
    int voice;
    int length;
    char * data;
    FILE * fp;
    
-   fp = fopen("test.ogg", "rb");
+   fp = fopen(song, "rb");
    if (!fp) {
-      fprintf(stderr, "Error opening test.ogg\n");
+      fprintf(stderr, "Error opening %s\n", song);
       return;
    }
    

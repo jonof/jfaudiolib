@@ -308,7 +308,7 @@ int DirectSoundDrv_PCM_Init(int * mixrate, int * numchannels, int * samplebits, 
         ErrorCode = DSErr_DirectSoundCreate;
         return DSErr_Error;
     }
-    
+
     err = IDirectSound_SetCooperativeLevel(lpds, (HWND) initdata, DSSCL_PRIORITY);
     if (FAILED( err )) {
         TeardownDSound(err);
