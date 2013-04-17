@@ -741,17 +741,17 @@ static playbackstatus MV_GetNextVOCBlock
 
       if ( voice->LoopEnd != NULL )
          {
-         if ( blocklength > ( unsigned int )voice->LoopEnd )
+         if ( blocklength > (intptr_t)voice->LoopEnd )
             {
-            blocklength = ( unsigned int )voice->LoopEnd;
+            blocklength = (intptr_t)voice->LoopEnd;
             }
          else
             {
-            voice->LoopEnd = ( char * )blocklength;
+            voice->LoopEnd = (char *)(intptr_t)blocklength;
             }
 
-         voice->LoopStart = voice->sound + ( unsigned int )voice->LoopStart;
-         voice->LoopEnd   = voice->sound + ( unsigned int )voice->LoopEnd;
+         voice->LoopStart = voice->sound + (intptr_t)voice->LoopStart;
+         voice->LoopEnd   = voice->sound + (intptr_t)voice->LoopEnd;
          voice->LoopSize  = voice->LoopEnd - voice->LoopStart;
          }
 

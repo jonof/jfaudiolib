@@ -100,13 +100,13 @@ static unsigned _MIDI_Time;
 static int  _MIDI_BeatsPerMeasure;
 static int  _MIDI_TicksPerBeat;
 static int  _MIDI_TimeBase;
-static long _MIDI_FPSecondsPerTick;
+static int  _MIDI_FPSecondsPerTick;
 static unsigned _MIDI_TotalTime;
 static int  _MIDI_TotalTicks;
 static int  _MIDI_TotalBeats;
 static int  _MIDI_TotalMeasures;
 
-static unsigned long _MIDI_PositionInTicks;
+static unsigned int _MIDI_PositionInTicks;
 
 static int  _MIDI_Context;
 
@@ -141,7 +141,7 @@ static const unsigned char _GSResetSysex[] =
    Reads a variable length number from a MIDI track.
 ---------------------------------------------------------------------*/
 
-static long _MIDI_ReadNumber
+static int _MIDI_ReadNumber
    (
    void *from,
    size_t size
@@ -149,7 +149,7 @@ static long _MIDI_ReadNumber
 
    {
    unsigned char *FromPtr;
-   long          value;
+   int           value;
 
    if ( size > 4 )
       {
@@ -175,13 +175,13 @@ static long _MIDI_ReadNumber
    Reads a variable length encoded delta delay time from the MIDI data.
 ---------------------------------------------------------------------*/
 
-static long _MIDI_ReadDelta
+static int _MIDI_ReadDelta
    (
    track *ptr
    )
 
    {
-   long          value;
+   int           value;
    unsigned char c;
 
    GET_NEXT_EVENT( ptr, value );
@@ -329,7 +329,7 @@ static void _MIDI_MetaEvent
    int   command;
    int   length;
    int   denominator;
-   long  tempo;
+   int   tempo;
 
    GET_NEXT_EVENT( Track, command );
    GET_NEXT_EVENT( Track, length );
@@ -1319,8 +1319,8 @@ int MIDI_PlaySong
    {
    int    numtracks;
    int    format;
-   long   headersize;
-   long   tracklength;
+   int    headersize;
+   int    tracklength;
    track *CurrentTrack;
    unsigned char *ptr;
 
@@ -1440,7 +1440,7 @@ void MIDI_SetTempo
    )
 
    {
-   long tickspersecond;
+   int tickspersecond;
 
    MIDI_Tempo = tempo;
    SoundDriver_MIDI_SetTempo(tempo, _MIDI_Division);
@@ -1624,7 +1624,7 @@ static int _MIDI_ProcessNextTick
 
 void MIDI_SetSongTick
    (
-   unsigned long PositionInTicks
+   unsigned int PositionInTicks
    )
 
    {
@@ -1677,13 +1677,13 @@ void MIDI_SetSongTick
 
 void MIDI_SetSongTime
    (
-   unsigned long milliseconds
+   unsigned int milliseconds
    )
 
    {
-   unsigned long mil;
-   unsigned long sec;
-   unsigned long newtime;
+   unsigned int mil;
+   unsigned int sec;
+   unsigned int newtime;
 
    if ( !_MIDI_SongLoaded )
       {
@@ -1744,7 +1744,7 @@ void MIDI_SetSongPosition
    )
 
    {
-   unsigned long pos;
+   unsigned int pos;
 
    if ( !_MIDI_SongLoaded )
       {
@@ -1801,8 +1801,8 @@ void MIDI_GetSongPosition
    )
 
    {
-   unsigned long mil;
-   unsigned long sec;
+   unsigned int mil;
+   unsigned int sec;
 
    mil = ( _MIDI_Time & ( ( 1 << TIME_PRECISION ) - 1 ) ) * 1000;
    sec = _MIDI_Time >> TIME_PRECISION;
@@ -1826,8 +1826,8 @@ void MIDI_GetSongLength
    )
 
    {
-   unsigned long mil;
-   unsigned long sec;
+   unsigned int mil;
+   unsigned int sec;
 
    mil = ( _MIDI_TotalTime & ( ( 1 << TIME_PRECISION ) - 1 ) ) * 1000;
    sec = _MIDI_TotalTime >> TIME_PRECISION;

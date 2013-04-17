@@ -23,7 +23,7 @@ int main(int argc, char ** argv)
    int NumVoices = 8;
    int NumChannels = 2;
    int NumBits = 16;
-   unsigned MixRate = 32000;
+   int MixRate = 32000;
    void * initdata = 0;
    int voice = FX_Error;
    const char * song = "test.ogg";
