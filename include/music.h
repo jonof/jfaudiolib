@@ -70,7 +70,7 @@ int   MUSIC_SongPlaying( void );
 void  MUSIC_Continue( void );
 void  MUSIC_Pause( void );
 int   MUSIC_StopSong( void );
-int   MUSIC_PlaySong( unsigned char *song, unsigned int length, int loopflag );
+int   MUSIC_PlaySong( char *song, unsigned int length, int loopflag );
 void  MUSIC_SetContext( int context );
 int   MUSIC_GetContext( void );
 void  MUSIC_SetSongTick( unsigned int PositionInTicks );
