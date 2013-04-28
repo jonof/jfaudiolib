@@ -29,7 +29,7 @@ void WinMMDrv_CD_Pause(int pauseon);
 int  WinMMDrv_CD_IsPlaying(void);
 void WinMMDrv_CD_SetVolume(int volume);
 
-int  WinMMDrv_MIDI_Init(midifuncs *);
+int  WinMMDrv_MIDI_Init(midifuncs *, const char *);
 void WinMMDrv_MIDI_Shutdown(void);
 int  WinMMDrv_MIDI_StartPlayback(void (*service)(void));
 void WinMMDrv_MIDI_HaltPlayback(void);

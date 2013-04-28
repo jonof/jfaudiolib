@@ -21,7 +21,7 @@
 int ALSADrv_GetError(void);
 const char *ALSADrv_ErrorString( int ErrorNumber );
 
-int  ALSADrv_MIDI_Init(midifuncs *);
+int  ALSADrv_MIDI_Init(midifuncs *, const char *);
 void ALSADrv_MIDI_Shutdown(void);
 int  ALSADrv_MIDI_StartPlayback(void (*service)(void));
 void ALSADrv_MIDI_HaltPlayback(void);

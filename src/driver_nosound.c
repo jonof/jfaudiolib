@@ -94,7 +94,7 @@ void NoSoundDrv_CD_SetVolume(int volume)
 {
 }
 
-int NoSoundDrv_MIDI_Init(midifuncs *funcs)
+int NoSoundDrv_MIDI_Init(midifuncs *funcs, const char *params)
 {
     memset(funcs, 0, sizeof(midifuncs));
     return 0;

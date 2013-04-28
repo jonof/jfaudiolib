@@ -112,7 +112,7 @@ const char *MUSIC_ErrorString
 int MUSIC_Init
    (
    int SoundCard,
-   int Address
+   const char *params
    )
 
    {
@@ -151,7 +151,7 @@ int MUSIC_Init
 
    ASS_MIDISoundDriver = SoundCard;
    
-   status = SoundDriver_MIDI_Init(&MUSIC_MidiFunctions);
+   status = SoundDriver_MIDI_Init(&MUSIC_MidiFunctions, params);
    if (status != MUSIC_Ok)
       {
       MUSIC_ErrorCode = MUSIC_DriverError;

@@ -76,7 +76,7 @@ static struct {
     int          (* CD_IsPlaying)(void);
     void         (* CD_SetVolume)(int volume);
 
-    int          (* MIDI_Init)(midifuncs *);
+    int          (* MIDI_Init)(midifuncs *, const char *);
     void         (* MIDI_Shutdown)(void);
     int          (* MIDI_StartPlayback)(void (*service)(void));
     void         (* MIDI_HaltPlayback)(void);
@@ -381,9 +381,9 @@ void SoundDriver_CD_SetVolume(int volume)
     SoundDrivers[ASS_CDSoundDriver].CD_SetVolume(volume);
 }
 
-int  SoundDriver_MIDI_Init(midifuncs *funcs)
+int  SoundDriver_MIDI_Init(midifuncs *funcs, const char *params)
 {
-    return SoundDrivers[ASS_MIDISoundDriver].MIDI_Init(funcs);
+    return SoundDrivers[ASS_MIDISoundDriver].MIDI_Init(funcs, params);
 }
 
 void SoundDriver_MIDI_Shutdown(void)

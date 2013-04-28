@@ -38,7 +38,7 @@ void NoSoundDrv_CD_Pause(int pauseon);
 int  NoSoundDrv_CD_IsPlaying(void);
 void NoSoundDrv_CD_SetVolume(int volume);
 
-int  NoSoundDrv_MIDI_Init(midifuncs *);
+int  NoSoundDrv_MIDI_Init(midifuncs *, const char *);
 void NoSoundDrv_MIDI_Shutdown(void);
 int  NoSoundDrv_MIDI_StartPlayback(void (*service)(void));
 void NoSoundDrv_MIDI_HaltPlayback(void);

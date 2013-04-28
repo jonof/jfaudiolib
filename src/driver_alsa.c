@@ -243,7 +243,7 @@ static void * threadProc(void * parm)
     return NULL;
 }
 
-int ALSADrv_MIDI_Init(midifuncs *funcs)
+int ALSADrv_MIDI_Init(midifuncs *funcs, const char *params)
 {
     int result;
     

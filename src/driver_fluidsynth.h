@@ -21,7 +21,7 @@
 int FluidSynthDrv_GetError(void);
 const char *FluidSynthDrv_ErrorString( int ErrorNumber );
 
-int  FluidSynthDrv_MIDI_Init(midifuncs *);
+int  FluidSynthDrv_MIDI_Init(midifuncs *, const char *);
 void FluidSynthDrv_MIDI_Shutdown(void);
 int  FluidSynthDrv_MIDI_StartPlayback(void (*service)(void));
 void FluidSynthDrv_MIDI_HaltPlayback(void);

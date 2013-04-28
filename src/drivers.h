@@ -56,7 +56,7 @@ void SoundDriver_CD_Pause(int pauseon);
 int  SoundDriver_CD_IsPlaying(void);
 void SoundDriver_CD_SetVolume(int volume);
 
-int  SoundDriver_MIDI_Init(midifuncs *);
+int  SoundDriver_MIDI_Init(midifuncs *, const char *params);
 void SoundDriver_MIDI_Shutdown(void);
 int  SoundDriver_MIDI_StartPlayback(void (*service)(void));
 void SoundDriver_MIDI_HaltPlayback(void);

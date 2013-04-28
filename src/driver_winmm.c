@@ -823,7 +823,7 @@ static void Func_SysEx( const unsigned char * data, int length )
     } else fprintf(stderr, "WinMM Func_SysEx error\n");
 }
 
-int WinMMDrv_MIDI_Init(midifuncs * funcs)
+int WinMMDrv_MIDI_Init(midifuncs * funcs, const char *params)
 {
     MMRESULT rv;
 

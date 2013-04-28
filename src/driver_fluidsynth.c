@@ -22,14 +22,25 @@
  * FluidSynth MIDI synthesiser output
  */
 
+#define _POSIX_SOURCE
 #include "midifuncs.h"
 #include "driver_fluidsynth.h"
 #include <fluidsynth.h>
 #include <string.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <pthread.h>
 #include <sys/select.h>
 #include <math.h>
+#include <unistd.h>
+#include <limits.h>
+#include <glob.h>
+
+#if ((FLUIDSYNTH_VERSION_MAJOR < 1) || \
+     (FLUIDSYNTH_VERSION_MAJOR >= 1 && FLUIDSYNTH_VERSION_MINOR < 1) || \
+     (FLUIDSYNTH_VERSION_MAJOR >= 1 && FLUIDSYNTH_VERSION_MINOR >= 1 && FLUIDSYNTH_VERSION_MICRO < 2))
+#error "FluidSynth support requires version 1.1.2 or better"
+#endif
 
 enum {
    FSynthErr_Warning = -2,
@@ -47,8 +58,11 @@ enum {
 };
 
 static int ErrorCode = FSynthErr_Ok;
-static char *soundFontName = "/usr/share/sounds/sf2/SGM-V2.01.sf2";
-//static char *soundFontName = "/usr/share/sounds/sf2/FluidR3_GM.sf2";
+static char soundFontName[PATH_MAX+1] = "";
+static const char *soundFontPaths[] = {
+    "/usr/share/sounds/sf2/*.sf2",
+    NULL,
+};
 
 static fluid_settings_t * fluidsettings = 0;
 static fluid_synth_t * fluidsynth = 0;
@@ -139,8 +153,78 @@ static inline void sequence_event(void)
     //fluid_sequencer_send_now(fluidsequencer, fluidevent);
     result = fluid_sequencer_send_at(fluidsequencer, fluidevent, threadTimer, 1);
     if (result < 0) {
-        fprintf(stderr, "fluidsynth could not queue event\n");
+        fprintf(stderr, "FluidSynthDrv: fluidsynth could not queue event\n");
     }
+}
+
+static int find_soundfont(void)
+{
+    int pathn, globi, found = 0;
+    glob_t globt;
+
+    for (pathn = 0; !found && soundFontPaths[pathn]; pathn++) {
+        if (strchr(soundFontPaths[pathn], '*') != NULL) {
+            // it's a glob pattern, so find the use the first readable match
+            memset(&globt, 0, sizeof(globt));
+            if (glob(soundFontPaths[pathn], 0, NULL, &globt) == 0) {
+                for (globi = 0; globi < globt.gl_pathc; globi++) {
+                    if (access(globt.gl_pathv[globi], R_OK) == 0) {
+                        strcpy(soundFontName, globt.gl_pathv[globi]);
+                        found = 1;
+                        break;
+                    }
+                }
+            }
+            globfree(&globt);
+        } else {
+            if (access(soundFontPaths[pathn], R_OK) == 0) {
+                strcpy(soundFontName, soundFontPaths[pathn]);
+                found = 1;
+            }
+        }
+    }
+
+    return !found;
+}
+
+static void apply_params(const char *params, fluid_settings_t *settings)
+{
+    char *parseparams, *savepair;
+    char *parampair, *paramname, *paramvalue;
+    char *firstpair;
+    int setok;
+
+    if (!params || !params[0]) return;
+
+    parseparams = strdup(params);
+    firstpair = parseparams;
+    while ((parampair = strtok_r(firstpair, " ", &savepair))) {
+        firstpair = NULL;
+        paramname = strtok_r(parampair, "=", &paramvalue);
+        if (!paramname) {
+            break;
+        }
+
+        switch (fluid_settings_get_type(settings, paramname)) {
+            case FLUID_NUM_TYPE:
+                setok = fluid_settings_setnum(settings, paramname, atof(paramvalue));
+                break;
+            case FLUID_INT_TYPE:
+                setok = fluid_settings_setint(settings, paramname, atoi(paramvalue));
+                break;
+            case FLUID_STR_TYPE:
+                setok = fluid_settings_setstr(settings, paramname, paramvalue);
+                break;
+            default:
+                setok = 0;
+                break;
+        }
+        if (!setok) {
+            fprintf(stderr, "FluidSynthDrv: error setting '%s' to '%s'\n", paramname, paramvalue);
+        }
+    }
+
+    free(parseparams);
 }
 
 static void Func_NoteOff( int channel, int key, int velocity )
@@ -157,7 +241,7 @@ static void Func_NoteOn( int channel, int key, int velocity )
 
 static void Func_PolyAftertouch( int channel, int key, int pressure )
 {
-    fprintf(stderr, "fluidsynth key %d channel %d aftertouch\n", key, channel);
+    fprintf(stderr, "FluidSynthDrv: key %d channel %d aftertouch\n", key, channel);
 }
 
 static void Func_ControlChange( int channel, int number, int value )
@@ -174,7 +258,7 @@ static void Func_ProgramChange( int channel, int program )
 
 static void Func_ChannelAftertouch( int channel, int pressure )
 {
-    fprintf(stderr, "fluidsynth channel %d aftertouch\n", channel);
+    fprintf(stderr, "FluidSynthDrv: channel %d aftertouch\n", channel);
 }
 
 static void Func_PitchBend( int channel, int lsb, int msb )
@@ -227,12 +311,18 @@ static void * threadProc(void * parm)
     return NULL;
 }
 
-int FluidSynthDrv_MIDI_Init(midifuncs *funcs)
+int FluidSynthDrv_MIDI_Init(midifuncs *funcs, const char *params)
 {
     int result;
     
     FluidSynthDrv_MIDI_Shutdown();
     memset(funcs, 0, sizeof(midifuncs));
+
+    if (find_soundfont()) {
+        ErrorCode = FSynthErr_BadSoundFont;
+        return FSynthErr_Error;
+    }
+    fprintf(stderr, "FluidSynthDrv: using soundfont %s\n", soundFontName);
 
     fluidsettings = new_fluid_settings();
     if (!fluidsettings) {
@@ -240,9 +330,7 @@ int FluidSynthDrv_MIDI_Init(midifuncs *funcs)
         return FSynthErr_Error;
     }
 
-    //fluid_settings_setint(fluidsettings, "synth.polyphony", 1024);
-    //fluid_settings_setstr(fluidsettings, "synth.reverb.active", "no");
-    //fluid_settings_setstr(fluidsettings, "synth.chorus.active", "no");
+    apply_params(params, fluidsettings);
         
     fluidsynth = new_fluid_synth(fluidsettings);
     if (!fluidsettings) {
@@ -333,7 +421,7 @@ int FluidSynthDrv_MIDI_StartPlayback(void (*service)(void))
     threadQuit = 0;
 
     if (pthread_create(&thread, NULL, threadProc, NULL)) {
-        fprintf(stderr, "fluidsynth pthread_create returned error\n");
+        fprintf(stderr, "FluidSynthDrv: pthread_create returned error\n");
         return FSynthErr_PlayThread;
     }
 
@@ -353,7 +441,7 @@ void FluidSynthDrv_MIDI_HaltPlayback(void)
     threadQuit = 1;
 
     if (pthread_join(thread, &ret)) {
-        fprintf(stderr, "fluidsynth pthread_join returned error\n");
+        fprintf(stderr, "FluidSynthDrv: pthread_join returned error\n");
     }
 
     threadRunning = 0;
