@@ -31,7 +31,7 @@
 # include "driver_sdl.h"
 #endif
 
-#if 0 //def __APPLE__
+#if defined __APPLE__ && !defined NO_COREAUDIO
 # include "driver_coreaudio.h"
 #endif
 
@@ -140,7 +140,7 @@ static struct {
     #endif
     
     // OS X CoreAudio
-    #if 0 //def __APPLE__
+    #if defined __APPLE__ && !defined NO_COREAUDIO
     {
         "Core Audio",
         CoreAudioDrv_GetError,

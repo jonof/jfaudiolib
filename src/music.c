@@ -125,7 +125,7 @@ int MUSIC_Init
       }
 
 	if (SoundCard == ASS_AutoDetect) {
-#if 0 //defined __APPLE__
+#if defined __APPLE__ && !defined NO_COREAUDIO
 		SoundCard = ASS_CoreAudio;
 #elif defined _WIN32
 		SoundCard = ASS_WinMM;
