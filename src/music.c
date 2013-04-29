@@ -188,6 +188,19 @@ int MUSIC_Shutdown
    return MUSIC_Ok;
    }
 
+int MUSIC_GetCurrentDriver(void)
+{
+    return ASS_MIDISoundDriver;
+}
+
+const char *MUSIC_GetCurrentDriverName(void)
+{
+    if (ASS_MIDISoundDriver < 0) {
+        return "(none)";
+    }
+
+    return SoundDriver_GetName(ASS_MIDISoundDriver);
+}
 
 /*---------------------------------------------------------------------
    Function: MUSIC_SetMaxFMMidiChannel

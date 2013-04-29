@@ -196,6 +196,21 @@ int FX_Shutdown
    }
 
 
+int FX_GetCurrentDriver(void)
+{
+    return ASS_PCMSoundDriver;
+}
+
+const char *FX_GetCurrentDriverName(void)
+{
+    if (ASS_PCMSoundDriver < 0) {
+        return "(none)";
+    }
+
+    return SoundDriver_GetName(ASS_PCMSoundDriver);
+}
+
+
 /*---------------------------------------------------------------------
    Function: FX_SetCallback
 

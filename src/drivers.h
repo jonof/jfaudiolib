@@ -32,6 +32,8 @@ int  SoundDriver_IsPCMSupported(int driver);
 int  SoundDriver_IsCDSupported(int driver);
 int  SoundDriver_IsMIDISupported(int driver);
 
+const char * SoundDriver_GetName(int driver);
+
 int  SoundDriver_PCM_GetError(void);
 const char * SoundDriver_PCM_ErrorString( int ErrorNumber );
 int  SoundDriver_CD_GetError(void);

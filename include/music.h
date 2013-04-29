@@ -60,6 +60,8 @@ typedef struct
 const char *MUSIC_ErrorString( int ErrorNumber );
 int   MUSIC_Init( int SoundCard, const char *params );
 int   MUSIC_Shutdown( void );
+int   MUSIC_GetCurrentDriver(void);
+const char *MUSIC_GetCurrentDriverName(void);
 void  MUSIC_SetMaxFMMidiChannel( int channel );
 void  MUSIC_SetVolume( int volume );
 void  MUSIC_SetMidiChannelVolume( int channel, int volume );

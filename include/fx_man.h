@@ -50,6 +50,8 @@ enum FX_ERRORS
 const char *FX_ErrorString( int ErrorNumber );
 int   FX_Init( int SoundCard, int numvoices, int * numchannels, int * samplebits, int * mixrate, void * initdata );
 int   FX_Shutdown( void );
+int   FX_GetCurrentDriver(void);
+const char *FX_GetCurrentDriverName(void);
 int   FX_SetCallBack( void ( *function )( unsigned int ) );
 void  FX_SetVolume( int volume );
 int   FX_GetVolume( void );

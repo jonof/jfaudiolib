@@ -19,36 +19,37 @@ void * win_gethwnd()
 
 int main(int argc, char ** argv)
 {
-   int status = 0;
-   int NumVoices = 8;
-   int NumChannels = 2;
-   int NumBits = 16;
-   int MixRate = 32000;
-   void * initdata = 0;
-   int voice = FX_Error;
-   const char * song = "test.ogg";
-   
-   if (argc > 1) {
-      song = argv[1];
-   }
-   
+    int status = 0;
+    int NumVoices = 8;
+    int NumChannels = 2;
+    int NumBits = 16;
+    int MixRate = 32000;
+    void * initdata = 0;
+    int voice = FX_Error;
+    const char * song = "test.ogg";
+
+    if (argc > 1) {
+        song = argv[1];
+    }
+
 #ifdef _WIN32
-   initdata = win_gethwnd();
+    initdata = win_gethwnd();
 #endif
-   
-   status = FX_Init( ASS_AutoDetect, NumVoices, &NumChannels, &NumBits, &MixRate, initdata );
-   if (status != FX_Ok) {
-      fprintf(stderr, "FX_Init error %s\n", FX_ErrorString(status));
-      return 1;
-   }
-   
-   fprintf(stdout, "Format is %dHz %d-bit %d-channel\n", MixRate, NumBits, NumChannels);
-   
-   playsong(song);
-   
-   FX_Shutdown();
-   
-   return 0;
+
+    status = FX_Init( ASS_AutoDetect, NumVoices, &NumChannels, &NumBits, &MixRate, initdata );
+    if (status != FX_Ok) {
+        fprintf(stderr, "FX_Init error %s\n", FX_ErrorString(status));
+        return 1;
+    }
+
+    fprintf(stdout, "FX driver is %s\n", FX_GetCurrentDriverName());
+    fprintf(stdout, "Format is %dHz %d-bit %d-channel\n", MixRate, NumBits, NumChannels);
+
+    playsong(song);
+
+    FX_Shutdown();
+
+    return 0;
 }
 
 void playsong(const char * song)

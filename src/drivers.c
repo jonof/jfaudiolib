@@ -58,6 +58,8 @@ int ASS_MIDISoundDriver = -1;
 #define UNSUPPORTED_COMPLETELY  { 0,0, UNSUPPORTED_PCM, UNSUPPORTED_CD, UNSUPPORTED_MIDI },
 
 static struct {
+    const char * DriverName;
+    
     int          (* GetError)(void);
     const char * (* ErrorString)(int);
 
@@ -87,6 +89,7 @@ static struct {
     
     // Everyone gets the "no sound" driver
     {
+        "No Sound",
         NoSoundDrv_GetError,
         NoSoundDrv_ErrorString,
         NoSoundDrv_PCM_Init,
@@ -114,6 +117,7 @@ static struct {
     // Simple DirectMedia Layer
     #ifdef HAVE_SDL
     {
+        "SDL",
         SDLDrv_GetError,
         SDLDrv_ErrorString,
         SDLDrv_PCM_Init,
@@ -138,6 +142,7 @@ static struct {
     // OS X CoreAudio
     #if 0 //def __APPLE__
     {
+        "Core Audio",
         CoreAudioDrv_GetError,
         CoreAudioDrv_ErrorString,
         CoreAudioDrv_PCM_Init,
@@ -156,6 +161,7 @@ static struct {
     // Windows DirectSound
     #ifdef _WIN32
     {
+        "DirectSound",
         DirectSoundDrv_GetError,
         DirectSoundDrv_ErrorString,
         DirectSoundDrv_PCM_Init,
@@ -174,6 +180,7 @@ static struct {
     // Windows MultiMedia system
     #ifdef _WIN32
     {
+        "WinMM",
         WinMMDrv_GetError,
         WinMMDrv_ErrorString,
 
@@ -201,6 +208,7 @@ static struct {
     // FluidSynth MIDI synthesiser
     #ifdef HAVE_FLUIDSYNTH
     {
+        "FluidSynth",
         FluidSynthDrv_GetError,
         FluidSynthDrv_ErrorString,
 
@@ -222,6 +230,7 @@ static struct {
     // ALSA MIDI synthesiser
     #ifdef HAVE_ALSA
     {
+        "ALSA",
         ALSADrv_GetError,
         ALSADrv_ErrorString,
 
@@ -255,6 +264,11 @@ int SoundDriver_IsCDSupported(int driver)
 int SoundDriver_IsMIDISupported(int driver)
 {
 	return (SoundDrivers[driver].MIDI_Init != 0);
+}
+
+const char * SoundDriver_GetName(int driver)
+{
+    return SoundDrivers[driver].DriverName;
 }
 
 int SoundDriver_PCM_GetError(void)
