@@ -152,7 +152,13 @@ static struct {
         CoreAudioDrv_PCM_Lock,
         CoreAudioDrv_PCM_Unlock,
         UNSUPPORTED_CD,
-        UNSUPPORTED_MIDI,
+        CoreAudioDrv_MIDI_Init,
+        CoreAudioDrv_MIDI_Shutdown,
+        CoreAudioDrv_MIDI_StartPlayback,
+        CoreAudioDrv_MIDI_HaltPlayback,
+        CoreAudioDrv_MIDI_SetTempo,
+        CoreAudioDrv_MIDI_Lock,
+        CoreAudioDrv_MIDI_Unlock,
     },
     #else
         UNSUPPORTED_COMPLETELY

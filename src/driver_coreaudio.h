@@ -28,3 +28,11 @@ int  CoreAudioDrv_PCM_BeginPlayback(char *BufferStart, int BufferSize,
 void CoreAudioDrv_PCM_StopPlayback(void);
 void CoreAudioDrv_PCM_Lock(void);
 void CoreAudioDrv_PCM_Unlock(void);
+int  CoreAudioDrv_MIDI_Init(midifuncs *, const char *);
+void CoreAudioDrv_MIDI_Shutdown(void);
+int  CoreAudioDrv_MIDI_StartPlayback(void (*service)(void));
+void CoreAudioDrv_MIDI_HaltPlayback(void);
+unsigned int CoreAudioDrv_MIDI_GetTick(void);
+void CoreAudioDrv_MIDI_SetTempo(int tempo, int division);
+void CoreAudioDrv_MIDI_Lock(void);
+void CoreAudioDrv_MIDI_Unlock(void);

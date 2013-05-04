@@ -2,6 +2,7 @@
 #include <stdlib.h>
 
 #include "fx_man.h"
+#include "music.h"
 #include "sndcards.h"
 #include "asssys.h"
 
@@ -41,12 +42,21 @@ int main(int argc, char ** argv)
         fprintf(stderr, "FX_Init error %s\n", FX_ErrorString(status));
         return 1;
     }
+    
+    status = MUSIC_Init(ASS_AutoDetect, 0);
+    if (status != MUSIC_Ok) {
+        fprintf(stderr, "MUSIC_Init error %s\n", MUSIC_ErrorString(status));
+        FX_Shutdown();
+        return 1;
+    }
 
     fprintf(stdout, "FX driver is %s\n", FX_GetCurrentDriverName());
+    fprintf(stdout, "Music driver is %s\n", MUSIC_GetCurrentDriverName());
     fprintf(stdout, "Format is %dHz %d-bit %d-channel\n", MixRate, NumBits, NumChannels);
 
     playsong(song);
 
+    MUSIC_Shutdown();
     FX_Shutdown();
 
     return 0;
@@ -54,48 +64,59 @@ int main(int argc, char ** argv)
 
 void playsong(const char * song)
 {
-   int voice;
-   int length;
-   char * data;
-   FILE * fp;
-   
-   fp = fopen(song, "rb");
-   if (!fp) {
-      fprintf(stderr, "Error opening %s\n", song);
-      return;
-   }
-   
-   fseek(fp, 0, SEEK_END);
-   length = ftell(fp);
-   if (length <= 0) {
-      fclose(fp);
-      return;
-   }
+    int status;
+    int length;
+    char * data;
+    FILE * fp;
 
-   data = (char *) malloc(length);
-   if (!data) {
-      fclose(fp);
-      return;
-   }
+    fp = fopen(song, "rb");
+    if (!fp) {
+        fprintf(stderr, "Error opening %s\n", song);
+        return;
+    }
 
-   fseek(fp, 0, SEEK_SET);
-   
-   if (fread(data, length, 1, fp) != 1) {
-      fclose(fp);
-      free(data);
-      return;
-   }
-   
-   fclose(fp);
-   
-   voice = FX_PlayAuto(data, length, 0, 255, 255, 255, FX_MUSIC_PRIORITY, 1);
-   if (voice >= FX_Ok) {
-      while (FX_SoundActive(voice)) {
-         ASS_Sleep(500);
-      }
-   } else {
-      fprintf(stderr, "Error playing sound\n");
-   }
-   
-   free(data);
+    fseek(fp, 0, SEEK_END);
+    length = ftell(fp);
+    if (length <= 0) {
+        fclose(fp);
+        return;
+    }
+
+    data = (char *) malloc(length);
+    if (!data) {
+        fclose(fp);
+        return;
+    }
+
+    fseek(fp, 0, SEEK_SET);
+
+    if (fread(data, length, 1, fp) != 1) {
+        fclose(fp);
+        free(data);
+        return;
+    }
+
+    fclose(fp);
+
+    if (memcmp(data, "MThd", 4) == 0) {
+        status = MUSIC_PlaySong(data, length, 0);
+        if (status != MUSIC_Ok) {
+            fprintf(stderr, "Error playing music: %s\n", MUSIC_ErrorString(MUSIC_ErrorCode));
+        } else {
+            while (MUSIC_SongPlaying()) {
+                ASS_Sleep(500);
+            }
+        }
+    } else {
+        status = FX_PlayAuto(data, length, 0, 255, 255, 255, FX_MUSIC_PRIORITY, 1);
+        if (status >= FX_Ok) {
+            while (FX_SoundActive(status)) {
+                ASS_Sleep(500);
+            }
+        } else {
+            fprintf(stderr, "Error playing sound: %s\n", FX_ErrorString(FX_ErrorCode));
+        }
+    }
+
+    free(data);
 }

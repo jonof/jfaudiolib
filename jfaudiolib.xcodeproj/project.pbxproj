@@ -29,7 +29,6 @@
 		AB32F97210762A7900A9BAFF /* asssys.c in Sources */ = {isa = PBXBuildFile; fileRef = AB32F97010762A7900A9BAFF /* asssys.c */; };
 		AB32F97310762A7900A9BAFF /* asssys.h in Headers */ = {isa = PBXBuildFile; fileRef = AB32F97110762A7900A9BAFF /* asssys.h */; };
 		AB32FA8B107710D400A9BAFF /* vorbis.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = AB8C5827101B6B7100B42306 /* vorbis.framework */; };
-		AB32FA8C107710E500A9BAFF /* SDL.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = ABBD3FDB102081FA00F32F37 /* SDL.framework */; };
 		AB32FA8F1077111D00A9BAFF /* test.c in Sources */ = {isa = PBXBuildFile; fileRef = AB32FA8E1077111D00A9BAFF /* test.c */; };
 		AB32FA9A107712B700A9BAFF /* libjfaudiolib.a in Frameworks */ = {isa = PBXBuildFile; fileRef = AB2E9E421011E61700DD2F1F /* libjfaudiolib.a */; };
 		AB8C5612101A077700B42306 /* mixst.c in Sources */ = {isa = PBXBuildFile; fileRef = AB8C5611101A077700B42306 /* mixst.c */; };
@@ -37,9 +36,7 @@
 		AB8C5868101B6D7500B42306 /* vorbis.c in Sources */ = {isa = PBXBuildFile; fileRef = AB8C5867101B6D7500B42306 /* vorbis.c */; };
 		ABBD3EF0101FFB1400F32F37 /* cd.h in Headers */ = {isa = PBXBuildFile; fileRef = ABBD3EEF101FFB1400F32F37 /* cd.h */; };
 		ABBD3F19101FFBD900F32F37 /* cd.c in Sources */ = {isa = PBXBuildFile; fileRef = ABBD3F17101FFBD900F32F37 /* cd.c */; };
-		ABBD3FD9102081C500F32F37 /* driver_sdl.c in Sources */ = {isa = PBXBuildFile; fileRef = ABBD3FD7102081C500F32F37 /* driver_sdl.c */; };
-		ABBD3FDA102081C500F32F37 /* driver_sdl.h in Headers */ = {isa = PBXBuildFile; fileRef = ABBD3FD8102081C500F32F37 /* driver_sdl.h */; };
-		ABBD3FDC102081FA00F32F37 /* SDL.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = ABBD3FDB102081FA00F32F37 /* SDL.framework */; };
+		ABE4C94C172EA55A00B18CE9 /* AudioToolbox.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = ABE4C94B172EA55A00B18CE9 /* AudioToolbox.framework */; };
 		ABFBB523102EBD4100D48B58 /* _midi.h in Headers */ = {isa = PBXBuildFile; fileRef = ABFBB51E102EBD4100D48B58 /* _midi.h */; };
 		ABFBB524102EBD4100D48B58 /* midi.c in Sources */ = {isa = PBXBuildFile; fileRef = ABFBB51F102EBD4100D48B58 /* midi.c */; };
 		ABFBB525102EBD4100D48B58 /* midi.h in Headers */ = {isa = PBXBuildFile; fileRef = ABFBB520102EBD4100D48B58 /* midi.h */; };
@@ -87,9 +84,7 @@
 		AB8C5867101B6D7500B42306 /* vorbis.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = vorbis.c; sourceTree = "<group>"; };
 		ABBD3EEF101FFB1400F32F37 /* cd.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = cd.h; sourceTree = "<group>"; };
 		ABBD3F17101FFBD900F32F37 /* cd.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = cd.c; sourceTree = "<group>"; };
-		ABBD3FD7102081C500F32F37 /* driver_sdl.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = driver_sdl.c; sourceTree = "<group>"; };
-		ABBD3FD8102081C500F32F37 /* driver_sdl.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = driver_sdl.h; sourceTree = "<group>"; };
-		ABBD3FDB102081FA00F32F37 /* SDL.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SDL.framework; path = /Users/jonof/Library/Frameworks/SDL.framework; sourceTree = "<absolute>"; };
+		ABE4C94B172EA55A00B18CE9 /* AudioToolbox.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AudioToolbox.framework; path = /System/Library/Frameworks/AudioToolbox.framework; sourceTree = "<absolute>"; };
 		ABFBB51E102EBD4100D48B58 /* _midi.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = _midi.h; sourceTree = "<group>"; };
 		ABFBB51F102EBD4100D48B58 /* midi.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = midi.c; sourceTree = "<group>"; };
 		ABFBB520102EBD4100D48B58 /* midi.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = midi.h; sourceTree = "<group>"; };
@@ -104,7 +99,6 @@
 			buildActionMask = 2147483647;
 			files = (
 				AB8C5829101B6B7100B42306 /* vorbis.framework in Frameworks */,
-				ABBD3FDC102081FA00F32F37 /* SDL.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -115,7 +109,7 @@
 				AB32FA9A107712B700A9BAFF /* libjfaudiolib.a in Frameworks */,
 				AB32FA8B107710D400A9BAFF /* vorbis.framework in Frameworks */,
 				AB217B6D172E74BB00364868 /* AudioUnit.framework in Frameworks */,
-				AB32FA8C107710E500A9BAFF /* SDL.framework in Frameworks */,
+				ABE4C94C172EA55A00B18CE9 /* AudioToolbox.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -153,8 +147,6 @@
 				AB217B66172E646A00364868 /* driver_coreaudio.h */,
 				AB2E9E521011E65900DD2F1F /* driver_nosound.c */,
 				AB2E9E531011E65900DD2F1F /* driver_nosound.h */,
-				ABBD3FD7102081C500F32F37 /* driver_sdl.c */,
-				ABBD3FD8102081C500F32F37 /* driver_sdl.h */,
 				AB2E9E561011E65900DD2F1F /* drivers.c */,
 				AB2E9E571011E65900DD2F1F /* drivers.h */,
 				AB2E9E581011E65900DD2F1F /* fx_man.c */,
@@ -191,7 +183,7 @@
 			isa = PBXGroup;
 			children = (
 				AB217B6B172E669100364868 /* AudioUnit.framework */,
-				ABBD3FDB102081FA00F32F37 /* SDL.framework */,
+				ABE4C94B172EA55A00B18CE9 /* AudioToolbox.framework */,
 				ABFFAB61171EE7C700DB88D3 /* ogg.framework */,
 				AB8C5827101B6B7100B42306 /* vorbis.framework */,
 			);
@@ -216,7 +208,6 @@
 				AB2E9E751011E66100DD2F1F /* music.h in Headers */,
 				AB2E9E761011E66100DD2F1F /* sndcards.h in Headers */,
 				ABBD3EF0101FFB1400F32F37 /* cd.h in Headers */,
-				ABBD3FDA102081C500F32F37 /* driver_sdl.h in Headers */,
 				ABFBB523102EBD4100D48B58 /* _midi.h in Headers */,
 				ABFBB525102EBD4100D48B58 /* midi.h in Headers */,
 				ABFBB526102EBD4100D48B58 /* midifuncs.h in Headers */,
@@ -302,7 +293,6 @@
 				AB8C5612101A077700B42306 /* mixst.c in Sources */,
 				AB8C5868101B6D7500B42306 /* vorbis.c in Sources */,
 				ABBD3F19101FFBD900F32F37 /* cd.c in Sources */,
-				ABBD3FD9102081C500F32F37 /* driver_sdl.c in Sources */,
 				ABFBB524102EBD4100D48B58 /* midi.c in Sources */,
 				ABFBB527102EBD4100D48B58 /* music.c in Sources */,
 				AB32F97210762A7900A9BAFF /* asssys.c in Sources */,
@@ -345,7 +335,6 @@
 				GCC_OPTIMIZATION_LEVEL = 0;
 				GCC_PREPROCESSOR_DEFINITIONS = (
 					HAVE_VORBIS,
-					HAVE_SDL,
 					__MACOSX__,
 				);
 				GCC_VERSION = com.apple.compilers.llvmgcc42;
@@ -368,7 +357,6 @@
 				);
 				GCC_PREPROCESSOR_DEFINITIONS = (
 					HAVE_VORBIS,
-					HAVE_SDL,
 					__MACOSX__,
 				);
 				GCC_VERSION = com.apple.compilers.llvmgcc42;
