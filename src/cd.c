@@ -85,6 +85,17 @@ int CD_Init(int SoundCard)
     return CD_Ok;
 }
 
+int  CD_GetCurrentDriver(void)
+{
+    return ASS_CDSoundDriver;
+}
+
+const char * CD_GetCurrentDriverName(void)
+{
+    return SoundDriver_GetName(ASS_CDSoundDriver);
+}
+
+
 void CD_Shutdown(void)
 {
     SoundDriver_CD_Shutdown();

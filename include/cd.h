@@ -31,6 +31,8 @@ enum {
 int  CD_GetError(void);
 const char * CD_ErrorString(int code);
 int  CD_Init(int SoundCard);
+int  CD_GetCurrentDriver(void);
+const char * CD_GetCurrentDriverName(void);
 void CD_Shutdown(void);
 int  CD_Play(int track, int loop);
 void CD_Stop(void);
