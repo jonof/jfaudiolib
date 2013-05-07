@@ -1,14 +1,12 @@
 -include Makefile.user
 
-DXROOT ?= $(HOME)/sdks/directx/dx7
+DXROOT ?= $(USERPROFILE)/sdks/directx/dx81
 
 ifeq (0,$(RELEASE))
  OPTLEVEL=-O0
 else
  OPTLEVEL=-O2
 endif
-
-DXROOT ?= $(HOME)/sdks/directx/dx7
 
 CC=gcc
 CFLAGS=-g $(OPTLEVEL) -Wall
