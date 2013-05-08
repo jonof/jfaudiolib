@@ -27,13 +27,11 @@ SOURCES=src/drivers.c \
 		
 include Makefile.shared
 
-ifeq (1,$(JFAUDIOLIB_HAVE_SDL))
- CPPFLAGS+= -DHAVE_VORBIS $(shell pkg-config --cflags vorbisfile)
-endif
-
 ifneq (,$(findstring MINGW,$(shell uname -s)))
  CPPFLAGS+= -I$(DXROOT)/include -Ithird-party/mingw32/include
  SOURCES+= src/driver_directsound.c src/driver_winmm.c
+
+ CPPFLAGS+= -DHAVE_VORBIS
 else
  ifeq (1,$(JFAUDIOLIB_HAVE_SDL))
   CPPFLAGS+= -DHAVE_SDL $(shell pkg-config --cflags sdl)
@@ -51,6 +49,9 @@ else
  ifeq (1,$(JFAUDIOLIB_HAVE_FLUIDSYNTH))
   CPPFLAGS+= -DHAVE_FLUIDSYNTH $(shell pkg-config --cflags fluidsynth)
   SOURCES+= src/driver_fluidsynth.c
+ endif
+ ifeq (1,$(JFAUDIOLIB_HAVE_VORBIS))
+  CPPFLAGS+= -DHAVE_VORBIS $(shell pkg-config --cflags vorbisfile)
  endif
 endif
 
