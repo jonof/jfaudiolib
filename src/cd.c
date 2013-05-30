@@ -20,6 +20,7 @@
 
 #include "cd.h"
 #include "drivers.h"
+#include <assert.h>
 
 static int ErrorCode = CD_Ok;
 
@@ -32,7 +33,10 @@ const char * CD_ErrorString(int code)
 {
     switch (code) {
         case CD_Error:
-            return CD_ErrorString(ErrorCode);
+            // make sure not to create an endless loop here
+            assert(ErrorCode != CD_Error);
+            if(ErrorCode != CD_Error)
+                return CD_ErrorString(ErrorCode);
 
         case CD_Ok:
             return "No error.";
@@ -107,7 +111,8 @@ int CD_Play(int track, int loop)
     
     err = SoundDriver_CD_Play(track, loop);
     if (err != CD_Ok) {
-        ErrorCode = err;
+        // the actual error string will be obtained from the driver
+        ErrorCode = CD_DriverError;
         return CD_Error;
     }
 
