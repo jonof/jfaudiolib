@@ -37,6 +37,7 @@ const char * CD_ErrorString(int code)
             assert(ErrorCode != CD_Error);
             if(ErrorCode != CD_Error)
                 return CD_ErrorString(ErrorCode);
+            return "General CD error";
 
         case CD_Ok:
             return "No error.";
