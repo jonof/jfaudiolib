@@ -189,7 +189,7 @@ static int find_soundfont(void)
 
 static void apply_params(const char *params, fluid_settings_t *settings)
 {
-    char *parseparams, *savepair;
+    char *parseparams, *savepair = NULL;
     char *parampair, *paramname, *paramvalue;
     char *firstpair;
     int setok;
@@ -207,12 +207,15 @@ static void apply_params(const char *params, fluid_settings_t *settings)
 
         switch (fluid_settings_get_type(settings, paramname)) {
             case FLUID_NUM_TYPE:
+                fprintf(stderr, "FluidSynthDrv: setting '%s' to %f\n", paramname, atof(paramvalue));
                 setok = fluid_settings_setnum(settings, paramname, atof(paramvalue));
                 break;
             case FLUID_INT_TYPE:
+                fprintf(stderr, "FluidSynthDrv: setting '%s' to %d\n", paramname, atoi(paramvalue));
                 setok = fluid_settings_setint(settings, paramname, atoi(paramvalue));
                 break;
             case FLUID_STR_TYPE:
+                fprintf(stderr, "FluidSynthDrv: setting '%s' to '%s'\n", paramname, paramvalue);
                 setok = fluid_settings_setstr(settings, paramname, paramvalue);
                 break;
             default:
