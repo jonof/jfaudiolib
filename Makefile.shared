@@ -7,7 +7,9 @@ JFAUDIOLIB_USE_SDLMIXER=0
 JFAUDIOLIB=libjfaudiolib.a
 JFAUDIOLIB_LDFLAGS=
 
-ifneq (,$(findstring MINGW,$(shell uname -s)))
+machine=$(strip $(shell $(CC) -dumpmachine))
+
+ifeq (mingw32,$(findstring mingw32,$(machine)))
  JFAUDIOLIB_HAVE_VORBIS=1
 else
  ifeq (yes,$(shell pkg-config --exists vorbisfile && echo yes))

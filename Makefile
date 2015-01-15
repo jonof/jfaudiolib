@@ -8,7 +8,8 @@ else
  OPTLEVEL=-O2
 endif
 
-CC=gcc
+CC?=gcc
+AR?=ar
 CFLAGS=-g $(OPTLEVEL) -Wall
 CPPFLAGS=-Iinclude -Isrc
 
@@ -27,7 +28,7 @@ SOURCES=src/drivers.c \
 		
 include Makefile.shared
 
-ifneq (,$(findstring MINGW,$(shell uname -s)))
+ifeq (mingw32,$(findstring mingw32,$(machine)))
  CPPFLAGS+= -I$(DXROOT)/include -Ithird-party/mingw32/include
  SOURCES+= src/driver_directsound.c src/driver_winmm.c
 
@@ -58,7 +59,7 @@ endif
 OBJECTS=$(SOURCES:%.c=%.o)
 
 $(JFAUDIOLIB): $(OBJECTS)
-	ar cr $@ $^
+	$(AR) cr $@ $^
 
 $(OBJECTS): %.o: %.c
 	$(CC) -c $(CPPFLAGS) $(CFLAGS) $< -o $@
