@@ -3,7 +3,7 @@
 DXROOT ?= $(USERPROFILE)/sdks/directx/dx81
 
 ifeq (0,$(RELEASE))
- OPTLEVEL=-O0
+ OPTLEVEL=-Og
 else
  OPTLEVEL=-O2
 endif
@@ -25,7 +25,7 @@ SOURCES=src/drivers.c \
         src/midi.c \
         src/driver_nosound.c \
         src/asssys.c
-		
+
 include Makefile.shared
 
 ifeq (mingw32,$(findstring mingw32,$(machine)))
