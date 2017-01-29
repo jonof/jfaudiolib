@@ -16,13 +16,13 @@ else
   JFAUDIOLIB_HAVE_VORBIS=1
   JFAUDIOLIB_LDFLAGS+= $(shell pkg-config --libs vorbisfile)
  endif
- ifeq (yes,$(shell pkg-config --exists sdl && echo yes))
-  JFAUDIOLIB_HAVE_SDL=1
-  JFAUDIOLIB_LDFLAGS+= $(shell pkg-config --libs sdl)
+ ifeq (yes,$(shell pkg-config --exists sdl2 && echo yes))
+  JFAUDIOLIB_HAVE_SDL=2
+  JFAUDIOLIB_LDFLAGS+= $(shell pkg-config --libs sdl2)
  else
-  ifeq (yes,$(shell pkg-config --exists sdl2 && echo yes))
-   JFAUDIOLIB_HAVE_SDL=2
-   JFAUDIOLIB_LDFLAGS+= $(shell pkg-config --libs sdl2)
+  ifeq (yes,$(shell pkg-config --exists sdl && echo yes))
+   JFAUDIOLIB_HAVE_SDL=1
+   JFAUDIOLIB_LDFLAGS+= $(shell pkg-config --libs sdl1)
   endif
  endif
  ifeq (yes,$(shell pkg-config --exists alsa && echo yes))
