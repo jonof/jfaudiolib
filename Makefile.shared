@@ -19,6 +19,11 @@ else
  ifeq (yes,$(shell pkg-config --exists sdl && echo yes))
   JFAUDIOLIB_HAVE_SDL=1
   JFAUDIOLIB_LDFLAGS+= $(shell pkg-config --libs sdl)
+ else
+  ifeq (yes,$(shell pkg-config --exists sdl2 && echo yes))
+   JFAUDIOLIB_HAVE_SDL=2
+   JFAUDIOLIB_LDFLAGS+= $(shell pkg-config --libs sdl2)
+  endif
  endif
  ifeq (yes,$(shell pkg-config --exists alsa && echo yes))
   JFAUDIOLIB_HAVE_ALSA=1

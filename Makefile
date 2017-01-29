@@ -34,8 +34,12 @@ ifeq (mingw32,$(findstring mingw32,$(machine)))
 
  CPPFLAGS+= -DHAVE_VORBIS
 else
- ifeq (1,$(JFAUDIOLIB_HAVE_SDL))
-  CPPFLAGS+= -DHAVE_SDL $(shell pkg-config --cflags sdl)
+ ifneq (0,$(JFAUDIOLIB_HAVE_SDL))
+  ifeq (1,$(JFAUDIOLIB_HAVE_SDL))
+   CPPFLAGS+= -DHAVE_SDL=1 $(shell pkg-config --cflags sdl)
+  else
+   CPPFLAGS+= -DHAVE_SDL=2 $(shell pkg-config --cflags sdl2)
+  endif
   ifeq (1,$(JFAUDIOLIB_USE_SDLMIXER))
    CPPFLAGS+= -DUSE_SDLMIXER
    SOURCES+= src/driver_sdlmixer.c

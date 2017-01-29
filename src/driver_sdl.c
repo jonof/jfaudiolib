@@ -23,7 +23,11 @@
  */
 
 #ifdef __APPLE__
-# include <SDL/SDL.h>
+# if HAVE_SDL == 2
+#  include <SDL2/SDL.h>
+# else
+#  include <SDL/SDL.h>
+# endif
 #else
 # include <SDL.h>
 #endif
@@ -39,7 +43,8 @@ enum {
     SDLErr_CDOpen,
     SDLErr_CDCannotPlayTrack,
     SDLErr_CDCreateSemaphore,
-    SDLErr_CDCreateThread
+    SDLErr_CDCreateThread,
+    SDLErr_CDNotSupported
 };
 
 static int ErrorCode = SDLErr_Ok;
@@ -48,11 +53,13 @@ static int Playing = 0;
 static int StartedSDL = 0;      // SDL services in use (1 = sound, 2 = CDA)
 static int StartedSDLInit = 0;  // SDL services we initialised (0x80000000 means we used SDL_Init)
 
+#if (SDL_MAJOR_VERSION == 1)
 static SDL_CD *CDRom = 0;
 static SDL_Thread *CDWatchThread = 0;
 static SDL_sem *CDWatchKillSem = 0;
 static int CDLoop = 0;
 static int CDTrack = 0;
+#endif
 
 static char *MixBuffer = 0;
 static int MixBufferSize = 0;
@@ -142,6 +149,10 @@ const char *SDLDrv_ErrorString( int ErrorNumber )
             ErrorString = "SDL CD: could not create looped CD playback thread.";
             break;
 
+        case SDLErr_CDNotSupported:
+            ErrorString = "SDL CD is not supported";
+            break;
+
         default:
             ErrorString = "Unknown SDL Audio error code.";
             break;
@@ -155,7 +166,6 @@ int SDLDrv_PCM_Init(int * mixrate, int * numchannels, int * samplebits, void * i
     Uint32 inited;
     Uint32 err = 0;
     SDL_AudioSpec spec, actual;
-    char drivername[256] = "(error)";
 
     if (Initialised) {
         SDLDrv_PCM_Shutdown();
@@ -182,8 +192,18 @@ int SDLDrv_PCM_Init(int * mixrate, int * numchannels, int * samplebits, void * i
 
     StartedSDL |= SDL_INIT_AUDIO;
 
-    SDL_AudioDriverName(drivername, sizeof(drivername));
-    fprintf(stderr, "SDL_AudioDriverName: %s\n", drivername);
+    #if (SDL_MAJOR_VERSION == 1)
+    {
+        char drivername[256] = "(error)";
+        SDL_AudioDriverName(drivername, sizeof(drivername));
+        fprintf(stderr, "SDL_AudioDriverName: %s\n", drivername);
+    }
+    #else
+    {
+        const char * drivername = SDL_GetCurrentAudioDriver();
+        fprintf(stderr, "SDL_GetCurrentAudioDriver: %s\n", drivername ? drivername : "(error)");
+    }
+    #endif
 
     spec.freq = *mixrate;
     spec.format = (*samplebits == 8) ? AUDIO_U8 : AUDIO_S16SYS;
@@ -314,6 +334,7 @@ void SDLDrv_PCM_Unlock(void)
 }
 
 
+#if (SDL_MAJOR_VERSION == 1)
 static int cdWatchThread(void * v)
 {
     CDstatus status;
@@ -348,10 +369,12 @@ static int cdWatchThread(void * v)
     
     return 0;
 }
+#endif
 
 
 int SDLDrv_CD_Init(void)
 {
+#if (SDL_MAJOR_VERSION == 1)
     Uint32 inited;
     Uint32 err = 0;
     int i;
@@ -394,10 +417,15 @@ int SDLDrv_CD_Init(void)
     }
     
     return SDLErr_Ok;
+#else
+    ErrorCode = SDLErr_CDNotSupported;
+    return SDLErr_Error;
+#endif
 }
 
 void SDLDrv_CD_Shutdown(void)
 {
+#if (SDL_MAJOR_VERSION == 1)
     SDLDrv_CD_Stop();
     
     if (CDRom) {
@@ -416,10 +444,12 @@ void SDLDrv_CD_Shutdown(void)
     }
 
     StartedSDL &= ~SDL_INIT_CDROM;
+#endif
 }
 
 int SDLDrv_CD_Play(int track, int loop)
 {
+#if (SDL_MAJOR_VERSION == 1)
     if (!CDRom) {
         ErrorCode = SDLErr_Uninitialised;
         return SDLErr_Error;
@@ -454,10 +484,15 @@ int SDLDrv_CD_Play(int track, int loop)
     }
     
     return SDLErr_Ok;
+#else
+    ErrorCode = SDLErr_CDNotSupported;
+    return SDLErr_Error;
+#endif
 }
 
 void SDLDrv_CD_Stop(void)
 {
+#if (SDL_MAJOR_VERSION == 1)
     if (!CDRom) {
         return;
     }
@@ -473,10 +508,12 @@ void SDLDrv_CD_Stop(void)
     CDWatchThread = 0;
             
     SDL_CDStop(CDRom);
+#endif
 }
 
 void SDLDrv_CD_Pause(int pauseon)
 {
+#if (SDL_MAJOR_VERSION == 1)
     if (!CDRom) {
         return;
     }
@@ -486,17 +523,21 @@ void SDLDrv_CD_Pause(int pauseon)
     } else {
         SDL_CDResume(CDRom);
     }
+#endif
 }
 
 int SDLDrv_CD_IsPlaying(void)
 {
+#if (SDL_MAJOR_VERSION == 1)
     if (!CDRom) {
         return 0;
     }
     return SDL_CDStatus(CDRom) == CD_PLAYING;
+#else
+    return 0;
+#endif
 }
 
 void SDLDrv_CD_SetVolume(int volume)
 {
 }
-
