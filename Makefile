@@ -65,7 +65,7 @@ $(OBJECTS): %.o: %.c
 	$(CC) -c $(CPPFLAGS) $(CFLAGS) $< -o $@
 
 test: src/test.o $(JFAUDIOLIB);
-	$(CC) $(CPPFLAGS) $(CFLAGS) $^ -o $@ $(JFAUDIOLIB_LDFLAGS)
+	$(CC) $(CPPFLAGS) $(CFLAGS) $^ -o $@ $(JFAUDIOLIB_LDFLAGS) -lm
 
 .PHONY: clean
 clean:

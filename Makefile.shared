@@ -23,6 +23,7 @@ else
  ifeq (yes,$(shell pkg-config --exists alsa && echo yes))
   JFAUDIOLIB_HAVE_ALSA=1
   JFAUDIOLIB_LDFLAGS+= $(shell pkg-config --libs alsa)
+  JFAUDIOLIB_LDFLAGS+=-lpthread
  endif
  ifeq (yes,$(shell pkg-config --exists fluidsynth && echo yes))
   JFAUDIOLIB_HAVE_FLUIDSYNTH=1

@@ -22,7 +22,6 @@
  * FluidSynth MIDI synthesiser output
  */
 
-#define _POSIX_SOURCE
 #include "midifuncs.h"
 #include "driver_fluidsynth.h"
 #include <fluidsynth.h>
@@ -196,7 +195,8 @@ static void apply_params(const char *params, fluid_settings_t *settings)
 
     if (!params || !params[0]) return;
 
-    parseparams = strdup(params);
+    parseparams = malloc(strlen(params) + 1);
+    strcpy(parseparams, params);
     firstpair = parseparams;
     while ((parampair = strtok_r(firstpair, " ", &savepair))) {
         firstpair = NULL;

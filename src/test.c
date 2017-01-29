@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 #include "fx_man.h"
 #include "music.h"
@@ -21,29 +22,53 @@ void * win_gethwnd()
 int main(int argc, char ** argv)
 {
     int status = 0;
+    int FXDevice = ASS_AutoDetect;
+    int MusicDevice = ASS_AutoDetect;
     int NumVoices = 8;
     int NumChannels = 2;
     int NumBits = 16;
     int MixRate = 32000;
+    int arg = 0;
     void * initdata = 0;
-    int voice = FX_Error;
+    const char * musicinit = 0;
     const char * song = "test.ogg";
 
-    if (argc > 1) {
-        song = argv[1];
+    for (arg = 1; arg < argc; arg++) {
+        if (argv[arg][0] == '-') {
+            if (argv[arg][1] == 'h') {
+                puts("test [options] [song]");
+                puts("");
+                puts("-h     This text.");
+                puts("-fn    Set specific FX device (n = device number)");
+                puts("-mn    Set specific Music device (n = device number)");
+                puts("-M...  Specify music device parameter string");
+		return 0;
+            } else if (argv[arg][1] == 'l') {
+                
+                return 0;
+            } else if (argv[arg][1] == 'f') {
+                FXDevice = atoi(argv[arg] + 2);
+            } else if (argv[arg][1] == 'm') {
+                MusicDevice = atoi(argv[arg] + 2);
+            } else if (argv[arg][1] == 'M') {
+                musicinit = argv[arg] + 2;
+            }
+        } else {
+            song = argv[arg];
+        }
     }
 
 #ifdef _WIN32
     initdata = win_gethwnd();
 #endif
 
-    status = FX_Init( ASS_AutoDetect, NumVoices, &NumChannels, &NumBits, &MixRate, initdata );
+    status = FX_Init( FXDevice, NumVoices, &NumChannels, &NumBits, &MixRate, initdata );
     if (status != FX_Ok) {
         fprintf(stderr, "FX_Init error %s\n", FX_ErrorString(status));
         return 1;
     }
     
-    status = MUSIC_Init(ASS_AutoDetect, 0);
+    status = MUSIC_Init(MusicDevice, musicinit);
     if (status != MUSIC_Ok) {
         fprintf(stderr, "MUSIC_Init error %s\n", MUSIC_ErrorString(status));
         FX_Shutdown();
