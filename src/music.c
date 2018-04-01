@@ -137,7 +137,7 @@ int MUSIC_Init
 		SoundCard = ASS_NoSound;
 #endif
 	}
-	
+
 	if (SoundCard < 0 || SoundCard >= ASS_NumSoundCards) {
 		MUSIC_ErrorCode = MUSIC_InvalidCard;
 		return MUSIC_Error;
@@ -150,7 +150,7 @@ int MUSIC_Init
       }
 
    ASS_MIDISoundDriver = SoundCard;
-   
+
    status = SoundDriver_MIDI_Init(&MUSIC_MidiFunctions, params);
    if (status != MUSIC_Ok)
       {
@@ -183,7 +183,9 @@ int MUSIC_Shutdown
       MUSIC_StopFade();
       }*/
 
-   SoundDriver_MIDI_Shutdown();
+   if (ASS_MIDISoundDriver >= 0) {
+      SoundDriver_MIDI_Shutdown();
+   }
 
    return MUSIC_Ok;
    }
