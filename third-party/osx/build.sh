@@ -80,7 +80,7 @@ if test ! -f $destdir/out/lib/libvorbisfile.a; then
         check_file $vorbisfilesum $vorbisfile || rm -f $vorbisfile
     fi
     if [ ! -f $vorbisfile ]; then
-        curl -sL $oggurl -o $vorbisfile || exit
+        curl -sL $vorbisurl -o $vorbisfile || exit
         check_file $vorbisfilesum $vorbisfile || rm -f $vorbisfile
     fi
     (cd libvorbis-build; tar zx --strip-components 1) < $vorbisfile || exit
