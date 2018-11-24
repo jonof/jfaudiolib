@@ -254,7 +254,7 @@ int WinMMDrv_CD_Init(void)
     WinMMDrv_CD_Shutdown();
 
     mciopenparms.lpstrDeviceType = "cdaudio";
-    rv = mciSendCommand(0, MCI_OPEN, MCI_OPEN_TYPE, (DWORD)(LPVOID) &mciopenparms);
+    rv = mciSendCommand(0, MCI_OPEN, MCI_OPEN_TYPE, (DWORD_PTR) &mciopenparms);
     if (rv) {
         fprintf(stderr, "WinMM CD_Init MCI_OPEN err %d\n", (int) rv);
         ErrorCode = WinMMErr_CDMCIOpen;
@@ -264,7 +264,7 @@ int WinMMDrv_CD_Init(void)
     cdDeviceID = mciopenparms.wDeviceID;
 
     mcisetparms.dwTimeFormat = MCI_FORMAT_TMSF;
-    rv = mciSendCommand(cdDeviceID, MCI_SET, MCI_SET_TIME_FORMAT, (DWORD)(LPVOID) &mcisetparms);
+    rv = mciSendCommand(cdDeviceID, MCI_SET, MCI_SET_TIME_FORMAT, (DWORD_PTR) &mcisetparms);
     if (rv) {
         fprintf(stderr, "WinMM CD_Init MCI_SET err %d\n", (int) rv);
         mciSendCommand(cdDeviceID, MCI_CLOSE, 0, 0);
@@ -313,8 +313,8 @@ int WinMMDrv_CD_Play(int track, int loop)
 
     mciplayparms.dwFrom = MCI_MAKE_TMSF(track, 0, 0, 0);
     mciplayparms.dwTo   = MCI_MAKE_TMSF(track + 1, 0, 0, 0);
-    mciplayparms.dwCallback = (DWORD) notifyWindow;
-    rv = mciSendCommand(cdDeviceID, MCI_PLAY, MCI_FROM | MCI_TO | MCI_NOTIFY, (DWORD)(LPVOID) &mciplayparms);
+    mciplayparms.dwCallback = (DWORD_PTR) notifyWindow;
+    rv = mciSendCommand(cdDeviceID, MCI_PLAY, MCI_FROM | MCI_TO | MCI_NOTIFY, (DWORD_PTR) &mciplayparms);
     if (rv) {
         fprintf(stderr, "WinMM CD_Play MCI_PLAY err %d\n", (int) rv);
         ErrorCode = WinMMErr_CDMCIPlay;
@@ -337,7 +337,7 @@ void WinMMDrv_CD_Stop(void)
     cdLoop = 0;
     cdPaused = 0;
 
-    rv = mciSendCommand(cdDeviceID, MCI_STOP, 0, (DWORD)(LPVOID) &mcigenparms);
+    rv = mciSendCommand(cdDeviceID, MCI_STOP, 0, (DWORD_PTR) &mcigenparms);
     if (rv) {
         fprintf(stderr, "WinMM CD_Stop MCI_STOP err %d\n", (int) rv);
     }
@@ -359,7 +359,7 @@ void WinMMDrv_CD_Pause(int pauseon)
         DWORD rv;
 
         mcistatusparms.dwItem = MCI_STATUS_POSITION;
-        rv = mciSendCommand(cdDeviceID, MCI_STATUS, MCI_WAIT | MCI_STATUS_ITEM, (DWORD)(LPVOID) &mcistatusparms);
+        rv = mciSendCommand(cdDeviceID, MCI_STATUS, MCI_WAIT | MCI_STATUS_ITEM, (DWORD_PTR) &mcistatusparms);
         if (rv) {
             fprintf(stderr, "WinMM CD_Pause MCI_STATUS err %d\n", (int) rv);
             return;
@@ -367,7 +367,7 @@ void WinMMDrv_CD_Pause(int pauseon)
 
         cdPausePosition = mcistatusparms.dwReturn;
 
-        rv = mciSendCommand(cdDeviceID, MCI_STOP, 0, (DWORD)(LPVOID) &mcigenparms);
+        rv = mciSendCommand(cdDeviceID, MCI_STOP, 0, (DWORD_PTR) &mcigenparms);
         if (rv) {
             fprintf(stderr, "WinMM CD_Pause MCI_STOP err %d\n", (int) rv);
         }
@@ -377,8 +377,8 @@ void WinMMDrv_CD_Pause(int pauseon)
 
         mciplayparms.dwFrom = cdPausePosition;
         mciplayparms.dwTo   = MCI_MAKE_TMSF(cdPlayTrack + 1, 0, 0, 0);
-        mciplayparms.dwCallback = (DWORD) notifyWindow;
-        rv = mciSendCommand(cdDeviceID, MCI_PLAY, MCI_FROM | MCI_TO | MCI_NOTIFY, (DWORD)(LPVOID) &mciplayparms);
+        mciplayparms.dwCallback = (DWORD_PTR) notifyWindow;
+        rv = mciSendCommand(cdDeviceID, MCI_PLAY, MCI_FROM | MCI_TO | MCI_NOTIFY, (DWORD_PTR) &mciplayparms);
         if (rv) {
             fprintf(stderr, "WinMM CD_Pause MCI_PLAY err %d\n", (int) rv);
             return;
@@ -400,7 +400,7 @@ int WinMMDrv_CD_IsPlaying(void)
     }
 
     mcistatusparms.dwItem = MCI_STATUS_MODE;
-    rv = mciSendCommand(cdDeviceID, MCI_STATUS, MCI_WAIT | MCI_STATUS_ITEM, (DWORD)(LPVOID) &mcistatusparms);
+    rv = mciSendCommand(cdDeviceID, MCI_STATUS, MCI_WAIT | MCI_STATUS_ITEM, (DWORD_PTR) &mcistatusparms);
     if (rv) {
         fprintf(stderr, "WinMM CD_IsPlaying MCI_STATUS err %d\n", (int) rv);
         return 0;
