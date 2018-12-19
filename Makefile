@@ -35,11 +35,7 @@ ifeq (mingw32,$(findstring mingw32,$(machine)))
  CPPFLAGS+= -DHAVE_VORBIS
 else
  ifneq (0,$(JFAUDIOLIB_HAVE_SDL))
-  ifeq (1,$(JFAUDIOLIB_HAVE_SDL))
-   CPPFLAGS+= -DHAVE_SDL=1 $(shell pkg-config --cflags sdl)
-  else
-   CPPFLAGS+= -DHAVE_SDL=2 $(shell pkg-config --cflags sdl2)
-  endif
+  CPPFLAGS+= -DHAVE_SDL=2 $(shell $(SDL2CONFIG) --cflags)
   ifeq (1,$(JFAUDIOLIB_USE_SDLMIXER))
    CPPFLAGS+= -DUSE_SDLMIXER
    SOURCES+= src/driver_sdlmixer.c
@@ -48,15 +44,15 @@ else
   endif
  endif
  ifeq (1,$(JFAUDIOLIB_HAVE_ALSA))
-  CPPFLAGS+= -DHAVE_ALSA $(shell pkg-config --cflags alsa)
+  CPPFLAGS+= -DHAVE_ALSA $(shell $(PKGCONFIG) --cflags alsa)
   SOURCES+= src/driver_alsa.c
  endif
  ifeq (1,$(JFAUDIOLIB_HAVE_FLUIDSYNTH))
-  CPPFLAGS+= -DHAVE_FLUIDSYNTH $(shell pkg-config --cflags fluidsynth)
+  CPPFLAGS+= -DHAVE_FLUIDSYNTH $(shell $(PKGCONFIG) --cflags fluidsynth)
   SOURCES+= src/driver_fluidsynth.c
  endif
  ifeq (1,$(JFAUDIOLIB_HAVE_VORBIS))
-  CPPFLAGS+= -DHAVE_VORBIS $(shell pkg-config --cflags vorbisfile)
+  CPPFLAGS+= -DHAVE_VORBIS $(shell $(PKGCONFIG) --cflags vorbisfile)
  endif
 endif
 
