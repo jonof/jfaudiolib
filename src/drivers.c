@@ -55,7 +55,7 @@ int ASS_MIDISoundDriver = -1;
 #define UNSUPPORTED_PCM         0,0,0,0,0,0
 #define UNSUPPORTED_CD          0,0,0,0,0,0,0
 #define UNSUPPORTED_MIDI        0,0,0,0,0,0,0
-#define UNSUPPORTED_COMPLETELY  { 0,0, UNSUPPORTED_PCM, UNSUPPORTED_CD, UNSUPPORTED_MIDI },
+#define UNSUPPORTED_COMPLETELY  0,0, UNSUPPORTED_PCM, UNSUPPORTED_CD, UNSUPPORTED_MIDI
 
 static struct {
     const char * DriverName;
@@ -115,9 +115,9 @@ static struct {
    },
     
     // Simple DirectMedia Layer
-    #ifdef HAVE_SDL
     {
         "SDL",
+    #ifdef HAVE_SDL
         SDLDrv_GetError,
         SDLDrv_ErrorString,
         SDLDrv_PCM_Init,
@@ -134,15 +134,15 @@ static struct {
         SDLDrv_CD_IsPlaying,
         SDLDrv_CD_SetVolume,
         UNSUPPORTED_MIDI,
-    },
     #else
-        UNSUPPORTED_COMPLETELY
+        UNSUPPORTED_COMPLETELY,
     #endif
-    
+    },
+
     // OS X CoreAudio
-    #if defined __APPLE__ && !defined NO_COREAUDIO
     {
         "Core Audio",
+    #if defined __APPLE__ && !defined NO_COREAUDIO
         CoreAudioDrv_GetError,
         CoreAudioDrv_ErrorString,
         CoreAudioDrv_PCM_Init,
@@ -159,15 +159,15 @@ static struct {
         CoreAudioDrv_MIDI_SetTempo,
         CoreAudioDrv_MIDI_Lock,
         CoreAudioDrv_MIDI_Unlock,
-    },
     #else
-        UNSUPPORTED_COMPLETELY
+        UNSUPPORTED_COMPLETELY,
     #endif
-    
+    },
+
     // Windows DirectSound
-    #ifdef _WIN32
     {
         "DirectSound",
+    #ifdef _WIN32
         DirectSoundDrv_GetError,
         DirectSoundDrv_ErrorString,
         DirectSoundDrv_PCM_Init,
@@ -178,15 +178,15 @@ static struct {
         DirectSoundDrv_PCM_Unlock,
         UNSUPPORTED_CD,
         UNSUPPORTED_MIDI,
-    },
     #else
-        UNSUPPORTED_COMPLETELY
+        UNSUPPORTED_COMPLETELY,
     #endif
+    },
 
     // Windows MultiMedia system
-    #ifdef _WIN32
     {
         "WinMM",
+    #ifdef _WIN32
         WinMMDrv_GetError,
         WinMMDrv_ErrorString,
 
@@ -206,15 +206,15 @@ static struct {
         WinMMDrv_MIDI_SetTempo,
         WinMMDrv_MIDI_Lock,
         WinMMDrv_MIDI_Unlock,
-    },
     #else
-        UNSUPPORTED_COMPLETELY
+        UNSUPPORTED_COMPLETELY,
     #endif
+    },
 
     // FluidSynth MIDI synthesiser
-    #ifdef HAVE_FLUIDSYNTH
     {
         "FluidSynth",
+    #ifdef HAVE_FLUIDSYNTH
         FluidSynthDrv_GetError,
         FluidSynthDrv_ErrorString,
 
@@ -228,15 +228,15 @@ static struct {
         FluidSynthDrv_MIDI_SetTempo,
         FluidSynthDrv_MIDI_Lock,
         FluidSynthDrv_MIDI_Unlock,
-    },
     #else
-        UNSUPPORTED_COMPLETELY
+        UNSUPPORTED_COMPLETELY,
     #endif
+    },
 
     // ALSA MIDI synthesiser
-    #ifdef HAVE_ALSA
     {
         "ALSA",
+    #ifdef HAVE_ALSA
         ALSADrv_GetError,
         ALSADrv_ErrorString,
 
@@ -250,10 +250,10 @@ static struct {
         ALSADrv_MIDI_SetTempo,
         ALSADrv_MIDI_Lock,
         ALSADrv_MIDI_Unlock,
-    },
     #else
-        UNSUPPORTED_COMPLETELY
+        UNSUPPORTED_COMPLETELY,
     #endif
+    },
 };
 
 
