@@ -4,10 +4,11 @@
 
 #include "fx_man.h"
 #include "music.h"
-#include "sndcards.h"
+#include "drivers.h"
 #include "asssys.h"
 
 void playsong(const char *);
+void listdevs(void);
 
 #ifdef _WIN32
 #define WIN32_LEAN_AND_MEAN
@@ -39,12 +40,13 @@ int main(int argc, char ** argv)
                 puts("test [options] [song]");
                 puts("");
                 puts("-h     This text.");
+                puts("-l     List drivers.");
                 puts("-fn    Set specific FX device (n = device number)");
                 puts("-mn    Set specific Music device (n = device number)");
                 puts("-M...  Specify music device parameter string");
 		return 0;
             } else if (argv[arg][1] == 'l') {
-                
+                listdevs();
                 return 0;
             } else if (argv[arg][1] == 'f') {
                 FXDevice = atoi(argv[arg] + 2);
@@ -145,3 +147,22 @@ void playsong(const char * song)
 
     free(data);
 }
+
+void listdevs(void)
+{
+    int dev;
+    #define YESNO(x) ((x) ? "Yes" : "No ")
+
+    for (dev = 0; dev < ASS_NumSoundCards; dev++) {
+        printf("%d) %-15s PCM %s  CD %s  MIDI %s \n",
+            dev, SoundDriver_GetName(dev),
+            YESNO(SoundDriver_IsPCMSupported(dev)),
+            YESNO(SoundDriver_IsCDSupported(dev)),
+            YESNO(SoundDriver_IsMIDISupported(dev))
+        );
+    }
+}
+
+/*
+ * vim:ts=4:
+ */
