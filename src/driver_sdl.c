@@ -205,12 +205,17 @@ int SDLDrv_PCM_Init(int * mixrate, int * numchannels, int * samplebits, void * i
     }
     #endif
 
+    memset(&spec, 0, sizeof(spec));
     spec.freq = *mixrate;
     spec.format = (*samplebits == 8) ? AUDIO_U8 : AUDIO_S16SYS;
     spec.channels = *numchannels;
-    spec.samples = 512;
     spec.callback = fillData;
     spec.userdata = 0;
+
+    // Mix buffer to be a power of 2, min 512 samples, and 4096 samples at 48kHz.
+    spec.samples = 512;
+    while (spec.samples < (4096 * *mixrate / 48000))
+        spec.samples += spec.samples;
 
     memset(&actual, 0, sizeof(actual));
 
@@ -254,6 +259,7 @@ int SDLDrv_PCM_Init(int * mixrate, int * numchannels, int * samplebits, void * i
         ErrorCode = SDLErr_OpenAudio;
         err = 1;
     }
+    // fprintf(stderr, "SDL_OpenAudio: actual.samples = %d vs spec.samples = %d\n", actual.samples, spec.samples);
 
     if (err) {
         SDL_CloseAudio();
