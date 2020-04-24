@@ -29,3 +29,5 @@ unsigned int ALSADrv_MIDI_GetTick(void);
 void ALSADrv_MIDI_SetTempo(int tempo, int division);
 void ALSADrv_MIDI_Lock(void);
 void ALSADrv_MIDI_Unlock(void);
+void ALSADrv_MIDI_QueueStart(void);
+void ALSADrv_MIDI_QueueStop(void);

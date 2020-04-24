@@ -124,6 +124,8 @@ static inline void sequence_event(snd_seq_event_t * ev)
         if (result < 0) {
             fprintf(stderr, "ALSA could not drain output: err %d\n", result);
         }
+
+        snd_seq_sync_output_queue(seq);
     }
 }
 
@@ -316,37 +318,17 @@ void ALSADrv_MIDI_Shutdown(void)
 
 int ALSADrv_MIDI_StartPlayback(void (*service)(void))
 {
-    int result;
-    
     ALSADrv_MIDI_HaltPlayback();
 
     threadService = service;
     threadQuit = 0;
 
-    if (!queueRunning) {
-        result = snd_seq_start_queue(seq, seq_queue, NULL);
-        if (result < 0) {
-            fprintf(stderr, "ALSA snd_seq_start_queue err %d\n", result);
-            return ALSAErr_StartQueue;
-        }
-
-        while ((result = snd_seq_drain_output(seq)) > 0) ;
-        if (result < 0) {
-            fprintf(stderr, "ALSA could not drain output: err %d\n", result);
-        }
-    }
-
-    queueRunning = 1;
+    ALSADrv_MIDI_QueueStart();
 
     if (pthread_create(&thread, NULL, threadProc, NULL)) {
         fprintf(stderr, "ALSA pthread_create returned error\n");
 
-        snd_seq_stop_queue(seq, seq_queue, NULL);
-        while ((result = snd_seq_drain_output(seq)) > 0) ;
-        if (result < 0) {
-            fprintf(stderr, "ALSA could not drain output: err %d\n", result);
-        }
-        queueRunning = 0;
+        ALSADrv_MIDI_HaltPlayback();
         
         return ALSAErr_PlayThread;
     }
@@ -358,7 +340,6 @@ int ALSADrv_MIDI_StartPlayback(void (*service)(void))
 
 void ALSADrv_MIDI_HaltPlayback(void)
 {
-    int result;
     void * ret;
     
     if (!threadRunning) {
@@ -371,18 +352,8 @@ void ALSADrv_MIDI_HaltPlayback(void)
         fprintf(stderr, "ALSA pthread_join returned error\n");
     }
 
-    if (queueRunning) {
-        //snd_seq_stop_queue(seq, seq_queue, NULL);
-    }
+    ALSADrv_MIDI_QueueStop();
 
-    while ((result = snd_seq_drain_output(seq)) > 0) ;
-    if (result < 0) {
-        fprintf(stderr, "ALSA could not drain output: err %d\n", result);
-    }
-
-    snd_seq_sync_output_queue(seq);
-
-    //queueRunning = 0;
     threadRunning = 0;
 }
 
@@ -390,15 +361,8 @@ void ALSADrv_MIDI_SetTempo(int tempo, int division)
 {
     double tps;
     snd_seq_queue_tempo_t * t;
-    int result;
 
-    if (queueRunning) {
-        snd_seq_stop_queue(seq, seq_queue, NULL);
-        while ((result = snd_seq_drain_output(seq)) > 0) ;
-        if (result < 0) {
-            fprintf(stderr, "ALSA could not drain output: err %d\n", result);
-        }
-    }
+    ALSADrv_MIDI_QueueStop();
 
     snd_seq_queue_tempo_alloca(&t);
     snd_seq_queue_tempo_set_tempo(t, 60000000 / tempo);
@@ -408,13 +372,7 @@ void ALSADrv_MIDI_SetTempo(int tempo, int division)
     tps = ( (double) tempo * (double) division ) / 60.0;
     threadQueueTicks = (int) ceil(tps / (double) THREAD_QUEUE_INTERVAL);
 
-    if (queueRunning) {
-        snd_seq_start_queue(seq, seq_queue, NULL);
-        while ((result = snd_seq_drain_output(seq)) > 0) ;
-        if (result < 0) {
-            fprintf(stderr, "ALSA could not drain output: err %d\n", result);
-        }
-    }
+    ALSADrv_MIDI_QueueStart();
 }
 
 void ALSADrv_MIDI_Lock(void)
@@ -425,3 +383,44 @@ void ALSADrv_MIDI_Unlock(void)
 {
 }
 
+void ALSADrv_MIDI_QueueStart(void)
+{
+    int result;
+
+    if (!queueRunning) {
+        result = snd_seq_start_queue(seq, seq_queue, NULL);
+        if (result < 0) {
+            fprintf(stderr, "ALSA snd_seq_start_queue err %d\n", result);
+        }
+
+        while ((result = snd_seq_drain_output(seq)) > 0);
+        if (result < 0) {
+            fprintf(stderr, "ALSA could not drain output: err %d\n", result);
+        }
+
+        snd_seq_sync_output_queue(seq);
+
+        queueRunning = 1;
+    }
+}
+
+void ALSADrv_MIDI_QueueStop(void)
+{
+    int result;
+
+    if (queueRunning) {
+        result = snd_seq_stop_queue(seq, seq_queue, NULL);
+        if (result < 0) {
+            fprintf(stderr, "ALSA snd_seq_stop_queue err %d\n", result);
+        }
+
+        while ((result = snd_seq_drop_output(seq)) > 0);
+        if (result < 0) {
+            fprintf(stderr, "ALSA could not drop output: err %d\n", result);
+        }
+
+        snd_seq_sync_output_queue(seq);
+
+        queueRunning = 0;
+    }
+}
