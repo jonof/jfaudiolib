@@ -8,3 +8,5 @@
 /*.xcodeproj/project.xcworkspace
 /*.xcodeproj/xcuserdata
 /Makefile.user
+/test
+/test.exe

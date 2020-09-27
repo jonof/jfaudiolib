@@ -33,7 +33,9 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
-#include <unistd.h>
+#ifndef _WIN32
+# include <unistd.h>
+#endif
 #include <errno.h>
 #include "pitch.h"
 #include "multivoc.h"
@@ -44,7 +46,7 @@
 
 
 typedef struct {
-   void * ptr;
+   char * ptr;
    size_t length;
    size_t pos;
    
@@ -58,8 +60,8 @@ static size_t read_vorbis(void * ptr, size_t size, size_t nmemb, void * datasour
 {
    vorbis_data * vorb = (vorbis_data *) datasource;
    size_t nread = 0;
-   size_t bytes;
-   
+   size_t bytes, woffset = 0;
+
    errno = 0;
 
    if (vorb->length == vorb->pos) {
@@ -71,11 +73,11 @@ static size_t read_vorbis(void * ptr, size_t size, size_t nmemb, void * datasour
       if (size < bytes) {
          bytes = size;
       }
-      
-      memcpy(ptr, vorb->ptr + vorb->pos, bytes);
+
+      memcpy((char *)ptr + woffset, vorb->ptr + vorb->pos, bytes);
       vorb->pos += bytes;
-      ptr += bytes;
-      
+      woffset += bytes;
+
       if (vorb->length == vorb->pos) {
          nread++;
          break;

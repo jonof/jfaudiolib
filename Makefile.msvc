@@ -19,6 +19,11 @@ SOURCES=src\drivers.c \
 
 !include Makefile.msvcshared
 
+!if $(JFAUDIOLIB_HAVE_VORBIS)
+CPPFLAGS=$(CPPFLAGS) /DHAVE_VORBIS /Ithird-party\msvc\include
+JFAUDIOLIB_LINKFLAGS=$(JFAUDIOLIB_LINKFLAGS) /LIBPATH:$(MAKEDIR)\third-party\msvc\lib$(PLATFORM)
+!endif
+
 OBJECTS=$(SOURCES:.c=.obj)
 
 $(JFAUDIOLIB): $(OBJECTS)
@@ -31,4 +36,4 @@ test.exe: src\test.obj $(JFAUDIOLIB)
 	$(CC) /c $(CPPFLAGS) $(CFLAGS) /Fo$@ $<
 
 clean:
-	-del /q $(OBJECTS) $(JFAUDIOLIB)
+	-del /q $(OBJECTS) $(JFAUDIOLIB) test.exe
