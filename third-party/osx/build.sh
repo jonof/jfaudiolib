@@ -17,6 +17,10 @@ archflags="${arches[*]/#/-arch }"
 
 destdir=$(cd $(dirname ${BASH_SOURCE[0]}) && pwd)
 
+# Determine how many CPU cores the system has so we can parallelise compiles.
+ncpus=$(sysctl -q -n hw.ncpu)
+makeflags=-j${ncpus:-1}
+
 export MAKE="xcrun make"
 export CC="xcrun clang"
 export CXX="xcrun clang++"
@@ -24,7 +28,7 @@ export LD="xcrun ld"
 export AR="xcrun ar"
 export RANLIB="xcrun ranlib"
 export STRIP="xcrun strip"
-export CFLAGS="$archflags -mmacosx-version-min=10.8"
+export CFLAGS="$archflags -mmacosx-version-min=10.9"
 
 check_tools() {
     echo "+++ Checking build tools"
@@ -61,7 +65,7 @@ if test ! -f $destdir/out/lib/libogg.a; then
     (cd libogg-build; ./configure --prefix=/out) || exit
 
     echo "+++ Building libogg"
-    (cd libogg-build; $MAKE) || exit
+    (cd libogg-build; $MAKE $makeflags) || exit
 
     echo "+++ Installing libogg to $destdir"
     (cd libogg-build; $MAKE DESTDIR=$destdir install) || exit
@@ -89,7 +93,7 @@ if test ! -f $destdir/out/lib/libvorbisfile.a; then
     (cd libvorbis-build; PKG_CONFIG=/usr/bin/false ./configure --prefix=/out --with-ogg=$destdir/out) || exit
 
     echo "+++ Building libvorbis"
-    (cd libvorbis-build; $MAKE) || exit
+    (cd libvorbis-build; $MAKE $makeflags) || exit
 
     echo "+++ Installing libvorbis to $destdir"
     (cd libvorbis-build; $MAKE DESTDIR=$destdir install) || exit
