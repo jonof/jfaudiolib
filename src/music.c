@@ -387,7 +387,7 @@ int MUSIC_StopSong
 
 int MUSIC_PlaySong
    (
-   char *song,
+   void *song,
    unsigned int length,
    int loopflag
    )
