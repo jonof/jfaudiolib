@@ -21,6 +21,10 @@
 #ifndef __CD_H
 #define __CD_H
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 enum {
     CD_Error = -1,
     CD_Ok,
@@ -39,5 +43,9 @@ void CD_Stop(void);
 void CD_Pause(int pauseon);
 int  CD_IsPlaying(void);
 void CD_SetVolume(int volume);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif
