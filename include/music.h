@@ -33,6 +33,10 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 #include "sndcards.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 extern int MUSIC_ErrorCode;
 
 enum MUSIC_ERRORS
@@ -85,5 +89,9 @@ int   MUSIC_FadeActive( void );
 void  MUSIC_StopFade( void );
 void  MUSIC_RerouteMidiChannel( int channel, int ( *function )( int event, int c1, int c2 ) );
 void  MUSIC_RegisterTimbreBank( unsigned char *timbres );
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

@@ -33,6 +33,10 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 #include "sndcards.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 extern int FX_ErrorCode;
 
 enum FX_ERRORS
@@ -112,5 +116,9 @@ int FX_StartDemandFeedPlayback( void ( *function )( char **ptr, unsigned int *le
        int priority, unsigned int callbackval );
 int  FX_StartRecording( int MixRate, void ( *function )( char *ptr, int length ) );
 void FX_StopRecord( void );
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif
