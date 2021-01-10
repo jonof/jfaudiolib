@@ -263,7 +263,7 @@ int WinMMDrv_CD_Init(void)
 
     cdDeviceID = mciopenparms.wDeviceID;
 
-    mcisetparms.dwTimeFormat = MCI_FORMAT_TMSF;
+    mcisetparms.dwTimeFormat = MCI_FORMAT_MSF;
     rv = mciSendCommand(cdDeviceID, MCI_SET, MCI_SET_TIME_FORMAT, (DWORD_PTR) &mcisetparms);
     if (rv) {
         fprintf(stderr, "WinMM CD_Init MCI_SET err %d\n", (int) rv);
@@ -300,7 +300,9 @@ void WinMMDrv_CD_Shutdown(void)
 int WinMMDrv_CD_Play(int track, int loop)
 {
     MCI_PLAY_PARMS mciplayparms;
-    DWORD rv;
+    MCI_STATUS_PARMS mcistatusparms;
+    DWORD rv, start, end;
+    BYTE minutes, seconds, frames;
 
     if (!cdDeviceID) {
         ErrorCode = WinMMErr_Uninitialised;
@@ -311,8 +313,34 @@ int WinMMDrv_CD_Play(int track, int loop)
     cdLoop = loop;
     cdPaused = 0;
 
-    mciplayparms.dwFrom = MCI_MAKE_TMSF(track, 0, 0, 0);
-    mciplayparms.dwTo   = MCI_MAKE_TMSF(track + 1, 0, 0, 0);
+    mcistatusparms.dwItem = MCI_STATUS_POSITION;
+    mcistatusparms.dwTrack = track;
+    rv = mciSendCommand(cdDeviceID, MCI_STATUS, MCI_WAIT | MCI_TRACK | MCI_STATUS_ITEM, (DWORD_PTR) &mcistatusparms);
+    if (rv) {
+        fprintf(stderr, "WinMM CD_Play MCI_STATUS position err %d\n", (int) rv);
+        ErrorCode = WinMMErr_CDMCIPlay;
+        return WinMMErr_Error;
+    }
+    start = mcistatusparms.dwReturn;
+
+    mcistatusparms.dwItem = MCI_STATUS_LENGTH;
+    mcistatusparms.dwTrack = track;
+    rv = mciSendCommand(cdDeviceID, MCI_STATUS, MCI_WAIT | MCI_TRACK | MCI_STATUS_ITEM, (DWORD_PTR) &mcistatusparms);
+    if (rv) {
+        fprintf(stderr, "WinMM CD_Play MCI_STATUS length err %d\n", (int) rv);
+        ErrorCode = WinMMErr_CDMCIPlay;
+        return WinMMErr_Error;
+    }
+    end = mcistatusparms.dwReturn;
+
+    minutes = MCI_MSF_MINUTE(start) + MCI_MSF_MINUTE(end);
+    seconds = MCI_MSF_SECOND(start) + MCI_MSF_SECOND(end);
+    frames = MCI_MSF_FRAME(start) + MCI_MSF_FRAME(end);
+    while (frames >= 75) { seconds += 1; frames -= 75; }
+    while (seconds >= 60) { minutes += 1; seconds -= 60; }
+
+    mciplayparms.dwFrom = start;
+    mciplayparms.dwTo = MCI_MAKE_MSF(minutes, seconds, frames);
     mciplayparms.dwCallback = (DWORD_PTR) notifyWindow;
     rv = mciSendCommand(cdDeviceID, MCI_PLAY, MCI_FROM | MCI_TO | MCI_NOTIFY, (DWORD_PTR) &mciplayparms);
     if (rv) {
