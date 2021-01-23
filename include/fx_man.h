@@ -90,6 +90,8 @@ int FX_PlayVOC3D( char *ptr, unsigned int ptrlength, int pitchoffset, int angle,
        int priority, unsigned int callbackval );
 int FX_PlayWAV3D( char *ptr, unsigned int ptrlength, int pitchoffset, int angle, int distance,
        int priority, unsigned int callbackval );
+int FX_PlayRaw3D( char *ptr, unsigned int ptrlength, unsigned rate,
+       int pitchoffset, int angle, int distance, int priority, unsigned int callbackval );
 
 int FX_PlayAuto( char *ptr, unsigned int ptrlength, int pitchoffset, int vol, int left, int right,
                 int priority, unsigned int callbackval );

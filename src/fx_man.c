@@ -705,6 +705,40 @@ int FX_PlayWAV3D
 
 
 /*---------------------------------------------------------------------
+   Function: FX_PlayRaw3D
+
+   Begin playback of sound data at specified angle and distance
+   from listener.
+---------------------------------------------------------------------*/
+
+int FX_PlayRaw3D
+   (
+   char *ptr,
+   unsigned int ptrlength,
+   unsigned rate,
+   int pitchoffset,
+   int angle,
+   int distance,
+   int priority,
+   unsigned int callbackval
+   )
+
+   {
+   int handle;
+
+   handle = MV_PlayRaw3D( ptr, ptrlength, rate, pitchoffset, angle, distance,
+      priority, callbackval );
+   if ( handle < MV_Ok )
+      {
+      FX_SetErrorCode( FX_MultiVocError );
+      handle = FX_Warning;
+      }
+
+   return( handle );
+   }
+
+
+/*---------------------------------------------------------------------
    Function: FX_PlayRaw
 
    Begin playback of raw sound data with the given volume and priority.

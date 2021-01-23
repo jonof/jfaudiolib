@@ -2274,6 +2274,60 @@ int MV_PlayWAV3D
 
 
 /*---------------------------------------------------------------------
+   Function: MV_PlayRaw3D
+
+   Begin playback of sound data at specified angle and distance
+   from listener.
+---------------------------------------------------------------------*/
+
+int MV_PlayRaw3D
+   (
+   char *ptr,
+   unsigned int length,
+   unsigned rate,
+   int  pitchoffset,
+   int  angle,
+   int  distance,
+   int  priority,
+   unsigned int callbackval
+   )
+
+   {
+   int left;
+   int right;
+   int mid;
+   int volume;
+   int status;
+
+   if ( !MV_Installed )
+      {
+      MV_SetErrorCode( MV_NotInstalled );
+      return( MV_Error );
+      }
+
+   if ( distance < 0 )
+      {
+      distance  = -distance;
+      angle    += MV_NumPanPositions / 2;
+      }
+
+   volume = MIX_VOLUME( distance );
+
+   // Ensure angle is within 0 - 31
+   angle &= MV_MaxPanPosition;
+
+   left  = MV_PanTable[ angle ][ volume ].left;
+   right = MV_PanTable[ angle ][ volume ].right;
+   mid   = max( 0, 255 - distance );
+
+   status = MV_PlayRaw( ptr, length, rate, pitchoffset, mid, left, right,
+      priority, callbackval );
+
+   return( status );
+   }
+
+
+/*---------------------------------------------------------------------
    Function: MV_PlayLoopedWAV
 
    Begin playback of sound data with the given sound levels and

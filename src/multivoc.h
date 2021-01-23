@@ -90,6 +90,8 @@ int   MV_PlayWAV( char *ptr, unsigned int length, int pitchoffset, int vol, int 
          int right, int priority, unsigned int callbackval );
 int   MV_PlayWAV3D( char *ptr, unsigned int length, int pitchoffset, int angle, int distance,
          int priority, unsigned int callbackval );
+int   MV_PlayRaw3D( char *ptr, unsigned int length, unsigned rate, int pitchoffset, int angle, int distance,
+         int priority, unsigned int callbackval );
 int   MV_PlayLoopedWAV( char *ptr, unsigned int length, int loopstart, int loopend,
          int pitchoffset, int vol, int left, int right, int priority,
          unsigned int callbackval );
