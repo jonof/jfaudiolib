@@ -1393,6 +1393,45 @@ int MV_SetFrequency
 
 
 /*---------------------------------------------------------------------
+   Function: MV_GetFrequency
+
+   Gets the frequency for the voice associated with the specified handle.
+---------------------------------------------------------------------*/
+
+int MV_GetFrequency
+   (
+   int handle,
+   int *frequency
+   )
+
+   {
+   VoiceNode *voice;
+
+   if ( !MV_Installed )
+      {
+      MV_SetErrorCode( MV_NotInstalled );
+      return( MV_Error );
+      }
+
+   voice = MV_GetVoice( handle );
+   if ( voice == NULL )
+      {
+      MV_SetErrorCode( MV_VoiceNotFound );
+      return( MV_Error );
+      }
+
+    if ( voice->SamplingRate == 0 )
+      {
+      voice->GetSound( voice );
+      }
+
+   *frequency = voice->SamplingRate;
+
+   return( MV_Ok );
+   }
+
+
+/*---------------------------------------------------------------------
    Function: MV_GetVolumeTable
 
    Returns a pointer to the volume table associated with the specified

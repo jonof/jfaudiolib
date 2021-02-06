@@ -503,6 +503,32 @@ int FX_SetFrequency
 
 
 /*---------------------------------------------------------------------
+   Function: FX_GetFrequency
+
+   Gets the frequency of the voice associated with the specified handle.
+---------------------------------------------------------------------*/
+
+int FX_GetFrequency
+   (
+   int handle,
+   int *frequency
+   )
+
+   {
+   int status;
+
+   status = MV_GetFrequency( handle, frequency );
+   if ( status == MV_Error )
+      {
+      FX_SetErrorCode( FX_MultiVocError );
+      status = FX_Warning;
+      }
+
+   return( status );
+   }
+
+
+/*---------------------------------------------------------------------
    Function: FX_PlayVOC
 
    Begin playback of sound data with the given volume and priority.

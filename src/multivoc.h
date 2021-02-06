@@ -63,6 +63,7 @@ int   MV_VoicesPlaying( void );
 int   MV_VoiceAvailable( int priority );
 int   MV_SetPitch( int handle, int pitchoffset );
 int   MV_SetFrequency( int handle, int frequency );
+int   MV_GetFrequency( int handle, int *frequency );
 int   MV_EndLooping( int handle );
 int   MV_SetPan( int handle, int vol, int left, int right );
 int   MV_Pan3D( int handle, int angle, int distance );

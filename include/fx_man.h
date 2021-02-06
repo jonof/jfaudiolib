@@ -75,6 +75,7 @@ int FX_EndLooping( int handle );
 int FX_SetPan( int handle, int vol, int left, int right );
 int FX_SetPitch( int handle, int pitchoffset );
 int FX_SetFrequency( int handle, int frequency );
+int FX_GetFrequency( int handle, int *frequency );
 
 int FX_PlayVOC( char *ptr, unsigned int ptrlength, int pitchoffset, int vol, int left, int right,
        int priority, unsigned int callbackval );
