@@ -59,6 +59,7 @@ enum {
 static int ErrorCode = FSynthErr_Ok;
 static char soundFontName[PATH_MAX+1] = "";
 static const char *soundFontPaths[] = {
+    "./*.sf2",
     "/usr/share/sounds/sf2/*.sf2",
     NULL,
 };
@@ -183,7 +184,7 @@ static int find_soundfont(void)
         }
     }
 
-    return !found;
+    return found;
 }
 
 static void apply_params(const char *params, fluid_settings_t *settings)
@@ -204,6 +205,10 @@ static void apply_params(const char *params, fluid_settings_t *settings)
         if (!paramname) {
             break;
         }
+        if (strcmp(paramname, "soundfont") == 0 || strcmp(paramname, "soundbank") == 0) {
+            strcpy(soundFontName, paramvalue);
+            continue;
+        }
 
         switch (fluid_settings_get_type(settings, paramname)) {
             case FLUID_NUM_TYPE:
@@ -222,7 +227,7 @@ static void apply_params(const char *params, fluid_settings_t *settings)
                 setok = 0;
                 break;
         }
-        if (!setok) {
+        if (setok < 0) {
             fprintf(stderr, "FluidSynthDrv: error setting '%s' to '%s'\n", paramname, paramvalue);
         }
     }
@@ -321,12 +326,6 @@ int FluidSynthDrv_MIDI_Init(midifuncs *funcs, const char *params)
     FluidSynthDrv_MIDI_Shutdown();
     memset(funcs, 0, sizeof(midifuncs));
 
-    if (find_soundfont()) {
-        ErrorCode = FSynthErr_BadSoundFont;
-        return FSynthErr_Error;
-    }
-    fprintf(stderr, "FluidSynthDrv: using soundfont %s\n", soundFontName);
-
     fluidsettings = new_fluid_settings();
     if (!fluidsettings) {
         ErrorCode = FSynthErr_NewFluidSettings;
@@ -334,32 +333,34 @@ int FluidSynthDrv_MIDI_Init(midifuncs *funcs, const char *params)
     }
 
     apply_params(params, fluidsettings);
-        
+
+    if (soundFontName[0]) {
+        fprintf(stderr, "FluidSynthDrv: using soundfont %s\n", soundFontName);
+    } else if (find_soundfont()) {
+        fprintf(stderr, "FluidSynthDrv: using found soundfont %s\n", soundFontName);
+    } else {
+        fluid_settings_copystr(fluidsettings, "synth.default-soundfont", soundFontName,
+            sizeof(soundFontName));
+    }
+
     fluidsynth = new_fluid_synth(fluidsettings);
     if (!fluidsettings) {
         FluidSynthDrv_MIDI_Shutdown();
         ErrorCode = FSynthErr_NewFluidSynth;
         return FSynthErr_Error;
     }
-    
-    fluidaudiodriver = new_fluid_audio_driver(fluidsettings, fluidsynth);
-    if (!fluidsettings) {
+
+    result = fluid_synth_sfload(fluidsynth, soundFontName, 1);
+    if (result < 0) {
         FluidSynthDrv_MIDI_Shutdown();
-        ErrorCode = FSynthErr_NewFluidAudioDriver;
-        return FSynthErr_Error;
-    }
-    
-    fluidsequencer = new_fluid_sequencer();
-    if (!fluidsettings) {
-        FluidSynthDrv_MIDI_Shutdown();
-        ErrorCode = FSynthErr_NewFluidSequencer;
+        ErrorCode = FSynthErr_BadSoundFont;
         return FSynthErr_Error;
     }
 
-    fluidevent = new_fluid_event();
-    if (!fluidevent) {
+    fluidsequencer = new_fluid_sequencer2(0);
+    if (!fluidsettings) {
         FluidSynthDrv_MIDI_Shutdown();
-        ErrorCode = FSynthErr_NewFluidEvent;
+        ErrorCode = FSynthErr_NewFluidSequencer;
         return FSynthErr_Error;
     }
 
@@ -370,10 +371,17 @@ int FluidSynthDrv_MIDI_Init(midifuncs *funcs, const char *params)
         return FSynthErr_Error;
     }
 
-    result = fluid_synth_sfload(fluidsynth, soundFontName, 1);
-    if (result < 0) {
+    fluidaudiodriver = new_fluid_audio_driver(fluidsettings, fluidsynth);
+    if (!fluidsettings) {
         FluidSynthDrv_MIDI_Shutdown();
-        ErrorCode = FSynthErr_BadSoundFont;
+        ErrorCode = FSynthErr_NewFluidAudioDriver;
+        return FSynthErr_Error;
+    }
+
+    fluidevent = new_fluid_event();
+    if (!fluidevent) {
+        FluidSynthDrv_MIDI_Shutdown();
+        ErrorCode = FSynthErr_NewFluidEvent;
         return FSynthErr_Error;
     }
 
@@ -393,20 +401,23 @@ int FluidSynthDrv_MIDI_Init(midifuncs *funcs, const char *params)
 
 void FluidSynthDrv_MIDI_Shutdown(void)
 {
-    if (fluidevent) {
-        delete_fluid_event(fluidevent);
+    if (fluidaudiodriver) {
+        delete_fluid_audio_driver(fluidaudiodriver);
+    }
+    if (synthseqid >= 0) {
+        fluid_sequencer_unregister_client(fluidsequencer, synthseqid);
     }
     if (fluidsequencer) {
         delete_fluid_sequencer(fluidsequencer);
-    }
-    if (fluidaudiodriver) {
-        delete_fluid_audio_driver(fluidaudiodriver);
     }
     if (fluidsynth) {
         delete_fluid_synth(fluidsynth);
     }
     if (fluidsettings) {
         delete_fluid_settings(fluidsettings);
+    }
+    if (fluidevent) {
+        delete_fluid_event(fluidevent);
     }
     synthseqid = -1;
     fluidevent = 0;
