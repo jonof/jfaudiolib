@@ -40,7 +40,8 @@ enum {
     CAErr_AssembleAUGraph,
     CAErr_InitialiseAUGraph,
     CAErr_SetPCMFormat,
-    CAErr_Mutex
+    CAErr_Mutex,
+    CAErr_SetSoundBank
 };
 
 enum {
@@ -79,6 +80,7 @@ static unsigned int MidiFrameOffset = 0;
 #define MIDI_MONO_MODE_ON     0x7E
 #define MIDI_ALL_NOTES_OFF    0x7B
 
+static char soundBankName[PATH_MAX+1] = "";
 
 
 static OSStatus pcmService(
@@ -322,7 +324,22 @@ static int initialise_graph(int subsystem)
                     0,
                     &pcmDesc,
                     sizeof(pcmDesc)), CAErr_SetPCMFormat);
-    
+
+    // Set a sound bank for the DLS synth
+    if (soundBankName[0]) {
+        CFURLRef url = CFURLCreateFromFileSystemRepresentation(NULL,
+                           (const UInt8 *)soundBankName, strlen(soundBankName), FALSE);
+        if (url) {
+            check_result(AudioUnitSetProperty(synthunit,
+                            kMusicDeviceProperty_SoundBankURL,
+                            kAudioUnitScope_Global,
+                            0,
+                            &url,
+                            sizeof(url)), CAErr_SetSoundBank);
+            CFRelease(url);
+        }
+    }
+
     // set the synth notify callback
     check_result(AudioUnitAddRenderNotify(synthunit, midiService, NULL), CAErr_InitialiseAUGraph);
 
@@ -368,6 +385,34 @@ static int uninitialise_graph(int subsystem)
     
     return CAErr_Ok;
 }    
+
+static void parse_params(const char *params)
+{
+    char *parseparams, *savepair = NULL;
+    char *parampair, *paramname, *paramvalue;
+    char *firstpair;
+    int setok;
+
+    if (!params || !params[0]) return;
+
+    parseparams = malloc(strlen(params) + 1);
+    strcpy(parseparams, params);
+    firstpair = parseparams;
+    while ((parampair = strtok_r(firstpair, " ", &savepair))) {
+        firstpair = NULL;
+        paramname = strtok_r(parampair, "=", &paramvalue);
+        if (!paramname) {
+            break;
+        }
+        if (strcmp(paramname, "soundbank") == 0 || strcmp(paramname, "soundfont") == 0) {
+            fprintf(stderr, "CoreAudioDrv: using sound bank %s\n", paramvalue);
+            strcpy(soundBankName, paramvalue);
+            continue;
+        }
+    }
+
+    free(parseparams);
+}
 
 int CoreAudioDrv_PCM_Init(int * mixrate, int * numchannels, int * samplebits, void * initdata)
 {
@@ -546,6 +591,8 @@ int CoreAudioDrv_MIDI_Init(midifuncs *funcs, const char *params)
     OSStatus result;
     
     memset(funcs, 0, sizeof(midifuncs));
+
+    parse_params(params);
 
     result = initialise_graph(CASystem_midi);
     if (result != CAErr_Ok) {
