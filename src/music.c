@@ -118,49 +118,59 @@ int MUSIC_Init
    {
    int i;
    int status;
+   int mincard, maxcard, card;
 
    for( i = 0; i < 128; i++ )
       {
       MIDI_PatchMap[ i ] = i;
       }
 
-	if (SoundCard == ASS_AutoDetect) {
-#if defined __APPLE__ && !defined NO_COREAUDIO
-		SoundCard = ASS_CoreAudio;
-#elif defined _WIN32
-		SoundCard = ASS_WinMM;
-#elif defined HAVE_ALSA
-        SoundCard = ASS_ALSA;
-#elif defined HAVE_FLUIDSYNTH
-		SoundCard = ASS_FluidSynth;
-#else
-		SoundCard = ASS_NoSound;
-#endif
-	}
-
-	if (SoundCard < 0 || SoundCard >= ASS_NumSoundCards) {
-		MUSIC_ErrorCode = MUSIC_InvalidCard;
-		return MUSIC_Error;
-	}
-
-    if (!SoundDriver_IsMIDISupported(SoundCard))
+   if (SoundCard == ASS_AutoDetect)
+      {
+      mincard = ASS_NoSound + 1;
+      maxcard = ASS_NumSoundCards - 1;
+      }
+   else if (SoundCard < 0 || SoundCard >= ASS_NumSoundCards)
       {
       MUSIC_ErrorCode = MUSIC_InvalidCard;
       return MUSIC_Error;
       }
-
-   ASS_MIDISoundDriver = SoundCard;
-
-   status = SoundDriver_MIDI_Init(&MUSIC_MidiFunctions, params);
-   if (status != MUSIC_Ok)
+   else
       {
-      MUSIC_ErrorCode = MUSIC_DriverError;
-      return MUSIC_Error;
+      mincard = SoundCard;
+      maxcard = SoundCard;
       }
 
-   MIDI_SetMidiFuncs( &MUSIC_MidiFunctions );
+   for (card = mincard; card <= maxcard; card++)
+      {
+      if (!SoundDriver_IsMIDISupported(card))
+         {
+         continue;
+         }
+      else if (SoundCard == ASS_AutoDetect)
+         {
+         fprintf(stderr, "MUSIC_Init: trying %s\n", SoundDriver_GetName(card));
+         }
 
-   return MUSIC_Ok;
+      ASS_MIDISoundDriver = card;
+      status = SoundDriver_MIDI_Init(&MUSIC_MidiFunctions, params);
+      if (status == MUSIC_Ok)
+         {
+         MIDI_SetMidiFuncs( &MUSIC_MidiFunctions );
+         return MUSIC_Ok;
+         }
+      }
+
+   if (SoundCard == ASS_AutoDetect)
+      {
+      // A failure to autodetect falls back to no sound.
+      ASS_MIDISoundDriver = ASS_NoSound;
+      MIDI_SetMidiFuncs( &MUSIC_MidiFunctions );
+      return MUSIC_Ok;
+      }
+
+   MUSIC_ErrorCode = MUSIC_DriverError;
+   return MUSIC_Error;
    }
 
 

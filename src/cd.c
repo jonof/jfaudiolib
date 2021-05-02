@@ -21,6 +21,7 @@
 #include "cd.h"
 #include "drivers.h"
 #include <assert.h>
+#include <stdio.h>
 
 static int ErrorCode = CD_Ok;
 
@@ -56,38 +57,41 @@ const char * CD_ErrorString(int code)
 int CD_Init(int SoundCard)
 {
     int err;
+    int mincard, maxcard, card;
 
-	if (SoundCard == ASS_AutoDetect) {
-#if 0 //defined __APPLE__
-		SoundCard = ASS_CoreAudio;
-#elif defined _WIN32
-		SoundCard = ASS_WinMM;
-#elif defined HAVE_SDL
-		SoundCard = ASS_SDL;
-#else
-		SoundCard = ASS_NoSound;
-#endif
-	}
-	
-	if (SoundCard < 0 || SoundCard >= ASS_NumSoundCards) {
-		ErrorCode = CD_InvalidCard;
-		return CD_Error;
-	}
-	
-	if (SoundDriver_IsCDSupported(SoundCard) == 0) {
-		// unsupported cards fall back to no sound
-		SoundCard = ASS_NoSound;
-	}
-   
-    ASS_CDSoundDriver = SoundCard;
-
-    err = SoundDriver_CD_Init();
-    if (err != CD_Ok) {
-        ErrorCode = CD_DriverError;
+    if (SoundCard == ASS_AutoDetect) {
+        mincard = ASS_NoSound + 1;
+        maxcard = ASS_NumSoundCards - 1;
+    } else if (SoundCard < 0 || SoundCard >= ASS_NumSoundCards) {
+        ErrorCode = CD_InvalidCard;
         return CD_Error;
+    } else {
+        mincard = SoundCard;
+        maxcard = SoundCard;
     }
 
-    return CD_Ok;
+    for (card = mincard; card <= maxcard; card++) {
+        if (!SoundDriver_IsCDSupported(card)) {
+            continue;
+        } else if (SoundCard == ASS_AutoDetect) {
+            fprintf(stderr, "CD_Init: trying %s\n", SoundDriver_GetName(card));
+        }
+
+        ASS_CDSoundDriver = card;
+        err = SoundDriver_CD_Init();
+        if (err == CD_Ok) {
+            return CD_Ok;
+        }
+    }
+
+    if (SoundCard == ASS_AutoDetect) {
+        // A failure to autodetect falls back to no sound.
+        ASS_CDSoundDriver = ASS_NoSound;
+        return CD_Ok;
+    }
+
+    ErrorCode = CD_DriverError;
+    return CD_Error;
 }
 
 int  CD_GetCurrentDriver(void)

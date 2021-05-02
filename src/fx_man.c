@@ -116,51 +116,64 @@ int FX_Init
    )
 
    {
-   int status;
    int devicestatus;
+   int mincard, maxcard, card;
 
    if ( FX_Installed )
       {
       FX_Shutdown();
       }
-	
-	if (SoundCard == ASS_AutoDetect) {
-#if defined __APPLE__ && !defined NO_COREAUDIO
-		SoundCard = ASS_CoreAudio;
-#elif defined _WIN32
-		SoundCard = ASS_DirectSound;
-#elif defined HAVE_SDL
-		SoundCard = ASS_SDL;
-#else
-		SoundCard = ASS_NoSound;
-#endif
-	}
-	
-	if (SoundCard < 0 || SoundCard >= ASS_NumSoundCards) {
-		FX_SetErrorCode( FX_InvalidCard );
-		status = FX_Error;
-		return status;
-	}
-	
-	if (SoundDriver_IsPCMSupported(SoundCard) == 0) {
-		// unsupported cards fall back to no sound
-		SoundCard = ASS_NoSound;
-	}
-   
-   status = FX_Ok;
-	devicestatus = MV_Init( SoundCard, mixrate, numvoices, numchannels, samplebits, initdata );
-	if ( devicestatus != MV_Ok )
-		{
-		FX_SetErrorCode( FX_MultiVocError );
-		status = FX_Error;
-		}
 
-   if ( status == FX_Ok )
+   if (SoundCard == ASS_AutoDetect)
       {
-      FX_Installed = TRUE;
+      mincard = ASS_NoSound + 1;
+      maxcard = ASS_NumSoundCards - 1;
+      }
+   else if (SoundCard < 0 || SoundCard >= ASS_NumSoundCards)
+      {
+      FX_SetErrorCode( FX_InvalidCard );
+      return FX_Error;
+      }
+   else
+      {
+      mincard = SoundCard;
+      maxcard = SoundCard;
       }
 
-   return( status );
+   for (card = mincard; card <= maxcard; card++)
+      {
+      if (!SoundDriver_IsPCMSupported(card))
+         {
+         continue;
+         }
+      else if (SoundCard == ASS_AutoDetect)
+         {
+         fprintf(stderr, "FX_Init: trying %s\n", SoundDriver_GetName(card));
+         }
+
+      devicestatus = MV_Init( card, mixrate, numvoices, numchannels, samplebits, initdata );
+      if (devicestatus == MV_Ok)
+         {
+         FX_Installed = TRUE;
+         return FX_Ok;
+         }
+      }
+
+   if (SoundCard == ASS_AutoDetect)
+      {
+      // A failure to autodetect falls back to no sound.
+      card = ASS_NoSound;
+
+      devicestatus = MV_Init( card, mixrate, numvoices, numchannels, samplebits, initdata );
+      if ( devicestatus == MV_Ok )
+         {
+         FX_Installed = TRUE;
+         return FX_Ok;
+         }
+      }
+
+   FX_SetErrorCode( FX_MultiVocError );
+   return FX_Error;
    }
 
 
