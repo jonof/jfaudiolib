@@ -143,9 +143,9 @@ static OSStatus midiService(
 {
     int secondsThisCall = (inNumberFrames << 16) / 44100;
 
-    if (MidiCallBack == 0) return;
+    if (MidiCallBack == 0) return noErr;
     
-    if (!(*ioActionFlags & kAudioUnitRenderAction_PreRender)) return;
+    if (!(*ioActionFlags & kAudioUnitRenderAction_PreRender)) return noErr;
     
     CoreAudioDrv_MIDI_Lock();
     while (MidiFrameOffset < inNumberFrames) {

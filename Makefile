@@ -12,6 +12,7 @@ CC?=gcc
 AR?=ar
 CFLAGS=-g $(OPTLEVEL) -Wall
 CPPFLAGS=-Iinclude -Isrc
+LDFLAGS=
 
 SOURCES=src/drivers.c \
         src/fx_man.c \
@@ -34,6 +35,10 @@ ifeq (mingw32,$(findstring mingw32,$(machine)))
 
  CPPFLAGS+= -DHAVE_VORBIS
 else
+ ifeq (apple-darwin,$(findstring apple-darwin,$(machine)))
+  SOURCES+= src/driver_coreaudio.c
+  LDFLAGS+= -framework AudioToolbox -framework AudioUnit -framework Foundation
+ endif
  ifneq (0,$(JFAUDIOLIB_HAVE_SDL))
   CPPFLAGS+= -DHAVE_SDL=2 $(shell $(SDL2CONFIG) --cflags)
   ifeq (1,$(JFAUDIOLIB_USE_SDLMIXER))
@@ -65,7 +70,7 @@ $(OBJECTS): %.o: %.c
 	$(CC) -c $(CPPFLAGS) $(CFLAGS) $< -o $@
 
 test: src/test.o $(JFAUDIOLIB);
-	$(CC) $(CPPFLAGS) $(CFLAGS) $^ -o $@ $(JFAUDIOLIB_LDFLAGS) -lm
+	$(CC) $(CPPFLAGS) $(CFLAGS) $^ -o $@ $(LDFLAGS) $(JFAUDIOLIB_LDFLAGS) -lm
 
 .PHONY: clean
 clean:
