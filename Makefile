@@ -5,7 +5,7 @@ DXROOT ?= $(USERPROFILE)/sdks/directx/dx81
 ifeq (0,$(RELEASE))
  OPTLEVEL=-Og
 else
- OPTLEVEL=-O2
+ OPTLEVEL=-fomit-frame-pointer -O2
 endif
 
 CC?=gcc
