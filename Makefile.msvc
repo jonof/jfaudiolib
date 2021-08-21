@@ -19,6 +19,10 @@ SOURCES=src\drivers.c \
 
 !include Makefile.msvcshared
 
+!if "$(PLATFORM)" == ""
+PLATFORM=x86
+!endif
+
 !if $(JFAUDIOLIB_HAVE_VORBIS)
 CPPFLAGS=$(CPPFLAGS) /DHAVE_VORBIS /Ithird-party\msvc\include
 JFAUDIOLIB_LINKFLAGS=$(JFAUDIOLIB_LINKFLAGS) /LIBPATH:$(MAKEDIR)\third-party\msvc\lib$(PLATFORM)
