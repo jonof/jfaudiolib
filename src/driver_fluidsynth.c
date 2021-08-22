@@ -60,6 +60,7 @@ static int ErrorCode = FSynthErr_Ok;
 static char soundFontName[PATH_MAX+1] = "";
 static const char *soundFontPaths[] = {
     "./*.sf2",
+    "/usr/share/soundfonts/*.sf2",
     "/usr/share/sounds/sf2/*.sf2",
     NULL,
 };
