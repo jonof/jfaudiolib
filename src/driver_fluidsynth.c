@@ -327,6 +327,8 @@ int FluidSynthDrv_MIDI_Init(midifuncs *funcs, const char *params)
     FluidSynthDrv_MIDI_Shutdown();
     memset(funcs, 0, sizeof(midifuncs));
 
+    fprintf(stderr, "FluidSynthDrv: using version %s, built with %s\n", fluid_version_str(), FLUIDSYNTH_VERSION);
+
     fluidsettings = new_fluid_settings();
     if (!fluidsettings) {
         ErrorCode = FSynthErr_NewFluidSettings;
