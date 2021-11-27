@@ -31,7 +31,6 @@
 #endif
 
 #include <stdlib.h>
-#include <stdio.h>
 #include <string.h>
 #ifndef _WIN32
 # include <unistd.h>
@@ -40,10 +39,8 @@
 #include "pitch.h"
 #include "multivoc.h"
 #include "_multivc.h"
-
-#define min(x,y) ((x) < (y) ? (x) : (y))
-#define max(x,y) ((x) > (y) ? (x) : (y))
-
+#include "asssys.h"
+#include "assmisc.h"
 
 typedef struct {
    char * ptr;
@@ -109,6 +106,7 @@ static int seek_vorbis(void * datasource, ogg_int64_t offset, int whence)
 
 static int close_vorbis(void * datasource)
 {
+   (void)datasource;
    return 0;
 }
 
@@ -148,13 +146,13 @@ static playbackstatus MV_GetNextVorbisBlock
    bytesread = 0;
    do {
       bytes = ov_read(&vd->vf, vd->block + bytesread, sizeof(vd->block) - bytesread, 0, 2, 1, &bitstream);
-      //fprintf(stderr, "ov_read = %d\n", bytes);
+      //ASS_Message("ov_read = %d\n", bytes);
       if (bytes == OV_HOLE) continue;
       if (bytes == 0) {
          if (voice->LoopStart) {
             err = ov_pcm_seek_page(&vd->vf, 0);
             if (err != 0) {
-               fprintf(stderr, "MV_GetNextVorbisBlock ov_pcm_seek_page_lap: err %d\n", err);
+               ASS_Message("MV_GetNextVorbisBlock ov_pcm_seek_page_lap: err %d\n", err);
             } else {
                continue;
             }
@@ -162,13 +160,13 @@ static playbackstatus MV_GetNextVorbisBlock
            break;
          }
       } else if (bytes < 0) {
-         fprintf(stderr, "MV_GetNextVorbisBlock ov_read: err %d\n", bytes);
+         ASS_Message("MV_GetNextVorbisBlock ov_read: err %d\n", bytes);
          voice->Playing = FALSE;
          return NoMoreData;
       }
 
       bytesread += bytes;
-   } while (bytesread < sizeof(vd->block));
+   } while (bytesread < (int)sizeof(vd->block));
 
    if (bytesread == 0) {
       voice->Playing = FALSE;
@@ -317,7 +315,9 @@ int MV_PlayLoopedVorbis
    int          status;
    vorbis_data * vd = 0;
    vorbis_info * vi = 0;
-   
+
+   (void)loopend;
+
    if ( !MV_Installed )
    {
       MV_SetErrorCode( MV_NotInstalled );
@@ -338,7 +338,7 @@ int MV_PlayLoopedVorbis
    
    status = ov_open_callbacks((void *) vd, &vd->vf, 0, 0, vorbis_callbacks);
    if (status < 0) {
-      fprintf(stderr, "MV_PlayLoopedVorbis: err %d\n", status);
+      ASS_Message("MV_PlayLoopedVorbis: err %d\n", status);
       MV_SetErrorCode( MV_InvalidVorbisFile );
       return MV_Error;
    }

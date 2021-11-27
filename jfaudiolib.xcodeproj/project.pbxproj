@@ -10,6 +10,7 @@
 		AB0A488F1E43574900CC2214 /* libogg.a in Frameworks */ = {isa = PBXBuildFile; fileRef = AB0A488C1E43574900CC2214 /* libogg.a */; };
 		AB0A48901E43574900CC2214 /* libvorbis.a in Frameworks */ = {isa = PBXBuildFile; fileRef = AB0A488D1E43574900CC2214 /* libvorbis.a */; };
 		AB0A48911E43574900CC2214 /* libvorbisfile.a in Frameworks */ = {isa = PBXBuildFile; fileRef = AB0A488E1E43574900CC2214 /* libvorbisfile.a */; };
+		AB21362327531AA80033C569 /* assmisc.h in Headers */ = {isa = PBXBuildFile; fileRef = AB21362227531AA80033C569 /* assmisc.h */; };
 		AB217B65172E645C00364868 /* driver_coreaudio.c in Sources */ = {isa = PBXBuildFile; fileRef = AB217B64172E645C00364868 /* driver_coreaudio.c */; };
 		AB217B67172E646A00364868 /* driver_coreaudio.h in Headers */ = {isa = PBXBuildFile; fileRef = AB217B66172E646A00364868 /* driver_coreaudio.h */; };
 		AB217B6D172E74BB00364868 /* AudioUnit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = AB217B6B172E669100364868 /* AudioUnit.framework */; };
@@ -59,6 +60,7 @@
 		AB0A488C1E43574900CC2214 /* libogg.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libogg.a; path = "third-party/osx/out/lib/libogg.a"; sourceTree = "<group>"; };
 		AB0A488D1E43574900CC2214 /* libvorbis.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libvorbis.a; path = "third-party/osx/out/lib/libvorbis.a"; sourceTree = "<group>"; };
 		AB0A488E1E43574900CC2214 /* libvorbisfile.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libvorbisfile.a; path = "third-party/osx/out/lib/libvorbisfile.a"; sourceTree = "<group>"; };
+		AB21362227531AA80033C569 /* assmisc.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = assmisc.h; sourceTree = "<group>"; };
 		AB217B64172E645C00364868 /* driver_coreaudio.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = driver_coreaudio.c; sourceTree = "<group>"; };
 		AB217B66172E646A00364868 /* driver_coreaudio.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = driver_coreaudio.h; sourceTree = "<group>"; };
 		AB217B6B172E669100364868 /* AudioUnit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AudioUnit.framework; path = System/Library/Frameworks/AudioUnit.framework; sourceTree = SDKROOT; };
@@ -143,6 +145,7 @@
 			children = (
 				ABFBB51E102EBD4100D48B58 /* _midi.h */,
 				AB2E9E4D1011E65900DD2F1F /* _multivc.h */,
+				AB21362227531AA80033C569 /* assmisc.h */,
 				AB32F97010762A7900A9BAFF /* asssys.c */,
 				AB32F97110762A7900A9BAFF /* asssys.h */,
 				ABBD3F17101FFBD900F32F37 /* cd.c */,
@@ -216,6 +219,7 @@
 				ABFBB525102EBD4100D48B58 /* midi.h in Headers */,
 				ABFBB526102EBD4100D48B58 /* midifuncs.h in Headers */,
 				AB32F97310762A7900A9BAFF /* asssys.h in Headers */,
+				AB21362327531AA80033C569 /* assmisc.h in Headers */,
 				AB217B67172E646A00364868 /* driver_coreaudio.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -356,6 +360,11 @@
 				MACOSX_DEPLOYMENT_TARGET = 10.9;
 				ONLY_ACTIVE_ARCH = YES;
 				SKIP_INSTALL = YES;
+				WARNING_CFLAGS = (
+					"-W",
+					"-Wall",
+					"-Wno-unused-variable",
+				);
 			};
 			name = Debug;
 		};
@@ -372,6 +381,11 @@
 				HEADER_SEARCH_PATHS = "$(PROJECT_DIR)/third-party/osx/out/include/**";
 				MACOSX_DEPLOYMENT_TARGET = 10.9;
 				SKIP_INSTALL = YES;
+				WARNING_CFLAGS = (
+					"-W",
+					"-Wall",
+					"-Wno-unused-variable",
+				);
 			};
 			name = Release;
 		};

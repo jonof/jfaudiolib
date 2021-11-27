@@ -32,11 +32,13 @@ int NoSoundDrv_GetError(void)
 
 const char *NoSoundDrv_ErrorString( int ErrorNumber )
 {
+	(void)ErrorNumber;
 	return "No sound, Ok.";
 }
 
 int NoSoundDrv_PCM_Init(int * mixrate, int * numchannels, int * samplebits, void * initdata)
 {
+	(void)mixrate; (void)numchannels; (void)samplebits; (void)initdata;
 	return 0;
 }
 
@@ -47,6 +49,7 @@ void NoSoundDrv_PCM_Shutdown(void)
 int NoSoundDrv_PCM_BeginPlayback(char *BufferStart, int BufferSize,
 						int NumDivisions, void ( *CallBackFunc )( void ) )
 {
+	(void)BufferStart; (void)BufferSize; (void)NumDivisions; (void)CallBackFunc;
 	return 0;
 }
 
@@ -74,6 +77,7 @@ void NoSoundDrv_CD_Shutdown(void)
 
 int NoSoundDrv_CD_Play(int track, int loop)
 {
+    (void)track; (void)loop;
     return 0;
 }
 
@@ -83,6 +87,7 @@ void NoSoundDrv_CD_Stop(void)
 
 void NoSoundDrv_CD_Pause(int pauseon)
 {
+    (void)pauseon;
 }
 
 int NoSoundDrv_CD_IsPlaying(void)
@@ -92,10 +97,12 @@ int NoSoundDrv_CD_IsPlaying(void)
 
 void NoSoundDrv_CD_SetVolume(int volume)
 {
+    (void)volume;
 }
 
 int NoSoundDrv_MIDI_Init(midifuncs *funcs, const char *params)
 {
+    (void)params;
     memset(funcs, 0, sizeof(midifuncs));
     return 0;
 }
@@ -106,6 +113,7 @@ void NoSoundDrv_MIDI_Shutdown(void)
 
 int  NoSoundDrv_MIDI_StartPlayback(void (*service)(void))
 {
+    (void)service;
     return 0;
 }
 
@@ -120,6 +128,7 @@ unsigned int NoSoundDrv_MIDI_GetTick(void)
 
 void NoSoundDrv_MIDI_SetTempo(int tempo, int division)
 {
+    (void)tempo; (void)division;
 }
 
 void NoSoundDrv_MIDI_Lock(void)

@@ -29,6 +29,7 @@
 #include <AudioUnit/AudioUnit.h>
 #include <AudioToolbox/AudioToolbox.h>
 #include <pthread.h>
+#include "asssys.h"
 #include "midifuncs.h"
 #include "driver_coreaudio.h"
 
@@ -93,7 +94,9 @@ static OSStatus pcmService(
 {
     UInt32 remaining, len, bufn;
     char *ptr, *sptr;
-    
+
+    (void)inRefCon; (void)inActionFlags; (void)inTimeStamp; (void)inBusNumber; (void)inNumberFrames;
+
     if (MixCallBack == 0) return noErr;
 
     CoreAudioDrv_PCM_Lock();
@@ -142,6 +145,8 @@ static OSStatus midiService(
                             AudioBufferList             *ioData)
 {
     int secondsThisCall = (inNumberFrames << 16) / 44100;
+
+    (void)inRefCon; (void)inTimeStamp; (void)inBusNumber; (void)ioData;
 
     if (MidiCallBack == 0) return noErr;
     
@@ -213,7 +218,7 @@ const char *CoreAudioDrv_ErrorString( int ErrorNumber )
 
 #define check_result(fcall, errval) \
 if ((result = (fcall)) != noErr) {\
-    fprintf(stderr, "CoreAudioDrv: error %d at line %d:" #fcall "\n", (int)result, __LINE__);\
+    ASS_Message("CoreAudioDrv: error %d at line %d:" #fcall "\n", (int)result, __LINE__);\
     ErrorCode = errval;\
     return CAErr_Error;\
 }
@@ -405,7 +410,7 @@ static void parse_params(const char *params)
             break;
         }
         if (strcmp(paramname, "soundbank") == 0 || strcmp(paramname, "soundfont") == 0) {
-            fprintf(stderr, "CoreAudioDrv: using sound bank %s\n", paramvalue);
+            ASS_Message("CoreAudioDrv: using sound bank %s\n", paramvalue);
             strcpy(soundBankName, paramvalue);
             continue;
         }
@@ -418,7 +423,9 @@ int CoreAudioDrv_PCM_Init(int * mixrate, int * numchannels, int * samplebits, vo
 {
     OSStatus result = noErr;
     AudioStreamBasicDescription pcmDesc;
-    
+
+    (void)initdata;
+
     result = initialise_graph(CASystem_pcm);
     if (result != CAErr_Ok) {
         return result;

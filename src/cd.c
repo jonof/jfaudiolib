@@ -20,8 +20,8 @@
 
 #include "cd.h"
 #include "drivers.h"
+#include "asssys.h"
 #include <assert.h>
-#include <stdio.h>
 
 static int ErrorCode = CD_Ok;
 
@@ -74,7 +74,7 @@ int CD_Init(int SoundCard)
         if (!SoundDriver_IsCDSupported(card)) {
             continue;
         } else if (SoundCard == ASS_AutoDetect) {
-            fprintf(stderr, "CD_Init: trying %s\n", SoundDriver_GetName(card));
+            ASS_Message("CD_Init: trying %s\n", SoundDriver_GetName(card));
         }
 
         ASS_CDSoundDriver = card;

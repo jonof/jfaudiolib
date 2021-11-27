@@ -28,16 +28,14 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
    (c) Copyright 1994 James R. Dose.  All Rights Reserved.
 **********************************************************************/
 
-#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include "sndcards.h"
 #include "drivers.h"
 #include "multivoc.h"
 #include "fx_man.h"
-
-#define TRUE  ( 1 == 1 )
-#define FALSE ( !TRUE )
+#include "asssys.h"
+#include "assmisc.h"
 
 int FX_ErrorCode = FX_Ok;
 int FX_Installed = FALSE;
@@ -148,7 +146,7 @@ int FX_Init
          }
       else if (SoundCard == ASS_AutoDetect)
          {
-         fprintf(stderr, "FX_Init: trying %s\n", SoundDriver_GetName(card));
+         ASS_Message("FX_Init: trying %s\n", SoundDriver_GetName(card));
          }
 
       devicestatus = MV_Init( card, mixrate, numvoices, numchannels, samplebits, initdata );
@@ -1030,6 +1028,8 @@ int FX_StartRecording
 
    {
    int status;
+
+	(void)MixRate; (void)function;
 
 	FX_SetErrorCode( FX_InvalidCard );
 	status = FX_Warning;

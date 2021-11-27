@@ -39,32 +39,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "drivers.h"
 #include "pitch.h"
 #include "multivoc.h"
+#include "assmisc.h"
 #include "_multivc.h"
-
-#ifdef __POWERPC__
-#define LITTLE16 SWAP16
-#define LITTLE32 SWAP32
-#else
-#define LITTLE16
-#define LITTLE32
-#endif
-
-#ifdef _MSC_VER
-#define inline _inline
-#endif
-
-static inline unsigned short SWAP16(unsigned short s)
-{
-	return (s >> 8) | (s << 8);
-}
-
-static inline unsigned int SWAP32(unsigned int s)
-{
-	return (s >> 24) | (s << 24) | ((s&0xff00) << 8) | ((s & 0xff0000) >> 8);
-}
-
-#define min(x,y) ((x) < (y) ? (x) : (y))
-#define max(x,y) ((x) > (y) ? (x) : (y))
 
 #define RoundFixed( fixedval, bits )            \
         (                                       \
@@ -149,6 +125,8 @@ static int DisableInterrupts(void)
 
 static void RestoreInterrupts(int a)
 {
+	(void)a;
+
 	if (--lockdepth > 0) {
 		return;
 	}
@@ -2052,6 +2030,8 @@ int MV_StartRecording
    )
 
    {
+	(void)MixRate; (void)function;
+
 	MV_SetErrorCode( MV_UnsupportedCard );
 	return( MV_Error );
    }
@@ -2394,6 +2374,8 @@ int MV_PlayLoopedWAV
    VoiceNode     *voice;
    int length;
 
+   (void)ptrlength; (void)loopend;
+
    if ( !MV_Installed )
       {
       MV_SetErrorCode( MV_NotInstalled );
@@ -2605,6 +2587,8 @@ int MV_PlayLoopedVOC
    {
    VoiceNode   *voice;
    int          status;
+
+   (void)ptrlength;
 
    if ( !MV_Installed )
       {

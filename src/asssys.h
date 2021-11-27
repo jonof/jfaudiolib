@@ -22,5 +22,6 @@
 #define __ASSSYS_H
 
 void ASS_Sleep(int msec);
+void ASS_Message(const char *fmt, ...);
 
 #endif

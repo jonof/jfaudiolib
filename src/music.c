@@ -35,12 +35,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "music.h"
 #include "midi.h"
 #include "ll_man.h"
-
-#define TRUE  ( 1 == 1 )
-#define FALSE ( !TRUE )
-
-#define min(x,y) ((x) < (y) ? (x) : (y))
-#define max(x,y) ((x) > (y) ? (x) : (y))
+#include "asssys.h"
+#include "assmisc.h"
 
 int MUSIC_ErrorCode = MUSIC_Ok;
 
@@ -149,7 +145,7 @@ int MUSIC_Init
          }
       else if (SoundCard == ASS_AutoDetect)
          {
-         fprintf(stderr, "MUSIC_Init: trying %s\n", SoundDriver_GetName(card));
+         ASS_Message("MUSIC_Init: trying %s\n", SoundDriver_GetName(card));
          }
 
       ASS_MIDISoundDriver = card;
@@ -226,6 +222,7 @@ void MUSIC_SetMaxFMMidiChannel
    )
 
    {
+   (void)channel;
    //AL_SetMaxMidiChannel( channel );
    }
 
@@ -404,6 +401,8 @@ int MUSIC_PlaySong
 
    {
    int status;
+
+   (void)length;
 
    MIDI_StopSong();
    status = MIDI_PlaySong( song, loopflag );
@@ -586,6 +585,7 @@ int MUSIC_FadeVolume
    )
 
    {
+   (void)tovolume; (void)milliseconds;
    /*int fromvolume;
 
    if ( ( MUSIC_SoundDevice == ProAudioSpectrum ) ||
@@ -691,5 +691,6 @@ void MUSIC_RegisterTimbreBank
    )
 
    {
+   (void)timbres;
    //AL_RegisterTimbreBank( timbres );
    }

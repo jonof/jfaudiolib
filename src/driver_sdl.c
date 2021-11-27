@@ -31,6 +31,7 @@
 #else
 # include <SDL.h>
 #endif
+#include "asssys.h"
 #include "driver_sdl.h"
 
 enum {
@@ -51,7 +52,7 @@ static int ErrorCode = SDLErr_Ok;
 static int Initialised = 0;
 static int Playing = 0;
 static int StartedSDL = 0;      // SDL services in use (1 = sound, 2 = CDA)
-static int StartedSDLInit = 0;  // SDL services we initialised (0x80000000 means we used SDL_Init)
+static unsigned StartedSDLInit = 0;  // SDL services we initialised (0x80000000 means we used SDL_Init)
 
 #if (SDL_MAJOR_VERSION == 1)
 static SDL_CD *CDRom = 0;
@@ -72,6 +73,8 @@ static void fillData(void * userdata, Uint8 * ptr, int remaining)
 {
     int len;
     char *sptr;
+
+    (void)userdata;
 
     while (remaining > 0) {
         if (MixBufferUsed == MixBufferSize) {
@@ -164,25 +167,24 @@ const char *SDLDrv_ErrorString( int ErrorNumber )
 int SDLDrv_PCM_Init(int * mixrate, int * numchannels, int * samplebits, void * initdata)
 {
     Uint32 inited;
-    Uint32 err = 0;
+    int err = 0;
     SDL_AudioSpec spec, actual;
+
+    (void)initdata;
 
     if (Initialised) {
         SDLDrv_PCM_Shutdown();
     }
 
     inited = SDL_WasInit(SDL_INIT_EVERYTHING);
-    //fprintf(stderr, "inited = %x\n", inited);
 
     if (inited == 0) {
         // nothing was initialised
         err = SDL_Init(SDL_INIT_AUDIO);
         StartedSDLInit |= 0x80000000 + SDL_INIT_AUDIO;
-        //fprintf(stderr, "called SDL_Init\n");
     } else if (!(inited & SDL_INIT_AUDIO)) {
         err = SDL_InitSubSystem(SDL_INIT_AUDIO);
         StartedSDLInit |= SDL_INIT_AUDIO;
-        //fprintf(stderr, "called SDL_InitSubSystem\n");
     }
 
     if (err < 0) {
@@ -196,12 +198,12 @@ int SDLDrv_PCM_Init(int * mixrate, int * numchannels, int * samplebits, void * i
     {
         char drivername[256] = "(error)";
         SDL_AudioDriverName(drivername, sizeof(drivername));
-        fprintf(stderr, "SDL_AudioDriverName: %s\n", drivername);
+        ASS_Message("SDL_AudioDriverName: %s\n", drivername);
     }
     #else
     {
         const char * drivername = SDL_GetCurrentAudioDriver();
-        fprintf(stderr, "SDL_GetCurrentAudioDriver: %s\n", drivername ? drivername : "(error)");
+        ASS_Message("SDL_GetCurrentAudioDriver: %s\n", drivername ? drivername : "(error)");
     }
     #endif
 
@@ -248,18 +250,18 @@ int SDLDrv_PCM_Init(int * mixrate, int * numchannels, int * samplebits, void * i
             case AUDIO_S16MSB: format = "AUDIO_S16MSB"; break;
             default: format = "?!"; break;
         }
-        fprintf(stderr, "SDL_OpenAudio: actual.format = %s\n", format);
+        ASS_Message("SDL_OpenAudio: actual.format = %s\n", format);
         ErrorCode = SDLErr_OpenAudio;
         err = 1;
     }
     if (actual.channels == 1 || actual.channels == 2) {
         *numchannels = actual.channels;
     } else {
-        fprintf(stderr, "SDL_OpenAudio: actual.channels = %d\n", actual.channels);
+        ASS_Message("SDL_OpenAudio: actual.channels = %d\n", actual.channels);
         ErrorCode = SDLErr_OpenAudio;
         err = 1;
     }
-    // fprintf(stderr, "SDL_OpenAudio: actual.samples = %d vs spec.samples = %d\n", actual.samples, spec.samples);
+    // ASS_Message("SDL_OpenAudio: actual.samples = %d vs spec.samples = %d\n", actual.samples, spec.samples);
 
     if (err) {
         SDL_CloseAudio();
@@ -405,7 +407,7 @@ int SDLDrv_CD_Init(void)
     
     StartedSDL |= SDL_INIT_CDROM;
     
-    fprintf(stderr, "SDL_CDNumDrives: %d\n", SDL_CDNumDrives());
+    ASS_Message("SDL_CDNumDrives: %d\n", SDL_CDNumDrives());
     
     CDRom = SDL_CDOpen(0);
     if (!CDRom) {
@@ -413,9 +415,9 @@ int SDLDrv_CD_Init(void)
         return SDLErr_Error;
     }
     
-    fprintf(stderr, "SDL_CD: numtracks: %d\n", CDRom->numtracks);
+    ASS_Message("SDL_CD: numtracks: %d\n", CDRom->numtracks);
     for (i = 0; i < CDRom->numtracks; i++) {
-        fprintf(stderr, "SDL_CD: track %d - %s, %dsec\n",
+        ASS_Message("SDL_CD: track %d - %s, %dsec\n",
                 CDRom->track[i].id,
                 CDRom->track[i].type == SDL_AUDIO_TRACK ? "audio" : "data",
                 CDRom->track[i].length / CD_FPS
@@ -491,6 +493,8 @@ int SDLDrv_CD_Play(int track, int loop)
     
     return SDLErr_Ok;
 #else
+    (void)track; (void)loop;
+
     ErrorCode = SDLErr_CDNotSupported;
     return SDLErr_Error;
 #endif
@@ -529,6 +533,8 @@ void SDLDrv_CD_Pause(int pauseon)
     } else {
         SDL_CDResume(CDRom);
     }
+#else
+    (void)pauseon;
 #endif
 }
 
@@ -546,4 +552,5 @@ int SDLDrv_CD_IsPlaying(void)
 
 void SDLDrv_CD_SetVolume(int volume)
 {
+    (void)volume;
 }

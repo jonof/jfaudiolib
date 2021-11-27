@@ -32,7 +32,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #define ___MIDI_H
 
 #define RELATIVE_BEAT( measure, beat, tick ) \
-   ( ( tick ) + ( ( beat ) << 9 ) + ( ( measure ) << 16 ) )
+   (unsigned)( ( tick ) + ( ( beat ) << 9 ) + ( ( measure ) << 16 ) )
 
 #define GENMIDI_DefaultVolume 100
 

@@ -10,7 +10,7 @@ endif
 
 CC?=gcc
 AR?=ar
-CFLAGS=-g $(OPTLEVEL) -Wall
+CFLAGS=-g $(OPTLEVEL) -W -Wall -Wno-unused-but-set-variable
 CPPFLAGS=-Iinclude -Isrc
 LDFLAGS=
 
