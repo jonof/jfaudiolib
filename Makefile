@@ -1,7 +1,5 @@
 -include Makefile.user
 
-DXROOT ?= $(USERPROFILE)/sdks/directx/dx81
-
 ifeq (0,$(RELEASE))
  OPTLEVEL=-Og
 else
@@ -13,6 +11,7 @@ AR?=ar
 CFLAGS=-g $(OPTLEVEL) -W -Wall -Wno-unused-but-set-variable
 CPPFLAGS=-Iinclude -Isrc
 LDFLAGS=
+o=o
 
 SOURCES=src/drivers.c \
         src/fx_man.c \
@@ -30,7 +29,7 @@ SOURCES=src/drivers.c \
 include Makefile.shared
 
 ifeq (mingw32,$(findstring mingw32,$(machine)))
- CPPFLAGS+= -I$(DXROOT)/include -Ithird-party/mingw32/include
+ CPPFLAGS+= -Ithird-party/mingw32/include
  SOURCES+= src/driver_directsound.c src/driver_winmm.c
 
  CPPFLAGS+= -DHAVE_VORBIS
@@ -62,6 +61,11 @@ else
 endif
 
 OBJECTS=$(SOURCES:%.c=%.o)
+
+.PHONY: all
+all: $(JFAUDIOLIB) test
+
+include Makefile.deps
 
 $(JFAUDIOLIB): $(OBJECTS)
 	$(AR) cr $@ $^
