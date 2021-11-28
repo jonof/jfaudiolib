@@ -32,7 +32,7 @@ int main(int argc, char ** argv)
     int arg = 0;
     void * initdata = 0;
     const char * musicinit = 0;
-    const char * song = "test.ogg";
+    const char * song = "samples/test.wav";
 
     for (arg = 1; arg < argc; arg++) {
         if (argv[arg][0] == '-') {
@@ -124,6 +124,8 @@ void playsong(const char * song)
     }
 
     fclose(fp);
+
+    printf("Playing %s\n", song);
 
     if (memcmp(data, "MThd", 4) == 0) {
         status = MUSIC_PlaySong(data, length, 0);

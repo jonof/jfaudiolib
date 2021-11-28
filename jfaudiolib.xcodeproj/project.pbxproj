@@ -11,6 +11,7 @@
 		AB0A48901E43574900CC2214 /* libvorbis.a in Frameworks */ = {isa = PBXBuildFile; fileRef = AB0A488D1E43574900CC2214 /* libvorbis.a */; };
 		AB0A48911E43574900CC2214 /* libvorbisfile.a in Frameworks */ = {isa = PBXBuildFile; fileRef = AB0A488E1E43574900CC2214 /* libvorbisfile.a */; };
 		AB21362327531AA80033C569 /* assmisc.h in Headers */ = {isa = PBXBuildFile; fileRef = AB21362227531AA80033C569 /* assmisc.h */; };
+		AB21362B275378D90033C569 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = AB21362A275378D90033C569 /* Foundation.framework */; };
 		AB217B65172E645C00364868 /* driver_coreaudio.c in Sources */ = {isa = PBXBuildFile; fileRef = AB217B64172E645C00364868 /* driver_coreaudio.c */; };
 		AB217B67172E646A00364868 /* driver_coreaudio.h in Headers */ = {isa = PBXBuildFile; fileRef = AB217B66172E646A00364868 /* driver_coreaudio.h */; };
 		AB217B6D172E74BB00364868 /* AudioUnit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = AB217B6B172E669100364868 /* AudioUnit.framework */; };
@@ -61,6 +62,7 @@
 		AB0A488D1E43574900CC2214 /* libvorbis.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libvorbis.a; path = "third-party/osx/out/lib/libvorbis.a"; sourceTree = "<group>"; };
 		AB0A488E1E43574900CC2214 /* libvorbisfile.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libvorbisfile.a; path = "third-party/osx/out/lib/libvorbisfile.a"; sourceTree = "<group>"; };
 		AB21362227531AA80033C569 /* assmisc.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = assmisc.h; sourceTree = "<group>"; };
+		AB21362A275378D90033C569 /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
 		AB217B64172E645C00364868 /* driver_coreaudio.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = driver_coreaudio.c; sourceTree = "<group>"; };
 		AB217B66172E646A00364868 /* driver_coreaudio.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = driver_coreaudio.h; sourceTree = "<group>"; };
 		AB217B6B172E669100364868 /* AudioUnit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AudioUnit.framework; path = System/Library/Frameworks/AudioUnit.framework; sourceTree = SDKROOT; };
@@ -115,6 +117,7 @@
 				AB32FA9A107712B700A9BAFF /* libjfaudiolib.a in Frameworks */,
 				AB217B6D172E74BB00364868 /* AudioUnit.framework in Frameworks */,
 				ABE4C94C172EA55A00B18CE9 /* AudioToolbox.framework in Frameworks */,
+				AB21362B275378D90033C569 /* Foundation.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -188,6 +191,7 @@
 		AB8C582E101B6B7900B42306 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				AB21362A275378D90033C569 /* Foundation.framework */,
 				AB0A488C1E43574900CC2214 /* libogg.a */,
 				AB0A488D1E43574900CC2214 /* libvorbis.a */,
 				AB0A488E1E43574900CC2214 /* libvorbisfile.a */,
