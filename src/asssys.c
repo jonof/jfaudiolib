@@ -33,6 +33,17 @@
 # include <stdio.h>
 #endif
 
+static void _ASS_MessageOutputString(const char *str)
+{
+#ifdef _WIN32
+    OutputDebugString(str);
+#else
+    fputs(str, stderr);
+#endif
+}
+
+void (*ASS_MessageOutputString)(const char *) = _ASS_MessageOutputString;
+
 void ASS_Sleep(int msec)
 {
 #ifdef _WIN32
@@ -48,20 +59,11 @@ void ASS_Sleep(int msec)
 
 void ASS_Message(const char *fmt, ...)
 {
-    va_list va;
-
-#ifdef _WIN32
     char text[256];
-
-    if (!IsDebuggerPresent()) return;
+    va_list va;
 
     va_start(va, fmt);
     vsnprintf(text, sizeof(text), fmt, va);
-    OutputDebugString(text);
     va_end(va);
-#else
-    va_start(va, fmt);
-    vfprintf(stderr, fmt, va);
-    va_end(va);
-#endif
+    ASS_MessageOutputString(text);
 }

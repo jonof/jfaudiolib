@@ -253,7 +253,7 @@ int WinMMDrv_CD_Init(void)
     mciopenparms.lpstrDeviceType = "cdaudio";
     rv = mciSendCommand(0, MCI_OPEN, MCI_OPEN_TYPE, (DWORD_PTR) &mciopenparms);
     if (rv) {
-        ASS_Message("WinMM CD_Init MCI_OPEN err %d\n", (int) rv);
+        ASS_Message("WinMMDrv: CD_Init MCI_OPEN err %d\n", (int) rv);
         ErrorCode = WinMMErr_CDMCIOpen;
         return WinMMErr_Error;
     }
@@ -263,7 +263,7 @@ int WinMMDrv_CD_Init(void)
     mcisetparms.dwTimeFormat = MCI_FORMAT_MSF;
     rv = mciSendCommand(cdDeviceID, MCI_SET, MCI_SET_TIME_FORMAT, (DWORD_PTR) &mcisetparms);
     if (rv) {
-        ASS_Message("WinMM CD_Init MCI_SET err %d\n", (int) rv);
+        ASS_Message("WinMMDrv: CD_Init MCI_SET err %d\n", (int) rv);
         mciSendCommand(cdDeviceID, MCI_CLOSE, 0, 0);
         cdDeviceID = 0;
 
@@ -314,7 +314,7 @@ int WinMMDrv_CD_Play(int track, int loop)
     mcistatusparms.dwTrack = track;
     rv = mciSendCommand(cdDeviceID, MCI_STATUS, MCI_WAIT | MCI_TRACK | MCI_STATUS_ITEM, (DWORD_PTR) &mcistatusparms);
     if (rv) {
-        ASS_Message("WinMM CD_Play MCI_STATUS position err %d\n", (int) rv);
+        ASS_Message("WinMMDrv: CD_Play MCI_STATUS position err %d\n", (int) rv);
         ErrorCode = WinMMErr_CDMCIPlay;
         return WinMMErr_Error;
     }
@@ -324,7 +324,7 @@ int WinMMDrv_CD_Play(int track, int loop)
     mcistatusparms.dwTrack = track;
     rv = mciSendCommand(cdDeviceID, MCI_STATUS, MCI_WAIT | MCI_TRACK | MCI_STATUS_ITEM, (DWORD_PTR) &mcistatusparms);
     if (rv) {
-        ASS_Message("WinMM CD_Play MCI_STATUS length err %d\n", (int) rv);
+        ASS_Message("WinMMDrv: CD_Play MCI_STATUS length err %d\n", (int) rv);
         ErrorCode = WinMMErr_CDMCIPlay;
         return WinMMErr_Error;
     }
@@ -341,7 +341,7 @@ int WinMMDrv_CD_Play(int track, int loop)
     mciplayparms.dwCallback = (DWORD_PTR) notifyWindow;
     rv = mciSendCommand(cdDeviceID, MCI_PLAY, MCI_FROM | MCI_TO | MCI_NOTIFY, (DWORD_PTR) &mciplayparms);
     if (rv) {
-        ASS_Message("WinMM CD_Play MCI_PLAY err %d\n", (int) rv);
+        ASS_Message("WinMMDrv: CD_Play MCI_PLAY err %d\n", (int) rv);
         ErrorCode = WinMMErr_CDMCIPlay;
         return WinMMErr_Error;
     }
@@ -364,7 +364,7 @@ void WinMMDrv_CD_Stop(void)
 
     rv = mciSendCommand(cdDeviceID, MCI_STOP, 0, (DWORD_PTR) &mcigenparms);
     if (rv) {
-        ASS_Message("WinMM CD_Stop MCI_STOP err %d\n", (int) rv);
+        ASS_Message("WinMMDrv: CD_Stop MCI_STOP err %d\n", (int) rv);
     }
 }
 
@@ -386,7 +386,7 @@ void WinMMDrv_CD_Pause(int pauseon)
         mcistatusparms.dwItem = MCI_STATUS_POSITION;
         rv = mciSendCommand(cdDeviceID, MCI_STATUS, MCI_WAIT | MCI_STATUS_ITEM, (DWORD_PTR) &mcistatusparms);
         if (rv) {
-            ASS_Message("WinMM CD_Pause MCI_STATUS err %d\n", (int) rv);
+            ASS_Message("WinMMDrv: CD_Pause MCI_STATUS err %d\n", (int) rv);
             return;
         }
 
@@ -394,7 +394,7 @@ void WinMMDrv_CD_Pause(int pauseon)
 
         rv = mciSendCommand(cdDeviceID, MCI_STOP, 0, (DWORD_PTR) &mcigenparms);
         if (rv) {
-            ASS_Message("WinMM CD_Pause MCI_STOP err %d\n", (int) rv);
+            ASS_Message("WinMMDrv: CD_Pause MCI_STOP err %d\n", (int) rv);
         }
     } else {
         MCI_PLAY_PARMS mciplayparms;
@@ -405,7 +405,7 @@ void WinMMDrv_CD_Pause(int pauseon)
         mciplayparms.dwCallback = (DWORD_PTR) notifyWindow;
         rv = mciSendCommand(cdDeviceID, MCI_PLAY, MCI_FROM | MCI_TO | MCI_NOTIFY, (DWORD_PTR) &mciplayparms);
         if (rv) {
-            ASS_Message("WinMM CD_Pause MCI_PLAY err %d\n", (int) rv);
+            ASS_Message("WinMMDrv: CD_Pause MCI_PLAY err %d\n", (int) rv);
             return;
         }
 
@@ -427,7 +427,7 @@ int WinMMDrv_CD_IsPlaying(void)
     mcistatusparms.dwItem = MCI_STATUS_MODE;
     rv = mciSendCommand(cdDeviceID, MCI_STATUS, MCI_WAIT | MCI_STATUS_ITEM, (DWORD_PTR) &mcistatusparms);
     if (rv) {
-        ASS_Message("WinMM CD_IsPlaying MCI_STATUS err %d\n", (int) rv);
+        ASS_Message("WinMMDrv: CD_IsPlaying MCI_STATUS err %d\n", (int) rv);
         return 0;
     }
 
@@ -479,7 +479,7 @@ static void midi_dispose_buffer(MidiBuffer * node, const char * caller)
     if (node->prepared) {
         rv = midiOutUnprepareHeader( (HMIDIOUT) midiStream, &node->hdr, sizeof(MIDIHDR) );
         if (rv != MMSYSERR_NOERROR) {
-            midi_error(rv, "WinMM %s/midi_dispose_buffer midiOutUnprepareHeader", caller);
+            midi_error(rv, "WinMMDrv: %s/midi_dispose_buffer midiOutUnprepareHeader", caller);
         }
         node->prepared = FALSE;
     }
@@ -490,11 +490,11 @@ static void midi_dispose_buffer(MidiBuffer * node, const char * caller)
     
         // when playing, we keep the buffers
         LL_Add( (MidiBuffer*) &spareMidiBuffers, node, next, prev );
-        //ASS_Message("WinMM %s/midi_dispose_buffer recycling buffer %p\n", caller, node);
+        //ASS_Message("WinMMDrv: %s/midi_dispose_buffer recycling buffer %p\n", caller, node);
     } else {
         // when not, we throw them away
         free(node);
-        //ASS_Message("WinMM %s/midi_dispose_buffer freeing buffer %p\n", caller, node);
+        //ASS_Message("WinMMDrv: %s/midi_dispose_buffer freeing buffer %p\n", caller, node);
     }
 }
 
@@ -515,20 +515,20 @@ static void midi_free_buffers(void)
 {
     MidiBuffer *node, *next;
 
-    //ASS_Message("waiting for active buffers to return\n");
+    //ASS_Message("WinMMDrv: waiting for active buffers to return\n");
     while (!LL_ListEmpty(&activeMidiBuffers, next, prev)) {
         // wait for Windows to finish with all the buffers queued
         midi_gc_buffers();
-        //ASS_Message("waiting...\n");
+        //ASS_Message("WinMMDrv: waiting...\n");
         Sleep(10);
     }
-    //ASS_Message("waiting over\n");
+    //ASS_Message("WinMMDrv: waiting over\n");
 
     for ( node = spareMidiBuffers.next; node != &spareMidiBuffers; node = next ) {
         next = node->next;
         LL_Remove( node, next, prev );
         free(node);
-        //ASS_Message("WinMM midi_free_buffers freeing buffer %p\n", node);
+        //ASS_Message("WinMMDrv: midi_free_buffers freeing buffer %p\n", node);
     }
     
     assert(currentMidiBuffer == 0);
@@ -566,7 +566,7 @@ static void midi_flush_current_buffer(void)
         // we need to prepare the buffer
         rv = midiOutPrepareHeader( (HMIDIOUT) midiStream, &currentMidiBuffer->hdr, sizeof(MIDIHDR) );
         if (rv != MMSYSERR_NOERROR) {
-            midi_error(rv, "WinMM midi_flush_current_buffer midiOutPrepareHeader");
+            midi_error(rv, "WinMMDrv: midi_flush_current_buffer midiOutPrepareHeader");
             return;
         }
 
@@ -580,12 +580,12 @@ static void midi_flush_current_buffer(void)
 
         rv = midiStreamOut(midiStream, &currentMidiBuffer->hdr, sizeof(MIDIHDR));
         if (rv != MMSYSERR_NOERROR) {
-            midi_error(rv, "WinMM midi_flush_current_buffer midiStreamOut");
+            midi_error(rv, "WinMMDrv: midi_flush_current_buffer midiStreamOut");
             midi_dispose_buffer(currentMidiBuffer, "midi_flush_current_buffer");
             return;
         }
 
-        //ASS_Message("WinMM midi_flush_current_buffer queued buffer %p\n", currentMidiBuffer);
+        //ASS_Message("WinMMDrv: midi_flush_current_buffer queued buffer %p\n", currentMidiBuffer);
     } else {
         // midi file not playing, so send immediately
         
@@ -595,16 +595,16 @@ static void midi_flush_current_buffer(void)
                 // busy-wait for Windows to be done with it
                 while (!(currentMidiBuffer->hdr.dwFlags & MHDR_DONE)) ;
                 
-                //ASS_Message("WinMM midi_flush_current_buffer sent immediate long\n");
+                //ASS_Message("WinMMDrv: midi_flush_current_buffer sent immediate long\n");
             } else {
-                midi_error(rv, "WinMM midi_flush_current_buffer midiOutLongMsg");
+                midi_error(rv, "WinMMDrv: midi_flush_current_buffer midiOutLongMsg");
             }
         } else {
             rv = midiOutShortMsg( (HMIDIOUT) midiStream, evt->dwEvent );
             if (rv == MMSYSERR_NOERROR) {
-                //ASS_Message("WinMM midi_flush_current_buffer sent immediate short\n");
+                //ASS_Message("WinMMDrv: midi_flush_current_buffer sent immediate short\n");
             } else {
-                midi_error(rv, "WinMM midi_flush_current_buffer midiOutShortMsg");
+                midi_error(rv, "WinMMDrv: midi_flush_current_buffer midiOutShortMsg");
             }
         }
 
@@ -693,7 +693,7 @@ static BOOL midi_get_buffer(int length, unsigned char ** data)
                 
                 currentMidiBuffer = node;
                 
-                //ASS_Message("WinMM midi_get_buffer fetched buffer %p\n", node);
+                //ASS_Message("WinMMDrv: midi_get_buffer fetched buffer %p\n", node);
                 break;
             }
         }
@@ -727,7 +727,7 @@ static BOOL midi_get_buffer(int length, unsigned char ** data)
         
         currentMidiBuffer = node;
         
-        //ASS_Message("WinMM midi_get_buffer allocated buffer %p\n", node);
+        //ASS_Message("WinMMDrv: midi_get_buffer allocated buffer %p\n", node);
     }
 
     midi_setup_event(length, data);
@@ -745,7 +745,7 @@ static inline void midi_sequence_event(void)
         return;
     }
     
-    //ASS_Message("WinMM midi_sequence_event buffered\n");
+    //ASS_Message("WinMMDrv: midi_sequence_event buffered\n");
 
     // update the delta time counter
     midiLastEventTime = midiThreadTimer;
@@ -760,7 +760,7 @@ static void Func_NoteOff( int channel, int key, int velocity )
         data[1] = key;
         data[2] = velocity;
         midi_sequence_event();
-    } else ASS_Message("WinMM Func_NoteOff error\n");
+    } else ASS_Message("WinMMDrv: note off error\n");
 }
 
 static void Func_NoteOn( int channel, int key, int velocity )
@@ -772,7 +772,7 @@ static void Func_NoteOn( int channel, int key, int velocity )
         data[1] = key;
         data[2] = velocity;
         midi_sequence_event();
-    } else ASS_Message("WinMM Func_NoteOn error\n");
+    } else ASS_Message("WinMMDrv: note on error\n");
 }
 
 static void Func_PolyAftertouch( int channel, int key, int pressure )
@@ -784,7 +784,7 @@ static void Func_PolyAftertouch( int channel, int key, int pressure )
         data[1] = key;
         data[2] = pressure;
         midi_sequence_event();
-    } else ASS_Message("WinMM Func_PolyAftertouch error\n");
+    } else ASS_Message("WinMMDrv: poly aftertouch error\n");
 }
 
 static void Func_ControlChange( int channel, int number, int value )
@@ -796,7 +796,7 @@ static void Func_ControlChange( int channel, int number, int value )
         data[1] = number;
         data[2] = value;
         midi_sequence_event();
-    } else ASS_Message("WinMM Func_ControlChange error\n");
+    } else ASS_Message("WinMMDrv: control change error\n");
 }
 
 static void Func_ProgramChange( int channel, int program )
@@ -807,7 +807,7 @@ static void Func_ProgramChange( int channel, int program )
         data[0] = MIDI_PROGRAM_CHANGE | channel;
         data[1] = program;
         midi_sequence_event();
-    } else ASS_Message("WinMM Func_ProgramChange error\n");
+    } else ASS_Message("WinMMDrv: program change error\n");
 }
 
 static void Func_ChannelAftertouch( int channel, int pressure )
@@ -818,7 +818,7 @@ static void Func_ChannelAftertouch( int channel, int pressure )
         data[0] = MIDI_AFTER_TOUCH | channel;
         data[1] = pressure;
         midi_sequence_event();
-    } else ASS_Message("WinMM Func_ChannelAftertouch error\n");
+    } else ASS_Message("WinMMDrv: channel aftertouch error\n");
 }
 
 static void Func_PitchBend( int channel, int lsb, int msb )
@@ -830,7 +830,7 @@ static void Func_PitchBend( int channel, int lsb, int msb )
         data[1] = lsb;
         data[2] = msb;
         midi_sequence_event();
-    } else ASS_Message("WinMM Func_PitchBend error\n");
+    } else ASS_Message("WinMMDrv: pitch bend error\n");
 }
 
 static void Func_SysEx( const unsigned char * data, int length )
@@ -840,7 +840,7 @@ static void Func_SysEx( const unsigned char * data, int length )
     if (midi_get_buffer(length, &wdata)) {
         memcpy(wdata, data, length);
         midi_sequence_event();
-    } else ASS_Message("WinMM Func_SysEx error\n");
+    } else ASS_Message("WinMMDrv: sysex error\n");
 }
 
 int WinMMDrv_MIDI_Init(midifuncs * funcs, const char *params)
@@ -867,7 +867,7 @@ int WinMMDrv_MIDI_Init(midifuncs * funcs, const char *params)
         CloseHandle(midiMutex);
         midiMutex = 0;
 
-        midi_error(rv, "WinMM MIDI_Init midiStreamOpen");
+        midi_error(rv, "WinMMDrv: MIDI_Init midiStreamOpen");
         ErrorCode = WinMMErr_MIDIStreamOpen;
         return WinMMErr_Error;
     }
@@ -899,7 +899,7 @@ void WinMMDrv_MIDI_Shutdown(void)
     if (midiStream) {
         rv = midiStreamClose(midiStream);
         if (rv != MMSYSERR_NOERROR) {
-            midi_error(rv, "WinMM MIDI_Shutdown midiStreamClose");
+            midi_error(rv, "WinMMDrv: MIDI_Shutdown midiStreamClose");
         }
     }
 
@@ -922,7 +922,7 @@ static DWORD midi_get_tick(void)
 
     rv = midiStreamPosition(midiStream, &mmtime, sizeof(MMTIME));
     if (rv != MMSYSERR_NOERROR) {
-        midi_error(rv, "WinMM midi_get_tick midiStreamPosition");
+        midi_error(rv, "WinMMDrv: midi_get_tick midiStreamPosition");
         return 0;
     }
 
@@ -935,7 +935,7 @@ static DWORD WINAPI midiDataThread(LPVOID lpParameter)
     DWORD sequenceTime;
     DWORD sleepAmount = 100 / THREAD_QUEUE_INTERVAL;
     
-    ASS_Message("WinMM midiDataThread: started\n");
+    ASS_Message("WinMMDrv: midiDataThread started\n");
 
     midiThreadTimer = midi_get_tick();
     midiLastEventTime = midiThreadTimer;
@@ -955,7 +955,7 @@ static DWORD WINAPI midiDataThread(LPVOID lpParameter)
     do {
         waitret = WaitForSingleObject(midiThreadQuitEvent, sleepAmount);
         if (waitret == WAIT_OBJECT_0) {
-            ASS_Message("WinMM midiDataThread: exiting\n");
+            ASS_Message("WinMMDrv: midiDataThread exiting\n");
             break;
         } else if (waitret == WAIT_TIMEOUT) {
             // queue a tick
@@ -983,7 +983,7 @@ static DWORD WINAPI midiDataThread(LPVOID lpParameter)
             WinMMDrv_MIDI_Unlock();
 
         } else {
-            ASS_Message("WinMM midiDataThread: wfmo err %d\n", (int) waitret);
+            ASS_Message("WinMMDrv: midiDataThread wfmo err %d\n", (int) waitret);
         }
     } while (1);
 
@@ -1034,7 +1034,7 @@ void WinMMDrv_MIDI_HaltPlayback(void)
         SetEvent(midiThreadQuitEvent);
 
         WaitForSingleObject(midiThread, INFINITE);
-        ASS_Message("WinMM MIDI_HaltPlayback synched\n");
+        ASS_Message("WinMMDrv: MIDI_HaltPlayback synched\n");
 
         CloseHandle(midiThread);
     }
@@ -1044,12 +1044,12 @@ void WinMMDrv_MIDI_HaltPlayback(void)
     }
     
     if (midiStreamRunning) {
-        ASS_Message("stopping stream\n");
+        ASS_Message("WinMMDrv: stopping stream\n");
         rv = midiStreamStop(midiStream);
         if (rv != MMSYSERR_NOERROR) {
-            midi_error(rv, "WinMM MIDI_HaltPlayback midiStreamStop");
+            midi_error(rv, "WinMMDrv: MIDI_HaltPlayback midiStreamStop");
         }
-        ASS_Message("stream stopped\n");
+        ASS_Message("WinMMDrv: stream stopped\n");
     
         midiStreamRunning = FALSE;
     }
@@ -1067,7 +1067,7 @@ void WinMMDrv_MIDI_SetTempo(int tempo, int division)
     MIDIPROPTIMEDIV propTimediv;
     BOOL running = midiStreamRunning;
 
-    //ASS_Message("MIDI_SetTempo %d/%d\n", tempo, division);
+    //ASS_Message("WinMMDrv: MIDI_SetTempo %d/%d\n", tempo, division);
 
     propTempo.cbStruct = sizeof(MIDIPROPTEMPO);
     propTempo.dwTempo = 60000000l / tempo;
@@ -1080,13 +1080,13 @@ void WinMMDrv_MIDI_SetTempo(int tempo, int division)
 
         rv = midiStreamProperty(midiStream, (LPBYTE) &propTimediv, MIDIPROP_SET | MIDIPROP_TIMEDIV);
         if (rv != MMSYSERR_NOERROR) {
-            midi_error(rv, "WinMM MIDI_SetTempo midiStreamProperty timediv");
+            midi_error(rv, "WinMMDrv: MIDI_SetTempo midiStreamProperty timediv");
         }
     }
 
     rv = midiStreamProperty(midiStream, (LPBYTE) &propTempo, MIDIPROP_SET | MIDIPROP_TEMPO);
     if (rv != MMSYSERR_NOERROR) {
-        midi_error(rv, "WinMM MIDI_SetTempo midiStreamProperty tempo");
+        midi_error(rv, "WinMMDrv: MIDI_SetTempo midiStreamProperty tempo");
     }
 
     if (midiLastDivision != division) {
@@ -1110,7 +1110,7 @@ void WinMMDrv_MIDI_Lock(void)
 
     err = WaitForSingleObject(midiMutex, INFINITE);
     if (err != WAIT_OBJECT_0) {
-        ASS_Message("WinMM midiMutex lock: wfso %d\n", (int) err);
+        ASS_Message("WinMMDrv: midiMutex lock: wfso %d\n", (int) err);
     }
 }
 

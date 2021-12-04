@@ -110,7 +110,7 @@ static void FillBuffer(int bufnum)
     DWORD remaining, remaining2;
     int retries = 1;
     
-    //ASS_Message("DirectSound FillBuffer: filling %d\n", bufnum);
+    //ASS_Message("DirectSoundDrv: FillBuffer filling %d\n", bufnum);
 
     do {
         err = IDirectSoundBuffer_Lock(lpdsbsec,
@@ -130,7 +130,7 @@ static void FillBuffer(int bufnum)
                     continue;
                 }
             }
-            ASS_Message("DirectSound FillBuffer: err %x\n", (unsigned int) err);
+            ASS_Message("DirectSoundDrv: FillBuffer err %x\n", (unsigned int) err);
             return;
         }
         break;
@@ -165,15 +165,15 @@ static DWORD WINAPI fillDataThread(LPVOID lpParameter)
                     FillBuffer(WAIT_OBJECT_0 + 1 - waitret);
                     ReleaseMutex(mutex);
                 } else {
-                    ASS_Message("DirectSound fillDataThread: wfso err %d\n", (int) waitret2);
+                    ASS_Message("DirectSoundDrv: fillDataThread wfso err %d\n", (int) waitret2);
                 }
                 break;
             case WAIT_OBJECT_0+2:
-                ASS_Message("DirectSound fillDataThread: exiting\n");
+                ASS_Message("DirectSoundDrv: fillDataThread exiting\n");
                 ExitThread(0);
                 break;
             default:
-                ASS_Message("DirectSound fillDataThread: wfmo err %d\n", (int) waitret);
+                ASS_Message("DirectSoundDrv: fillDataThread wfmo err %d\n", (int) waitret);
                 break;
         }
 	} while (1);
@@ -271,7 +271,7 @@ const char *DirectSoundDrv_ErrorString( int ErrorNumber )
 static void TeardownDSound(HRESULT err)
 {
     if (FAILED(err)) {
-        ASS_Message("Dying error: %x\n", (unsigned int) err);
+        ASS_Message("DirectSoundDrv: TeardownDSound error: %x\n", (unsigned int) err);
     }
 
     if (lpdsnotify)   IDirectSoundNotify_Release(lpdsnotify);
@@ -404,8 +404,6 @@ int DirectSoundDrv_PCM_Init(int * mixrate, int * numchannels, int * samplebits, 
     
     Initialised = 1;
     
-    ASS_Message("DirectSound Init: yay\n");
-    
 	return DSErr_Ok;
 }
 
@@ -481,7 +479,7 @@ void DirectSoundDrv_PCM_Lock(void)
     
     err = WaitForSingleObject(mutex, INFINITE);
     if (err != WAIT_OBJECT_0) {
-        ASS_Message("DirectSound lock: wfso %d\n", (int) err);
+        ASS_Message("DirectSoundDrv: PCM_Lock wfso %d\n", (int) err);
     }
 }
 

@@ -119,11 +119,11 @@ static inline void sequence_event(snd_seq_event_t * ev)
     snd_seq_ev_schedule_tick(ev, seq_queue, 0, threadTimer);
     result = snd_seq_event_output(seq, ev);
     if (result < 0) {
-        ASS_Message("ALSA could not queue event: err %d\n", result);
+        ASS_Message("ALSADrv: could not queue event: err %d\n", result);
     } else {
         while ((result = snd_seq_drain_output(seq)) > 0) ;
         if (result < 0) {
-            ASS_Message("ALSA could not drain output: err %d\n", result);
+            ASS_Message("ALSADrv: could not drain output: err %d\n", result);
         }
 
         snd_seq_sync_output_queue(seq);
@@ -195,7 +195,7 @@ static unsigned int get_tick(void)
     
     result = snd_seq_get_queue_status(seq, seq_queue, status);
     if (result < 0) {
-        ASS_Message("ALSA snd_seq_get_queue_status err %d\n", result);
+        ASS_Message("ALSADrv: snd_seq_get_queue_status err %d\n", result);
         return 0;
     }
 
@@ -259,7 +259,7 @@ int ALSADrv_MIDI_Init(midifuncs *funcs, const char *params)
 
     result = snd_seq_open(&seq, "default", SND_SEQ_OPEN_DUPLEX, 0);
     if (result < 0) {
-        ASS_Message("ALSA snd_seq_open err %d\n", result);
+        ASS_Message("ALSADrv: snd_seq_open err %d\n", result);
         ErrorCode = ALSAErr_SeqOpen;
         return ALSAErr_Error;
     }
@@ -269,7 +269,7 @@ int ALSADrv_MIDI_Init(midifuncs *funcs, const char *params)
                   SND_SEQ_PORT_TYPE_APPLICATION);
     if (seq_port < 0) {
         ALSADrv_MIDI_Shutdown();
-        ASS_Message("ALSA snd_seq_create_simple_port err %d\n", seq_port);
+        ASS_Message("ALSADrv: snd_seq_create_simple_port err %d\n", seq_port);
         ErrorCode = ALSAErr_CreateSimplePort;
         return ALSAErr_Error;
     }
@@ -279,7 +279,7 @@ int ALSADrv_MIDI_Init(midifuncs *funcs, const char *params)
     seq_queue = snd_seq_alloc_queue(seq);
     if (seq_queue < 0) {
         ALSADrv_MIDI_Shutdown();
-        ASS_Message("ALSA snd_seq_alloc_queue err %d\n", seq_queue);
+        ASS_Message("ALSADrv: snd_seq_alloc_queue err %d\n", seq_queue);
         ErrorCode = ALSAErr_AllocQueue;
         return ALSAErr_Error;
     }
@@ -287,7 +287,7 @@ int ALSADrv_MIDI_Init(midifuncs *funcs, const char *params)
     result = snd_seq_connect_to(seq, seq_port, 128, 0);
     if (result < 0) {
         ALSADrv_MIDI_Shutdown();
-        ASS_Message("ALSA snd_seq_connect_to err %d\n", result);
+        ASS_Message("ALSADrv: snd_seq_connect_to err %d\n", result);
         ErrorCode = ALSAErr_ConnectTo;
         return ALSAErr_Error;
     }
@@ -331,7 +331,7 @@ int ALSADrv_MIDI_StartPlayback(void (*service)(void))
     ALSADrv_MIDI_QueueStart();
 
     if (pthread_create(&thread, NULL, threadProc, NULL)) {
-        ASS_Message("ALSA pthread_create returned error\n");
+        ASS_Message("ALSADrv: pthread_create returned error\n");
 
         ALSADrv_MIDI_HaltPlayback();
         
@@ -354,7 +354,7 @@ void ALSADrv_MIDI_HaltPlayback(void)
     threadQuit = 1;
 
     if (pthread_join(thread, &ret)) {
-        ASS_Message("ALSA pthread_join returned error\n");
+        ASS_Message("ALSADrv: pthread_join returned error\n");
     }
 
     ALSADrv_MIDI_QueueStop();
@@ -395,12 +395,12 @@ void ALSADrv_MIDI_QueueStart(void)
     if (!queueRunning) {
         result = snd_seq_start_queue(seq, seq_queue, NULL);
         if (result < 0) {
-            ASS_Message("ALSA snd_seq_start_queue err %d\n", result);
+            ASS_Message("ALSADrv: snd_seq_start_queue err %d\n", result);
         }
 
         while ((result = snd_seq_drain_output(seq)) > 0);
         if (result < 0) {
-            ASS_Message("ALSA could not drain output: err %d\n", result);
+            ASS_Message("ALSADrv: could not drain output: err %d\n", result);
         }
 
         snd_seq_sync_output_queue(seq);
@@ -416,12 +416,12 @@ void ALSADrv_MIDI_QueueStop(void)
     if (queueRunning) {
         result = snd_seq_stop_queue(seq, seq_queue, NULL);
         if (result < 0) {
-            ASS_Message("ALSA snd_seq_stop_queue err %d\n", result);
+            ASS_Message("ALSADrv: snd_seq_stop_queue err %d\n", result);
         }
 
         while ((result = snd_seq_drop_output(seq)) > 0);
         if (result < 0) {
-            ASS_Message("ALSA could not drop output: err %d\n", result);
+            ASS_Message("ALSADrv: could not drop output: err %d\n", result);
         }
 
         snd_seq_sync_output_queue(seq);

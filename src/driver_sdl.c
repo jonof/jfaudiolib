@@ -198,12 +198,12 @@ int SDLDrv_PCM_Init(int * mixrate, int * numchannels, int * samplebits, void * i
     {
         char drivername[256] = "(error)";
         SDL_AudioDriverName(drivername, sizeof(drivername));
-        ASS_Message("SDL_AudioDriverName: %s\n", drivername);
+        ASS_Message("SDLDrv: audio driver: %s\n", drivername);
     }
     #else
     {
         const char * drivername = SDL_GetCurrentAudioDriver();
-        ASS_Message("SDL_GetCurrentAudioDriver: %s\n", drivername ? drivername : "(error)");
+        ASS_Message("SDLDrv: audio driver: %s\n", drivername ? drivername : "(error)");
     }
     #endif
 
@@ -250,18 +250,18 @@ int SDLDrv_PCM_Init(int * mixrate, int * numchannels, int * samplebits, void * i
             case AUDIO_S16MSB: format = "AUDIO_S16MSB"; break;
             default: format = "?!"; break;
         }
-        ASS_Message("SDL_OpenAudio: actual.format = %s\n", format);
+        ASS_Message("SDLDrv: audio format: %s\n", format);
         ErrorCode = SDLErr_OpenAudio;
         err = 1;
     }
     if (actual.channels == 1 || actual.channels == 2) {
         *numchannels = actual.channels;
     } else {
-        ASS_Message("SDL_OpenAudio: actual.channels = %d\n", actual.channels);
+        ASS_Message("SDLDrv: audio channels: %d\n", actual.channels);
         ErrorCode = SDLErr_OpenAudio;
         err = 1;
     }
-    // ASS_Message("SDL_OpenAudio: actual.samples = %d vs spec.samples = %d\n", actual.samples, spec.samples);
+    // ASS_Message("SDLDrv: actual samples = %d vs spec samples = %d\n", actual.samples, spec.samples);
 
     if (err) {
         SDL_CloseAudio();
@@ -407,7 +407,7 @@ int SDLDrv_CD_Init(void)
     
     StartedSDL |= SDL_INIT_CDROM;
     
-    ASS_Message("SDL_CDNumDrives: %d\n", SDL_CDNumDrives());
+    ASS_Message("SDLDrv: num CD drives: %d\n", SDL_CDNumDrives());
     
     CDRom = SDL_CDOpen(0);
     if (!CDRom) {
@@ -415,9 +415,9 @@ int SDLDrv_CD_Init(void)
         return SDLErr_Error;
     }
     
-    ASS_Message("SDL_CD: numtracks: %d\n", CDRom->numtracks);
+    ASS_Message("SDLDrv: num CD tracks: %d\n", CDRom->numtracks);
     for (i = 0; i < CDRom->numtracks; i++) {
-        ASS_Message("SDL_CD: track %d - %s, %dsec\n",
+        ASS_Message("SDLDrv: CD track %d - %s, %dsec\n",
                 CDRom->track[i].id,
                 CDRom->track[i].type == SDL_AUDIO_TRACK ? "audio" : "data",
                 CDRom->track[i].length / CD_FPS
