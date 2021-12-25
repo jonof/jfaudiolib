@@ -23,6 +23,9 @@ SOURCES=src\drivers.c \
 !if "$(PLATFORM)" == ""
 PLATFORM=x86
 !endif
+!if "$(PLATFORM)" == "X86" || "$(PLATFORM)" == "x86"
+CFLAGS=$(CFLAGS) /arch:IA32
+!endif
 
 !if $(JFAUDIOLIB_HAVE_VORBIS)
 CPPFLAGS=$(CPPFLAGS) /DHAVE_VORBIS /Ithird-party\msvc\include
@@ -45,4 +48,4 @@ test.exe: src\test.obj $(JFAUDIOLIB)
 	$(CC) /c $(CPPFLAGS) $(CFLAGS) /Fo$@ $<
 
 clean:
-	-del /q $(OBJECTS) $(JFAUDIOLIB) test.exe
+	-del /q $(OBJECTS) $(JFAUDIOLIB) src\test.obj test.exe
