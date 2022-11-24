@@ -262,13 +262,13 @@ void MV_Mix8BitStereo16( unsigned int position,
 void MV_Mix16BitStereo16( unsigned int position,
    unsigned int rate, char *start, unsigned int length );
 
-void MV_16BitReverb( char *src, char *dest, VOLUME16 *volume, int count );
+void MV_16BitReverb( char *src, char *dest, VOLUME16 *volume, unsigned int count );
 
-void MV_8BitReverb( signed char *src, signed char *dest, VOLUME16 *volume, int count );
+void MV_8BitReverb( signed char *src, signed char *dest, VOLUME16 *volume, unsigned int count );
 
-void MV_16BitReverbFast( char *src, char *dest, int count, int shift );
+void MV_16BitReverbFast( char *src, char *dest, unsigned int count, int shift );
 
-void MV_8BitReverbFast( signed char *src, signed char *dest, int count, int shift );
+void MV_8BitReverbFast( signed char *src, signed char *dest, unsigned int count, int shift );
 
 // implemented in mixst.c
 void ClearBuffer_DW( void *ptr, unsigned data, int length );

@@ -101,7 +101,7 @@ static int seek_vorbis(void * datasource, ogg_int64_t offset, int whence)
       vorb->pos = vorb->length;
    }
    
-   return vorb->pos;
+   return (int)vorb->pos;
 }
 
 static int close_vorbis(void * datasource)
@@ -145,7 +145,7 @@ static playbackstatus MV_GetNextVorbisBlock
    
    bytesread = 0;
    do {
-      bytes = ov_read(&vd->vf, vd->block + bytesread, sizeof(vd->block) - bytesread, 0, 2, 1, &bitstream);
+      bytes = (int)ov_read(&vd->vf, vd->block + bytesread, sizeof(vd->block) - bytesread, 0, 2, 1, &bitstream);
       //ASS_Message("ov_read = %d\n", bytes);
       if (bytes == OV_HOLE) continue;
       if (bytes == 0) {
@@ -188,7 +188,7 @@ static playbackstatus MV_GetNextVorbisBlock
       }
       
       voice->channels = vi->channels;
-      voice->SamplingRate = vi->rate;
+      voice->SamplingRate = (unsigned)vi->rate;
       voice->RateScale    = ( voice->SamplingRate * voice->PitchScale ) / MV_MixRate;
       voice->FixedPointBufferSize = ( voice->RateScale * MixBufferSize ) -
          voice->RateScale;
@@ -389,7 +389,7 @@ int MV_PlayLoopedVorbis
    voice->Playing     = TRUE;
    voice->Paused      = FALSE;
    
-   voice->SamplingRate = vi->rate;
+   voice->SamplingRate = (unsigned)vi->rate;
    voice->RateScale    = ( voice->SamplingRate * voice->PitchScale ) / MV_MixRate;
    voice->FixedPointBufferSize = ( voice->RateScale * MixBufferSize ) -
       voice->RateScale;

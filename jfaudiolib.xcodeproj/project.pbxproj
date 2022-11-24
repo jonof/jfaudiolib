@@ -353,8 +353,10 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_CXX_LANGUAGE_STANDARD = "c++98";
 				COPY_PHASE_STRIP = NO;
 				FRAMEWORK_SEARCH_PATHS = "$(HOME)/Library/Frameworks";
+				GCC_C_LANGUAGE_STANDARD = c99;
 				GCC_OPTIMIZATION_LEVEL = 0;
 				GCC_PREPROCESSOR_DEFINITIONS = (
 					HAVE_VORBIS,
@@ -367,7 +369,6 @@
 				WARNING_CFLAGS = (
 					"-W",
 					"-Wall",
-					"-Wno-unused-variable",
 				);
 			};
 			name = Debug;
@@ -376,8 +377,10 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_CXX_LANGUAGE_STANDARD = "c++98";
 				COPY_PHASE_STRIP = YES;
 				FRAMEWORK_SEARCH_PATHS = "$(HOME)/Library/Frameworks";
+				GCC_C_LANGUAGE_STANDARD = c99;
 				GCC_PREPROCESSOR_DEFINITIONS = (
 					HAVE_VORBIS,
 					__MACOSX__,
@@ -388,7 +391,6 @@
 				WARNING_CFLAGS = (
 					"-W",
 					"-Wall",
-					"-Wno-unused-variable",
 				);
 			};
 			name = Release;

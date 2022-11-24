@@ -66,8 +66,8 @@ static int MV_TotalVolume = MV_MaxTotalVolume;
 static int MV_MaxVoices   = 1;
 static int MV_Recording;
 
-static int MV_BufferSize = MixBufferSize;
-static int MV_BufferLength;
+static unsigned int MV_BufferSize = MixBufferSize;
+static unsigned int MV_BufferLength;
 
 static int MV_NumberOfBuffers = NumberOfBuffers;
 
@@ -406,8 +406,8 @@ static void MV_ServiceVoc
       char *end;
       char *source;
       char *dest;
-      int   count;
-      int   length;
+      unsigned int   count;
+      unsigned int   length;
 
       end = MV_MixBuffer[ 0 ] + MV_BufferLength;;
       dest = MV_MixBuffer[ MV_MixPage ];
@@ -423,7 +423,7 @@ static void MV_ServiceVoc
          count = length;
          if ( source + count > end )
             {
-            count = end - source;
+            count = (unsigned int)(end - source);
             }
 
          if ( MV_Bits == 16 )
@@ -2215,7 +2215,7 @@ int MV_PlayLoopedRaw
    voice->callbackval = callbackval;
    voice->LoopStart   = loopstart;
    voice->LoopEnd     = loopend;
-   voice->LoopSize    = ( voice->LoopEnd - voice->LoopStart ) + 1;
+   voice->LoopSize    = (unsigned int)( voice->LoopEnd - voice->LoopStart ) + 1;
 
    MV_SetVoicePitch( voice, rate, pitchoffset );
    MV_SetVoiceVolume( voice, vol, left, right );

@@ -1834,6 +1834,8 @@ static void _MIDI_InitEMIDI
    int    c1;
    int    c2;
 
+   (void)channel;
+
    _MIDI_ResetTracks();
 
    _MIDI_TotalTime     = 0;

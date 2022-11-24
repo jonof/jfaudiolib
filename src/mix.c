@@ -285,7 +285,7 @@ void MV_Mix16BitStereo16( unsigned int position, unsigned int rate,
     MV_MixDestination = (char *) dest;
 }
 
-void MV_16BitReverb( char *src, char *dest, VOLUME16 *volume, int count )
+void MV_16BitReverb( char *src, char *dest, VOLUME16 *volume, unsigned int count )
 {
     unsigned short * input = (unsigned short *) src;
     short * output = (short *) dest;
@@ -310,7 +310,7 @@ void MV_16BitReverb( char *src, char *dest, VOLUME16 *volume, int count )
     } while (count-- > 0);
 }
 
-void MV_8BitReverb( signed char *src, signed char *dest, VOLUME16 *volume, int count )
+void MV_8BitReverb( signed char *src, signed char *dest, VOLUME16 *volume, unsigned int count )
 {
     unsigned char * input = (unsigned char *) src;
     unsigned char * output = (unsigned char *) dest;
@@ -323,7 +323,7 @@ void MV_8BitReverb( signed char *src, signed char *dest, VOLUME16 *volume, int c
     } while (count-- > 0);
 }
 
-void MV_16BitReverbFast( char *src, char *dest, int count, int shift )
+void MV_16BitReverbFast( char *src, char *dest, unsigned int count, int shift )
 {
     short * input = (short *) src;
     short * output = (short *) dest;
@@ -336,7 +336,7 @@ void MV_16BitReverbFast( char *src, char *dest, int count, int shift )
     } while (count-- > 0);
 }
 
-void MV_8BitReverbFast( signed char *src, signed char *dest, int count, int shift )
+void MV_8BitReverbFast( signed char *src, signed char *dest, unsigned int count, int shift )
 {
     unsigned char sample0, c;
     

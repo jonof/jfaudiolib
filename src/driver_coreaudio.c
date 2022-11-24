@@ -144,8 +144,6 @@ static OSStatus midiService(
                             UInt32                      inNumberFrames,
                             AudioBufferList             *ioData)
 {
-    int secondsThisCall = (inNumberFrames << 16) / 44100;
-
     (void)inRefCon; (void)inTimeStamp; (void)inBusNumber; (void)ioData;
 
     if (MidiCallBack == 0) return noErr;
@@ -362,8 +360,6 @@ static int initialise_graph(int subsystem)
 
 static int uninitialise_graph(int subsystem)
 {
-    OSStatus result;
-
     if (!Initialised) {
         return CAErr_Ok;
     }
@@ -396,7 +392,6 @@ static void parse_params(const char *params)
     char *parseparams, *savepair = NULL;
     char *parampair, *paramname, *paramvalue;
     char *firstpair;
-    int setok;
 
     if (!params || !params[0]) return;
 
@@ -466,8 +461,6 @@ void CoreAudioDrv_PCM_Shutdown(void)
 int CoreAudioDrv_PCM_BeginPlayback(char *BufferStart, int BufferSize,
                                   int NumDivisions, void ( *CallBackFunc )( void ) )
 {
-    OSStatus result;
-
     if (!(Initialised & CASystem_pcm)) {
         ErrorCode = CAErr_Uninitialised;
         return CAErr_Error;
@@ -492,9 +485,6 @@ int CoreAudioDrv_PCM_BeginPlayback(char *BufferStart, int BufferSize,
 
 void CoreAudioDrv_PCM_StopPlayback(void)
 {
-    OSStatus result;
-    AURenderCallbackStruct callback;
-
     if (!MixCallBack) {
         return;
     }

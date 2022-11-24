@@ -127,7 +127,7 @@ void playsong(const char * song, int loopstart, int loopend)
     }
 
     fseek(fp, 0, SEEK_END);
-    length = ftell(fp);
+    length = (int)ftell(fp);
     if (length <= 0) {
         fclose(fp);
         return;
