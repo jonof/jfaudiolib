@@ -149,10 +149,10 @@ static playbackstatus MV_GetNextVorbisBlock
       //ASS_Message("ov_read = %d\n", bytes);
       if (bytes == OV_HOLE) continue;
       if (bytes == 0) {
-         if (voice->LoopStart) {
+         if (voice->LoopCount) {
             err = ov_pcm_seek_page(&vd->vf, 0);
             if (err != 0) {
-               ASS_Message("MV_GetNextVorbisBlock ov_pcm_seek_page_lap: err %d\n", err);
+               ASS_Message("MV_GetNextVorbisBlock ov_pcm_seek_page: err %d\n", err);
             } else {
                continue;
             }
@@ -375,7 +375,7 @@ int MV_PlayLoopedVorbis
    voice->GetSound    = MV_GetNextVorbisBlock;
    voice->NextBlock   = vd->block;
    voice->DemandFeed  = NULL;
-   voice->LoopCount   = 0;
+   voice->LoopCount   = (loopstart >= 0 ? TRUE : FALSE);
    voice->BlockLength = 0;
    voice->PitchScale  = PITCH_GetScale( pitchoffset );
    voice->length      = 0;
@@ -383,7 +383,7 @@ int MV_PlayLoopedVorbis
    voice->prev        = NULL;
    voice->priority    = priority;
    voice->callbackval = callbackval;
-   voice->LoopStart   = (char *)(intptr_t)(loopstart >= 0 ? TRUE : FALSE);
+   voice->LoopStart   = 0;
    voice->LoopEnd     = 0;
    voice->LoopSize    = 0;
    voice->Playing     = TRUE;

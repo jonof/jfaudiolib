@@ -7,7 +7,7 @@
 #include "drivers.h"
 #include "asssys.h"
 
-void playsong(const char *);
+void playsong(const char *, int, int);
 void listdevs(void);
 
 #ifdef _WIN32
@@ -20,6 +20,8 @@ void * win_gethwnd()
 }
 #endif
 
+#define bound(l,n,u) ((n) < (l) ? (l) : ((n) > (u) ? (u) : (n)))
+
 int main(int argc, char ** argv)
 {
     int status = 0;
@@ -30,6 +32,7 @@ int main(int argc, char ** argv)
     int NumBits = 16;
     int MixRate = 32000;
     int arg = 0;
+    int loopstart = -1, loopend = -1;
     void * initdata = 0;
     const char * musicinit = 0;
     const char * song = "samples/test.wav";
@@ -42,23 +45,44 @@ int main(int argc, char ** argv)
                 puts("-h     This text.");
                 puts("-l     List drivers.");
                 puts("-fn    Set specific FX device (n = device number)");
+                puts("-cn    Set 'n' FX output channels (1 or 2)");
+                puts("-bn    Set 'n' FX output bits-per-sample (8 or 16)");
+                puts("-sx    Set 'n' FX sample rate (8000 to 48000)");
                 puts("-mn    Set specific Music device (n = device number)");
                 puts("-M...  Specify music device parameter string");
-		return 0;
+                puts("-rx,y  Loop FX from samples x to y (0,-1 loops fully)");
+                return 0;
             } else if (argv[arg][1] == 'l') {
                 listdevs();
                 return 0;
             } else if (argv[arg][1] == 'f') {
                 FXDevice = atoi(argv[arg] + 2);
+            } else if (argv[arg][1] == 'c') {
+                NumChannels = atoi(argv[arg] + 2);
+            } else if (argv[arg][1] == 'b') {
+                NumBits = atoi(argv[arg] + 2);
+            } else if (argv[arg][1] == 's') {
+                MixRate = atoi(argv[arg] + 2);
             } else if (argv[arg][1] == 'm') {
                 MusicDevice = atoi(argv[arg] + 2);
             } else if (argv[arg][1] == 'M') {
                 musicinit = argv[arg] + 2;
+            } else if (argv[arg][1] == 'r') {
+                char *comma = NULL;
+                loopstart = (int)strtol(argv[arg] + 2, &comma, 10);
+                if (comma > argv[arg] + 2 && *comma == ',')
+                    loopend = (int)strtol(comma + 1, NULL, 10);
+                else
+                    loopstart = -1;
             }
         } else {
             song = argv[arg];
         }
     }
+
+    NumChannels = bound(1, NumChannels, 2);
+    NumBits = bound(1, (NumBits >> 3), 2) << 3;
+    MixRate = bound(8000, MixRate, 48000);
 
 #ifdef _WIN32
     initdata = win_gethwnd();
@@ -81,7 +105,7 @@ int main(int argc, char ** argv)
     fprintf(stdout, "Music driver is %s\n", MUSIC_GetCurrentDriverName());
     fprintf(stdout, "Format is %dHz %d-bit %d-channel\n", MixRate, NumBits, NumChannels);
 
-    playsong(song);
+    playsong(song, loopstart, loopend);
 
     MUSIC_Shutdown();
     FX_Shutdown();
@@ -89,7 +113,7 @@ int main(int argc, char ** argv)
     return 0;
 }
 
-void playsong(const char * song)
+void playsong(const char * song, int loopstart, int loopend)
 {
     int status;
     int length;
@@ -137,7 +161,13 @@ void playsong(const char * song)
             }
         }
     } else {
-        status = FX_PlayAuto(data, length, 0, 255, 255, 255, FX_MUSIC_PRIORITY, 1);
+        if (loopstart >= 0) {
+            printf("Looping from %d to %d\n", loopstart, loopend);
+            status = FX_PlayLoopedAuto(data, length, loopstart, loopend,
+                0, 255, 255, 255, FX_MUSIC_PRIORITY, 1);
+        } else {
+            status = FX_PlayAuto(data, length, 0, 255, 255, 255, FX_MUSIC_PRIORITY, 1);
+        }
         if (status >= FX_Ok) {
             while (FX_SoundActive(status)) {
                 ASS_Sleep(500);
