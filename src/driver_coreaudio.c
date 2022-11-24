@@ -437,7 +437,8 @@ int CoreAudioDrv_PCM_Init(int * mixrate, int * numchannels, int * samplebits, vo
     pcmDesc.mChannelsPerFrame = *numchannels;
     pcmDesc.mSampleRate = *mixrate;
     pcmDesc.mBitsPerChannel = *samplebits;
-    pcmDesc.mFormatFlags |= kLinearPCMFormatFlagIsSignedInteger;
+    if (*samplebits > 8)
+        pcmDesc.mFormatFlags |= kLinearPCMFormatFlagIsSignedInteger;
 #ifdef __POWERPC__
     pcmDesc.mFormatFlags |= kLinearPCMFormatFlagIsBigEndian;
 #endif
