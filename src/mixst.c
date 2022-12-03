@@ -44,6 +44,9 @@ void MV_Mix8BitMono8Stereo( unsigned int position, unsigned int rate,
 {
     unsigned char *source = (unsigned char *) start;
     unsigned char *dest = (unsigned char *) MV_MixDestination;
+    int samplesize = MV_SampleSize;
+    const short *leftvolume = MV_LeftVolume;
+    const char *harshcliptable = MV_HarshClipTable;
     int sample0, sample1;
     
     while (length--) {
@@ -51,12 +54,12 @@ void MV_Mix8BitMono8Stereo( unsigned int position, unsigned int rate,
         sample1 = source[((position >> 16) << 1) + 1];
         position += rate;
         
-        sample0 = (MV_LeftVolume[sample0] + MV_LeftVolume[sample1]) / 2 + *dest;
-        sample0 = MV_HarshClipTable[sample0 + 128];
+        sample0 = (leftvolume[sample0] + leftvolume[sample1]) / 2 + *dest;
+        sample0 = harshcliptable[sample0 + 128];
         
         *dest = sample0 & 255;
         
-        dest += MV_SampleSize;
+        dest += samplesize;
     }
     
     MV_MixPosition = position;
@@ -69,6 +72,11 @@ void MV_Mix8BitStereo8Stereo( unsigned int position, unsigned int rate,
 {
     unsigned char *source = (unsigned char *) start;
     unsigned char *dest = (unsigned char *) MV_MixDestination;
+    int samplesize = MV_SampleSize;
+    const short *leftvolume = MV_LeftVolume;
+    const short *rightvolume = MV_RightVolume;
+    int rightchanneloffset = MV_RightChannelOffset;
+    const char *harshcliptable = MV_HarshClipTable;
     int sample0, sample1;
     
     while (length--) {
@@ -76,15 +84,15 @@ void MV_Mix8BitStereo8Stereo( unsigned int position, unsigned int rate,
         sample1 = source[((position >> 16) << 1) + 1];
         position += rate;
         
-        sample0 = MV_LeftVolume[sample0] + *dest;
-        sample1 = MV_RightVolume[sample1] + *(dest + MV_RightChannelOffset);
-        sample0 = MV_HarshClipTable[sample0 + 128];
-        sample1 = MV_HarshClipTable[sample1 + 128];
+        sample0 = leftvolume[sample0] + *dest;
+        sample1 = rightvolume[sample1] + *(dest + rightchanneloffset);
+        sample0 = harshcliptable[sample0 + 128];
+        sample1 = harshcliptable[sample1 + 128];
         
         *dest = sample0 & 255;
-        *(dest + MV_RightChannelOffset) = sample1 & 255;
+        *(dest + rightchanneloffset) = sample1 & 255;
         
-        dest += MV_SampleSize;
+        dest += samplesize;
     }
     
     MV_MixPosition = position;
@@ -198,6 +206,9 @@ void MV_Mix8BitMono16Stereo( unsigned int position, unsigned int rate,
 {
     signed char *source = (signed char *) start + 1;
     unsigned char *dest = (unsigned char *) MV_MixDestination;
+    int samplesize = MV_SampleSize;
+    const short *leftvolume = MV_LeftVolume;
+    const char *harshcliptable = MV_HarshClipTable;
     int sample0, sample1;
     
     while (length--) {
@@ -205,14 +216,14 @@ void MV_Mix8BitMono16Stereo( unsigned int position, unsigned int rate,
         sample1 = source[((position >> 16) << 2) + 2];
         position += rate;
         
-        sample0 = MV_LeftVolume[sample0 + 128];
-        sample1 = MV_LeftVolume[sample1 + 128];
+        sample0 = leftvolume[sample0 + 128];
+        sample1 = leftvolume[sample1 + 128];
         sample0 = (sample0 + sample1) / 2 + *dest;
-        sample0 = MV_HarshClipTable[sample0 + 128];
+        sample0 = harshcliptable[sample0 + 128];
         
         *dest = sample0 & 255;
         
-        dest += MV_SampleSize;
+        dest += samplesize;
     }
     
     MV_MixPosition = position;
@@ -225,6 +236,11 @@ void MV_Mix8BitStereo16Stereo( unsigned int position, unsigned int rate,
 {
     signed char *source = (signed char *) start + 1;
     unsigned char *dest = (unsigned char *) MV_MixDestination;
+    int samplesize = MV_SampleSize;
+    const short *leftvolume = MV_LeftVolume;
+    const short *rightvolume = MV_RightVolume;
+    int rightchanneloffset = MV_RightChannelOffset;
+    const char *harshcliptable = MV_HarshClipTable;
     int sample0, sample1;
     
     while (length--) {
@@ -232,15 +248,15 @@ void MV_Mix8BitStereo16Stereo( unsigned int position, unsigned int rate,
         sample1 = source[((position >> 16) << 2) + 2];
         position += rate;
         
-        sample0 = MV_LeftVolume[sample0 + 128] + *dest;
-        sample1 = MV_RightVolume[sample1 + 128] + *(dest + MV_RightChannelOffset);
-        sample0 = MV_HarshClipTable[sample0 + 128];
-        sample1 = MV_HarshClipTable[sample1 + 128];
+        sample0 = leftvolume[sample0 + 128] + *dest;
+        sample1 = rightvolume[sample1 + 128] + *(dest + rightchanneloffset);
+        sample0 = harshcliptable[sample0 + 128];
+        sample1 = harshcliptable[sample1 + 128];
         
         *dest = sample0 & 255;
-        *(dest + MV_RightChannelOffset) = sample1 & 255;
+        *(dest + rightchanneloffset) = sample1 & 255;
         
-        dest += MV_SampleSize;
+        dest += samplesize;
     }
     
     MV_MixPosition = position;
