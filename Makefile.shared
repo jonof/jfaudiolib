@@ -10,9 +10,10 @@ JFAUDIOLIB_LDFLAGS=
 SDL2CONFIG?=$(shell which sdl2-config || which false)
 PKGCONFIG?=$(shell which pkg-config || which false)
 
-machine=$(strip $(shell $(CC) -dumpmachine))
+TARGETMACHINE?=$(strip $(shell $(CC) -dumpmachine))
+export TARGETMACHINE
 
-ifeq (mingw32,$(findstring mingw32,$(machine)))
+ifeq (mingw32,$(findstring mingw32,$(TARGETMACHINE)))
  JFAUDIOLIB_HAVE_VORBIS=1
 else
  ifeq (yes,$(shell $(PKGCONFIG) --exists vorbisfile && echo yes))
@@ -32,4 +33,8 @@ else
   JFAUDIOLIB_HAVE_FLUIDSYNTH=1
   JFAUDIOLIB_LDFLAGS+= $(shell $(PKGCONFIG) --libs fluidsynth)
  endif
+endif
+
+ifeq (-darwin,$(findstring -darwin,$(TARGETMACHINE)))
+ JFAUDIOLIB_LDFLAGS+= -framework AudioUnit -framework AudioToolbox
 endif

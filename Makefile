@@ -28,15 +28,15 @@ SOURCES=src/drivers.c \
 
 include Makefile.shared
 
-ifeq (mingw32,$(findstring mingw32,$(machine)))
+ifeq (mingw32,$(findstring mingw32,$(TARGETMACHINE)))
  CPPFLAGS+= -Ithird-party/mingw32/include
  SOURCES+= src/driver_directsound.c src/driver_winmm.c
 
  CPPFLAGS+= -DHAVE_VORBIS
 else
- ifeq (apple-darwin,$(findstring apple-darwin,$(machine)))
+ ifeq (-darwin,$(findstring -darwin,$(TARGETMACHINE)))
   SOURCES+= src/driver_coreaudio.c
-  LDFLAGS+= -framework AudioToolbox -framework AudioUnit -framework Foundation
+  LDFLAGS+= -framework Foundation
  endif
  ifneq (0,$(JFAUDIOLIB_HAVE_SDL))
   CPPFLAGS+= -DHAVE_SDL=2 $(shell $(SDL2CONFIG) --cflags)

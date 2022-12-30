@@ -22,13 +22,18 @@
  * ALSA MIDI output
  */
 
+// alsa/global.h will try defining 'struct timeval' otherwise.
+#define _POSIX_C_SOURCE 200809L
+
 #include "midifuncs.h"
 #include "driver_alsa.h"
 #include "asssys.h"
 #include <pthread.h>
+#include <sys/select.h>
 #include <alsa/asoundlib.h>
 #include <unistd.h>
 #include <math.h>
+#include <alloca.h>
 
 enum {
    ALSAErr_Warning = -2,

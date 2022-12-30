@@ -1,6 +1,6 @@
 CC=cl
 CFLAGS=/MD /J /nologo /O2
-CPPFLAGS=/Iinclude /Isrc /Isrc\msvc
+CPPFLAGS=/Iinclude /Isrc
 o=obj
 
 SOURCES=src\drivers.c \

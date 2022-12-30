@@ -3,7 +3,7 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 46;
+	objectVersion = 54;
 	objects = {
 
 /* Begin PBXBuildFile section */
@@ -296,6 +296,7 @@
 /* Begin PBXShellScriptBuildPhase section */
 		AB0A488B1E43568E00CC2214 /* ShellScript */ = {
 			isa = PBXShellScriptBuildPhase;
+			alwaysOutOfDate = 1;
 			buildActionMask = 2147483647;
 			files = (
 			);
@@ -426,7 +427,10 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				FRAMEWORK_SEARCH_PATHS = "$(inherited)";
-				LD_RUNPATH_SEARCH_PATHS = "../../third-party $(PROJECT_DIR)/third-party";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"../../third-party",
+					"$(PROJECT_DIR)/third-party",
+				);
 				PRODUCT_NAME = test;
 			};
 			name = Debug;

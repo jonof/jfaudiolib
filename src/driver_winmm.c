@@ -467,8 +467,8 @@ static const char *mmsyserr_str(MMRESULT rv)
         default: return "?";
     }
 }
-#define midi_error(rv, fmt, ...) { \
-    ASS_Message(fmt, __VA_ARGS__); \
+#define midi_error(rv, ...) { \
+    ASS_Message(__VA_ARGS__); \
     ASS_Message(" err %d (%s)\n", (int)(rv), mmsyserr_str(rv)); \
 }
 
