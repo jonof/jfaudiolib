@@ -1,11 +1,11 @@
 #!/bin/bash
 
 oggbase=https://downloads.xiph.org/releases/ogg
-oggfile=libogg-1.3.2.tar.gz
-oggfilesum=e19ee34711d7af328cb26287f4137e70630e7261b17cbe3cd41011d73a654692
+oggfile=libogg-1.3.5.tar.gz
+oggfilesum=0eb4b4b9420a0f51db142ba3f9c64b333f826532dc0f48c6410ae51f4799b664
 vorbisbase=https://downloads.xiph.org/releases/vorbis
-vorbisfile=libvorbis-1.3.5.tar.gz
-vorbisfilesum=6efbcecdd3e5dfbf090341b485da9d176eb250d893e3eb378c428a2db38301ce
+vorbisfile=libvorbis-1.3.7.tar.gz
+vorbisfilesum=0e982409a9c3fc82ee06e08205b1355e5c6aa4c36bca58146ef399621b0ce5ab
 
 oggurl=$oggbase/$oggfile
 vorbisurl=$vorbisbase/$vorbisfile
@@ -28,7 +28,7 @@ export LD="xcrun ld"
 export AR="xcrun ar"
 export RANLIB="xcrun ranlib"
 export STRIP="xcrun strip"
-export CFLAGS="$archflags -mmacosx-version-min=10.9"
+export CFLAGS="$archflags -mmacosx-version-min=10.15"
 
 check_tools() {
     echo "+++ Checking build tools"
@@ -62,13 +62,13 @@ if test ! -f $destdir/out/lib/libogg.a; then
     (cd libogg-build; tar zx --strip-components 1) < $oggfile || exit
 
     echo "+++ Configuring libogg"
-    (cd libogg-build; ./configure --prefix=/out) || exit
+    (cd libogg-build; ./configure --prefix=$destdir/out) || exit
 
     echo "+++ Building libogg"
     (cd libogg-build; $MAKE $makeflags) || exit
 
     echo "+++ Installing libogg to $destdir"
-    (cd libogg-build; $MAKE DESTDIR=$destdir install) || exit
+    (cd libogg-build; $MAKE install) || exit
 
     # echo "+++ Cleaning up libogg"
     # rm -rf libogg-build
@@ -89,14 +89,17 @@ if test ! -f $destdir/out/lib/libvorbisfile.a; then
     fi
     (cd libvorbis-build; tar zx --strip-components 1) < $vorbisfile || exit
 
+    echo "+++ Patching libvorbis configure"
+    sed -i -e 's/-force_cpusubtype_ALL//' libvorbis-build/configure || exit
+
     echo "+++ Configuring libvorbis"
-    (cd libvorbis-build; PKG_CONFIG=/usr/bin/false ./configure --prefix=/out --with-ogg=$destdir/out) || exit
+    (cd libvorbis-build; PKG_CONFIG=/usr/bin/false ./configure --prefix=$destdir/out --with-ogg=$destdir/out) || exit
 
     echo "+++ Building libvorbis"
     (cd libvorbis-build; $MAKE $makeflags) || exit
 
     echo "+++ Installing libvorbis to $destdir"
-    (cd libvorbis-build; $MAKE DESTDIR=$destdir install) || exit
+    (cd libvorbis-build; $MAKE install) || exit
 
     # echo "+++ Cleaning up libvorbis"
     # rm -rf libvorbis-build
