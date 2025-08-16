@@ -221,6 +221,11 @@ if ((result = (fcall)) != noErr) {\
     return CAErr_Error;\
 }
 
+#define check_result_noret(fcall) \
+if ((result = (fcall)) != noErr) {\
+    ASS_Message("CoreAudioDrv: error %d at line %d:" #fcall "\n", (int)result, __LINE__);\
+}
+
 static int initialise_graph(int subsystem)
 {
     OSStatus result;
@@ -578,9 +583,21 @@ static void Func_PitchBend( int channel, int lsb, int msb )
                          MidiFrameOffset);
 }
 
+static void Func_SetVolume( int volume )
+{
+    OSStatus result;
+    check_result_noret(AudioUnitSetParameter(synthunit,
+                        kMusicDeviceParam_Volume,
+                        kAudioUnitScope_Global,
+                        0,
+                        -powf(255.f - (float)volume, 1.66f) / 255.f,
+                        0));
+}
+
 static void Func_SysEx( const unsigned char * data, int length )
 {
-    MusicDeviceSysEx(synthunit, data, length);
+    OSStatus result;
+    check_result_noret(MusicDeviceSysEx(synthunit, data, length));
 }
 
 
@@ -604,6 +621,7 @@ int CoreAudioDrv_MIDI_Init(midifuncs *funcs, const char *params)
     funcs->ProgramChange = Func_ProgramChange;
     funcs->ChannelAftertouch = Func_ChannelAftertouch;
     funcs->PitchBend = Func_PitchBend;
+    funcs->SetVolume = Func_SetVolume;
     funcs->SysEx = Func_SysEx;
 
     return CAErr_Ok;

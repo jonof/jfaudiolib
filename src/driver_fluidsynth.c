@@ -253,9 +253,8 @@ static void Func_NoteOn( int channel, int key, int velocity )
 
 static void Func_PolyAftertouch( int channel, int key, int pressure )
 {
-    (void)pressure;
-
-    ASS_Message("FluidSynthDrv: key %d channel %d aftertouch\n", key, channel);
+    fluid_event_key_pressure(fluidevent, channel, key, pressure);
+    sequence_event();
 }
 
 static void Func_ControlChange( int channel, int number, int value )
@@ -272,15 +271,26 @@ static void Func_ProgramChange( int channel, int program )
 
 static void Func_ChannelAftertouch( int channel, int pressure )
 {
-    (void)pressure;
-
-    ASS_Message("FluidSynthDrv: channel %d aftertouch\n", channel);
+    fluid_event_channel_pressure(fluidevent, channel, pressure);
+    sequence_event();
 }
 
 static void Func_PitchBend( int channel, int lsb, int msb )
 {
     fluid_event_pitch_bend(fluidevent, channel, lsb | (msb << 7));
     sequence_event();
+}
+
+static void Func_SetVolume( int volume )
+{
+    fluid_synth_set_gain(fluidsynth, .6f - .6f * powf((255.f - (float)volume) / 255.f, 1.66f));
+}
+
+static void Func_SysEx( const unsigned char * data, int length )
+{
+    data += 1;  // Remove 0xf0 ... 0xf7 bookends.
+    length -= 2;
+    fluid_synth_sysex(fluidsynth, (const char *)data, length, NULL, NULL, NULL, 0);
 }
 
 static void * threadProc(void * parm)
@@ -407,7 +417,9 @@ int FluidSynthDrv_MIDI_Init(midifuncs *funcs, const char *params)
     funcs->ProgramChange = Func_ProgramChange;
     funcs->ChannelAftertouch = Func_ChannelAftertouch;
     funcs->PitchBend = Func_PitchBend;
-    
+    funcs->SetVolume = Func_SetVolume;
+    funcs->SysEx = Func_SysEx;
+
     return FSynthErr_Ok;
 }
 
