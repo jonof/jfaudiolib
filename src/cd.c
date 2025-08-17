@@ -41,16 +41,16 @@ const char * CD_ErrorString(int code)
             return "General CD error";
 
         case CD_Ok:
-            return "No error.";
+            return "CD ok.";
 
         case CD_InvalidCard:
-            return "Invalid or unsupported card.";
+            return "Invalid CD device.";
 
         case CD_DriverError:
             return SoundDriver_CD_ErrorString(SoundDriver_CD_GetError());
 
         default:
-            return "Unknown error code.";
+            return "Unknown CD error code.";
     }
 }
 
