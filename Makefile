@@ -9,7 +9,7 @@ endif
 CC?=gcc
 AR?=ar
 CFLAGS=-g $(OPTLEVEL) -W -Wall -std=c99
-CPPFLAGS=-Iinclude -Isrc
+JFAUDIOLIB_CPPFLAGS=-Iinclude -Isrc
 LDFLAGS=
 o=o
 
@@ -29,34 +29,34 @@ SOURCES=src/drivers.c \
 include Makefile.shared
 
 ifeq (mingw32,$(findstring mingw32,$(TARGETMACHINE)))
- CPPFLAGS+= -Ithird-party/mingw32/include
+ JFAUDIOLIB_CPPFLAGS+= -Ithird-party/mingw32/include
  SOURCES+= src/driver_directsound.c src/driver_winmm.c
 
- CPPFLAGS+= -DHAVE_VORBIS
+ JFAUDIOLIB_CPPFLAGS+= -DHAVE_VORBIS
 else
  ifeq (-darwin,$(findstring -darwin,$(TARGETMACHINE)))
   SOURCES+= src/driver_coreaudio.c
   LDFLAGS+= -framework Foundation
  endif
  ifneq (0,$(JFAUDIOLIB_HAVE_SDL))
-  CPPFLAGS+= -DHAVE_SDL=2 $(shell $(SDL2CONFIG) --cflags)
+  JFAUDIOLIB_CPPFLAGS+= -DHAVE_SDL=2 $(shell $(SDL2CONFIG) --cflags)
   ifeq (1,$(JFAUDIOLIB_USE_SDLMIXER))
-   CPPFLAGS+= -DUSE_SDLMIXER
+   JFAUDIOLIB_CPPFLAGS+= -DUSE_SDLMIXER
    SOURCES+= src/driver_sdlmixer.c
   else
    SOURCES+= src/driver_sdl.c
   endif
  endif
  ifeq (1,$(JFAUDIOLIB_HAVE_ALSA))
-  CPPFLAGS+= -DHAVE_ALSA $(shell $(PKGCONFIG) --cflags alsa)
+  JFAUDIOLIB_CPPFLAGS+= -DHAVE_ALSA $(shell $(PKGCONFIG) --cflags alsa)
   SOURCES+= src/driver_alsa.c
  endif
  ifeq (1,$(JFAUDIOLIB_HAVE_FLUIDSYNTH))
-  CPPFLAGS+= -DHAVE_FLUIDSYNTH $(shell $(PKGCONFIG) --cflags fluidsynth)
+  JFAUDIOLIB_CPPFLAGS+= -DHAVE_FLUIDSYNTH $(shell $(PKGCONFIG) --cflags fluidsynth)
   SOURCES+= src/driver_fluidsynth.c
  endif
  ifeq (1,$(JFAUDIOLIB_HAVE_VORBIS))
-  CPPFLAGS+= -DHAVE_VORBIS $(shell $(PKGCONFIG) --cflags vorbisfile)
+  JFAUDIOLIB_CPPFLAGS+= -DHAVE_VORBIS $(shell $(PKGCONFIG) --cflags vorbisfile)
  endif
 endif
 
@@ -70,11 +70,11 @@ include Makefile.deps
 $(JFAUDIOLIB): $(OBJECTS)
 	$(AR) cr $@ $^
 
-$(OBJECTS): %.o: %.c
-	$(CC) -c $(CPPFLAGS) $(CFLAGS) $< -o $@
+$(OBJECTS) src/test.o: %.o: %.c
+	$(CC) -c $(JFAUDIOLIB_CPPFLAGS) $(CPPFLAGS) $(CFLAGS) $< -o $@
 
 test: src/test.o $(JFAUDIOLIB);
-	$(CC) $(CPPFLAGS) $(CFLAGS) $^ -o $@ $(LDFLAGS) $(JFAUDIOLIB_LDFLAGS) -lm
+	$(CC) $(JFAUDIOLIB_CPPFLAGS) $(CPPFLAGS) $(CFLAGS) $^ -o $@ $(LDFLAGS) $(JFAUDIOLIB_LDFLAGS) -lm
 
 .PHONY: clean
 clean:
