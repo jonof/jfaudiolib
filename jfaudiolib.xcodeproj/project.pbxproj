@@ -22,7 +22,6 @@
 		AB2E9E691011E65900DD2F1F /* drivers.h in Headers */ = {isa = PBXBuildFile; fileRef = AB2E9E571011E65900DD2F1F /* drivers.h */; };
 		AB2E9E6A1011E65900DD2F1F /* fx_man.c in Sources */ = {isa = PBXBuildFile; fileRef = AB2E9E581011E65900DD2F1F /* fx_man.c */; };
 		AB2E9E6B1011E65900DD2F1F /* linklist.h in Headers */ = {isa = PBXBuildFile; fileRef = AB2E9E591011E65900DD2F1F /* linklist.h */; };
-		AB2E9E6C1011E65900DD2F1F /* ll_man.h in Headers */ = {isa = PBXBuildFile; fileRef = AB2E9E5A1011E65900DD2F1F /* ll_man.h */; };
 		AB2E9E6D1011E65900DD2F1F /* multivoc.c in Sources */ = {isa = PBXBuildFile; fileRef = AB2E9E5B1011E65900DD2F1F /* multivoc.c */; };
 		AB2E9E6E1011E65900DD2F1F /* multivoc.h in Headers */ = {isa = PBXBuildFile; fileRef = AB2E9E5C1011E65900DD2F1F /* multivoc.h */; };
 		AB2E9E6F1011E65900DD2F1F /* pitch.c in Sources */ = {isa = PBXBuildFile; fileRef = AB2E9E5D1011E65900DD2F1F /* pitch.c */; };
@@ -74,7 +73,6 @@
 		AB2E9E571011E65900DD2F1F /* drivers.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = drivers.h; sourceTree = "<group>"; };
 		AB2E9E581011E65900DD2F1F /* fx_man.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = fx_man.c; sourceTree = "<group>"; };
 		AB2E9E591011E65900DD2F1F /* linklist.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = linklist.h; sourceTree = "<group>"; };
-		AB2E9E5A1011E65900DD2F1F /* ll_man.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ll_man.h; sourceTree = "<group>"; };
 		AB2E9E5B1011E65900DD2F1F /* multivoc.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = multivoc.c; sourceTree = "<group>"; };
 		AB2E9E5C1011E65900DD2F1F /* multivoc.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = multivoc.h; sourceTree = "<group>"; };
 		AB2E9E5D1011E65900DD2F1F /* pitch.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = pitch.c; sourceTree = "<group>"; };
@@ -160,7 +158,6 @@
 				AB2E9E571011E65900DD2F1F /* drivers.h */,
 				AB2E9E581011E65900DD2F1F /* fx_man.c */,
 				AB2E9E591011E65900DD2F1F /* linklist.h */,
-				AB2E9E5A1011E65900DD2F1F /* ll_man.h */,
 				ABFBB51F102EBD4100D48B58 /* midi.c */,
 				ABFBB520102EBD4100D48B58 /* midi.h */,
 				ABFBB521102EBD4100D48B58 /* midifuncs.h */,
@@ -212,7 +209,6 @@
 				AB2E9E651011E65900DD2F1F /* driver_nosound.h in Headers */,
 				AB2E9E691011E65900DD2F1F /* drivers.h in Headers */,
 				AB2E9E6B1011E65900DD2F1F /* linklist.h in Headers */,
-				AB2E9E6C1011E65900DD2F1F /* ll_man.h in Headers */,
 				AB2E9E6E1011E65900DD2F1F /* multivoc.h in Headers */,
 				AB2E9E701011E65900DD2F1F /* pitch.h in Headers */,
 				AB2E9E741011E66100DD2F1F /* fx_man.h in Headers */,

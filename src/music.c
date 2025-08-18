@@ -34,7 +34,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "drivers.h"
 #include "music.h"
 #include "midi.h"
-#include "ll_man.h"
 #include "asssys.h"
 #include "assmisc.h"
 
