@@ -1,0 +1,56 @@
+name: CI
+on: [ push, pull_request, workflow_dispatch ]
+
+jobs:
+  build-linux:
+    name: Linux
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libsdl2-dev libfluidsynth-dev
+      - name: Make
+        run: |
+          cd "$GITHUB_WORKSPACE"
+          make
+
+  build-windows:
+    name: Windows
+    runs-on: windows-latest
+    strategy:
+      fail-fast: false
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      - name: Setup MSVC
+        uses: ilammy/msvc-dev-cmd@v1
+        with:
+          sdk: 10.0.19041.0
+      - name: Make
+        shell: cmd
+        run: |
+          nmake /f Makefile.msvc
+
+  build-macos:
+    name: macOS
+    runs-on: macos-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      - name: Cache Xiph artifacts
+        uses: actions/cache@v4
+        with:
+          path: third-party/osx/*.tar.gz
+          key: third-party-osx-${{hashfiles('third-party/osx/build.sh')}}
+      - name: Build
+        run: |
+          cd "$GITHUB_WORKSPACE"
+          xcodebuild -project jfaudiolib.xcodeproj -alltargets

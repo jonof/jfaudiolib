@@ -51,14 +51,16 @@ if test ! -f $destdir/out/lib/libogg.a; then
 
     mkdir libogg-build
 
-    echo "+++ Fetching and unpacking $oggurl"
     if [ -f $oggfile ]; then
+        echo "+++ Checking $oggfile for validity"
         check_file $oggfilesum $oggfile || rm -f $oggfile
     fi
     if [ ! -f $oggfile ]; then
+        echo "+++ Fetching $oggurl"
         curl -sL $oggurl -o $oggfile || exit
         check_file $oggfilesum $oggfile || rm -f $oggfile
     fi
+    echo "+++ Unpacking $oggfile"
     (cd libogg-build; tar zx --strip-components 1) < $oggfile || exit
 
     echo "+++ Configuring libogg"
@@ -79,14 +81,16 @@ if test ! -f $destdir/out/lib/libvorbisfile.a; then
 
     mkdir libvorbis-build
 
-    echo "+++ Fetching and unpacking $vorbisurl"
     if [ -f $vorbisfile ]; then
+        echo "+++ Checking $vorbisfile for validity"
         check_file $vorbisfilesum $vorbisfile || rm -f $vorbisfile
     fi
     if [ ! -f $vorbisfile ]; then
+        echo "+++ Fetching $vorbisurl"
         curl -sL $vorbisurl -o $vorbisfile || exit
         check_file $vorbisfilesum $vorbisfile || rm -f $vorbisfile
     fi
+    echo "+++ Unpacking $vorbisfile"
     (cd libvorbis-build; tar zx --strip-components 1) < $vorbisfile || exit
 
     echo "+++ Patching libvorbis configure"
