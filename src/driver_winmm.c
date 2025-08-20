@@ -833,12 +833,30 @@ static void Func_PitchBend( int channel, int lsb, int msb )
     } else ASS_Message("WinMMDrv: pitch bend error\n");
 }
 
-static void Func_SysEx( const unsigned char * data, int length )
+static void Func_SetVolume( int volume )
 {
-    unsigned char * wdata;
+    unsigned char * data;
+
+    if (midi_get_buffer(8, &data)) {
+        volume <<= 6;   // 8-bit ranged argument shifted to be 14-bits.
+        data[0] = 0xf0; // Universal Real Time SysEx header
+        data[1] = 0x7f;
+        data[2] = 0x7f; // Broadcast
+        data[3] = 0x04; // sub-ID#1 = Device Control
+        data[4] = 0x01; // sub-ID#2 = Master Volume
+        data[5] = volume&127; // 14-bit volume LSB
+        data[6] = (volume>>7)&127; // 14-bit volume MSB
+        data[7] = 0xf7; // EOX
+        midi_sequence_event();
+    } else ASS_Message("WinMMDrv: setvolume error\n");
+}
+
+static void Func_SysEx( const unsigned char * sysex, int length )
+{
+    unsigned char * data;
     
-    if (midi_get_buffer(length, &wdata)) {
-        memcpy(wdata, data, length);
+    if (midi_get_buffer(length, &data)) {
+        memcpy(data, sysex, length);
         midi_sequence_event();
     } else ASS_Message("WinMMDrv: sysex error\n");
 }
@@ -879,6 +897,7 @@ int WinMMDrv_MIDI_Init(midifuncs * funcs, const char *params)
     funcs->ProgramChange = Func_ProgramChange;
     funcs->ChannelAftertouch = Func_ChannelAftertouch;
     funcs->PitchBend = Func_PitchBend;
+    funcs->SetVolume = Func_SetVolume;
     funcs->SysEx = Func_SysEx;
 
     midiInstalled = TRUE;

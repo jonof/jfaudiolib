@@ -191,6 +191,31 @@ static void Func_PitchBend( int channel, int lsb, int msb )
     sequence_event(&ev);
 }
 
+static void Func_SetVolume( int volume )
+{
+    snd_seq_event_t ev;
+    volume <<= 6;   // 8-bit ranged argument shifted to be 14-bits.
+    unsigned char sysex[8] = {
+        0xf0, 0x7f, // Universal Real Time SysEx header
+        0x7f,       // Broadcast
+        0x04, 0x01, // sub-ID#1 = Device Control, sub-ID#2 = Master Volume
+        volume&127, // 14-bit volume LSB
+        (volume>>7)&127, // 14-bit volume MSB
+        0xf7,       // EOX
+    };
+    snd_seq_ev_clear(&ev);
+    snd_seq_ev_set_sysex(&ev, sizeof(sysex), sysex);
+    sequence_event(&ev);
+}
+
+static void Func_SysEx( const unsigned char * data, int length )
+{
+    snd_seq_event_t ev;
+    snd_seq_ev_clear(&ev);
+    snd_seq_ev_set_sysex(&ev, length, (char *)data);
+    sequence_event(&ev);
+}
+
 static unsigned int get_tick(void)
 {
     snd_seq_queue_status_t * status;
@@ -304,6 +329,8 @@ int ALSADrv_MIDI_Init(midifuncs *funcs, const char *params)
     funcs->ProgramChange = Func_ProgramChange;
     funcs->ChannelAftertouch = Func_ChannelAftertouch;
     funcs->PitchBend = Func_PitchBend;
+    funcs->SetVolume = Func_SetVolume;
+    funcs->SysEx = Func_SysEx;
     
     return ALSAErr_Ok;
 }

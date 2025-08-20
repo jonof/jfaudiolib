@@ -241,10 +241,10 @@ void MUSIC_SetVolume
    volume = max( 0, volume );
    volume = min( volume, 255 );
 
-   /*if ( MUSIC_SoundDevice != -1 )
+   if ( ASS_MIDISoundDriver != -1 )
       {
       MIDI_SetVolume( volume );
-      }*/
+      }
    }
 
 
@@ -293,10 +293,10 @@ int MUSIC_GetVolume
    )
 
    {
-   /*if ( MUSIC_SoundDevice == -1 )
+   if ( ASS_MIDISoundDriver == -1 )
       {
       return( 0 );
-      }*/
+      }
    return( MIDI_GetVolume() );
    }
 
