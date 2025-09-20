@@ -30,8 +30,8 @@ SOURCES=src/drivers.c \
 include Makefile.shared
 
 ifeq (mingw32,$(findstring mingw32,$(TARGETMACHINE)))
- SOURCES+= src/driver_directsound.c src/driver_winmm.c
- JFAUDIOLIB_CPPFLAGS+= -Ithird-party/mingw/include -DHAVE_VORBIS
+ SOURCES+= src/driver_directsound.c src/driver_winmm.c src/driver_xaudio2.c
+ JFAUDIOLIB_CPPFLAGS+= -Ithird-party/mingw/include -DHAVE_VORBIS -DHAVE_XAUDIO2
 else
  ifeq (-darwin,$(findstring -darwin,$(TARGETMACHINE)))
   SOURCES+= src/driver_coreaudio.c
@@ -69,7 +69,7 @@ include Makefile.deps
 $(JFAUDIOLIB): $(OBJECTS)
 	$(AR) cr $@ $^
 
-$(OBJECTS) src/test.o: %.o: %.c
+%.o: %.c
 	$(CC) -c $(JFAUDIOLIB_CPPFLAGS) $(CPPFLAGS) $(CFLAGS) $(JFAUDIOLIB_CFLAGS) $< -o $@
 
 test: src/test.o $(JFAUDIOLIB);
@@ -77,4 +77,4 @@ test: src/test.o $(JFAUDIOLIB);
 
 .PHONY: clean
 clean:
-	-rm -f $(OBJECTS) $(JFAUDIOLIB)
+	-rm -f $(OBJECTS) $(JFAUDIOLIB) src/test.o test

@@ -7,6 +7,7 @@ src/driver_fluidsynth.$o: src/driver_fluidsynth.c src/midifuncs.h src/driver_flu
 src/driver_nosound.$o: src/driver_nosound.c src/midifuncs.h
 src/driver_sdl.$o: src/driver_sdl.c src/driver_sdl.h
 src/driver_winmm.$o: src/driver_winmm.c src/asssys.h src/assmisc.h src/midifuncs.h src/driver_winmm.h src/linklist.h
+src/driver_xaudio2.$o: src/driver_xaudio2.c src/asssys.h src/assmisc.h src/driver_xaudio2.h
 src/drivers.$o: src/drivers.c src/drivers.h include/sndcards.h src/midifuncs.h src/driver_alsa.h src/driver_coreaudio.h src/driver_directsound.h src/driver_fluidsynth.h src/driver_nosound.h src/driver_sdl.h src/driver_winmm.h
 src/fx_man.$o: src/fx_man.c include/sndcards.h src/drivers.h src/midifuncs.h src/multivoc.h include/fx_man.h include/sndcards.h
 src/midi.$o: src/midi.c include/sndcards.h src/drivers.h src/midifuncs.h include/music.h include/sndcards.h src/_midi.h src/midi.h src/asssys.h

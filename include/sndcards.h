@@ -37,6 +37,7 @@ typedef enum
    {
    ASS_NoSound,
    ASS_CoreAudio,
+   ASS_XAudio2,
    ASS_DirectSound,
    ASS_WinMM,
    ASS_FluidSynth,

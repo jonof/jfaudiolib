@@ -27,6 +27,7 @@
 
 //#define NO_COREAUDIO
 //#define NO_DIRECTSOUND
+//#define NO_XAUDIO2
 
 #include "driver_nosound.h"
 
@@ -41,6 +42,7 @@
 #ifdef _WIN32
 # include "driver_directsound.h"
 # include "driver_winmm.h"
+# include "driver_xaudio2.h"
 #endif
 
 #ifdef HAVE_FLUIDSYNTH
@@ -137,6 +139,25 @@ static struct {
         CoreAudioDrv_MIDI_SetTempo,
         CoreAudioDrv_MIDI_Lock,
         CoreAudioDrv_MIDI_Unlock,
+    #else
+        UNSUPPORTED_COMPLETELY,
+    #endif
+    },
+
+    // Windows XAudio2
+    {
+        "XAudio2",
+    #if defined _WIN32 && defined HAVE_XAUDIO2 && !defined NO_XAUDIO2
+        XAudio2Drv_GetError,
+        XAudio2Drv_ErrorString,
+        XAudio2Drv_PCM_Init,
+        XAudio2Drv_PCM_Shutdown,
+        XAudio2Drv_PCM_BeginPlayback,
+        XAudio2Drv_PCM_StopPlayback,
+        XAudio2Drv_PCM_Lock,
+        XAudio2Drv_PCM_Unlock,
+        UNSUPPORTED_CD,
+        UNSUPPORTED_MIDI,
     #else
         UNSUPPORTED_COMPLETELY,
     #endif

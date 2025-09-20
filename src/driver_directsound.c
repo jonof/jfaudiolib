@@ -31,12 +31,19 @@
 #include "asssys.h"
 #include "driver_directsound.h"
 
+#if defined(__MINGW32__)
+# define CASTPROC(x) (void(*)(void))x
+#else
+# define CASTPROC(x) x
+#endif
+
 enum {
    DSErr_Warning = -2,
    DSErr_Error   = -1,
    DSErr_Ok      = 0,
 	DSErr_Uninitialised,
-	DSErr_DirectSoundCreate,
+	DSErr_DLLLoadError,
+    DSErr_DirectSoundCreate,
 	DSErr_SetCooperativeLevel,
 	DSErr_CreateSoundBuffer,
 	DSErr_CreateSoundBufferSecondary,
@@ -68,6 +75,7 @@ static LPDIRECTSOUNDNOTIFY lpdsnotify = 0;
 static DSBPOSITIONNOTIFY notifyPositions[3] = { { 0,0 }, { 0,0 }, { 0,0 } };
 static HANDLE mixThread = 0;
 static HANDLE mutex = 0;
+static HANDLE dsounddll;
 
 
 static void FillBufferPortion(char * ptr, int remaining)
@@ -150,6 +158,8 @@ static DWORD WINAPI fillDataThread(LPVOID lpParameter)
 {
     HANDLE handles[3];
     DWORD waitret, waitret2;
+
+    (void)lpParameter;
     
     handles[0] = notifyPositions[0].hEventNotify;
     handles[1] = notifyPositions[1].hEventNotify;
@@ -206,6 +216,10 @@ const char *DirectSoundDrv_ErrorString( int ErrorNumber )
 			ErrorString = "DirectSound uninitialised.";
 			break;
 			
+        case DSErr_DLLLoadError:
+            ErrorString = "Error loading dsound.dll";
+            break;
+
 		case DSErr_DirectSoundCreate:
             ErrorString = "DirectSound error: DirectSoundCreate failed.";
             break;
@@ -297,12 +311,27 @@ int DirectSoundDrv_PCM_Init(int * mixrate, int * numchannels, int * samplebits, 
     HRESULT err;
     DSBUFFERDESC bufdesc;
     WAVEFORMATEX wfex;
-    
+    HRESULT (WINAPI *procDirectSoundCreate)(LPCGUID,LPDIRECTSOUND *,LPUNKNOWN);
+
     if (Initialised) {
         DirectSoundDrv_PCM_Shutdown();
     }
     
-    err = DirectSoundCreate(0, &lpds, 0);
+    if (!dsounddll) {
+        dsounddll = LoadLibrary("dsound.dll");
+        if (!dsounddll) {
+            ErrorCode = DSErr_DLLLoadError;
+            return DSErr_Error;
+        }
+    }
+    procDirectSoundCreate = (HRESULT (WINAPI *)(LPCGUID,LPDIRECTSOUND *,LPUNKNOWN))
+        CASTPROC(GetProcAddress(dsounddll, "DirectSoundCreate"));
+    if (!procDirectSoundCreate) {
+        ErrorCode = DSErr_DLLLoadError;
+        return DSErr_Error;
+    }
+
+    err = procDirectSoundCreate(0, &lpds, 0);
     if (FAILED( err )) {
         ErrorCode = DSErr_DirectSoundCreate;
         return DSErr_Error;
@@ -343,7 +372,7 @@ int DirectSoundDrv_PCM_Init(int * mixrate, int * numchannels, int * samplebits, 
 
     // Mix buffer to be a power of 2, min 512 samples, and 4096 samples at 48kHz.
     bufdesc.dwBufferBytes = 512;
-    while (bufdesc.dwBufferBytes < (4096 * *mixrate / 48000))
+    while (bufdesc.dwBufferBytes < (4096u * *mixrate / 48000))
         bufdesc.dwBufferBytes += bufdesc.dwBufferBytes;
     bufdesc.dwBufferBytes *= wfex.nBlockAlign * 2;
 
