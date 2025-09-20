@@ -14,7 +14,9 @@ TARGETMACHINE?=$(strip $(shell $(CC) -dumpmachine))
 export TARGETMACHINE
 
 ifeq (mingw32,$(findstring mingw32,$(TARGETMACHINE)))
+ JFAUDIOLIB_LDFLAGS+= -lwinmm -ldsound -ldxguid
  JFAUDIOLIB_HAVE_VORBIS=1
+ JFAUDIOLIB_LDFLAGS+= -Lthird-party/mingw/$(TARGETMACHINE)/lib -lvorbisfile -lvorbis -logg
 else
  ifeq (yes,$(shell $(PKGCONFIG) --exists vorbisfile && echo yes))
   JFAUDIOLIB_HAVE_VORBIS=1

@@ -8,9 +8,10 @@ endif
 
 CC?=gcc
 AR?=ar
-CFLAGS=-g $(OPTLEVEL) -W -Wall -std=c99
+CFLAGS=-g $(OPTLEVEL) -W -Wall
 JFAUDIOLIB_CPPFLAGS=-Iinclude -Isrc
-LDFLAGS=
+JFAUDIOLIB_CFLAGS=-std=c99
+JFAUDIOLIB_LDFLAGS=
 o=o
 
 SOURCES=src/drivers.c \
@@ -29,14 +30,12 @@ SOURCES=src/drivers.c \
 include Makefile.shared
 
 ifeq (mingw32,$(findstring mingw32,$(TARGETMACHINE)))
- JFAUDIOLIB_CPPFLAGS+= -Ithird-party/mingw32/include
  SOURCES+= src/driver_directsound.c src/driver_winmm.c
-
- JFAUDIOLIB_CPPFLAGS+= -DHAVE_VORBIS
+ JFAUDIOLIB_CPPFLAGS+= -Ithird-party/mingw/include -DHAVE_VORBIS
 else
  ifeq (-darwin,$(findstring -darwin,$(TARGETMACHINE)))
   SOURCES+= src/driver_coreaudio.c
-  LDFLAGS+= -framework Foundation
+  JFAUDIOLIB_LDFLAGS+= -framework Foundation
  endif
  ifneq (0,$(JFAUDIOLIB_HAVE_SDL))
   JFAUDIOLIB_CPPFLAGS+= -DHAVE_SDL=2 $(shell $(SDL2CONFIG) --cflags)
@@ -71,7 +70,7 @@ $(JFAUDIOLIB): $(OBJECTS)
 	$(AR) cr $@ $^
 
 $(OBJECTS) src/test.o: %.o: %.c
-	$(CC) -c $(JFAUDIOLIB_CPPFLAGS) $(CPPFLAGS) $(CFLAGS) $< -o $@
+	$(CC) -c $(JFAUDIOLIB_CPPFLAGS) $(CPPFLAGS) $(CFLAGS) $(JFAUDIOLIB_CFLAGS) $< -o $@
 
 test: src/test.o $(JFAUDIOLIB);
 	$(CC) $(JFAUDIOLIB_CPPFLAGS) $(CPPFLAGS) $(CFLAGS) $^ -o $@ $(LDFLAGS) $(JFAUDIOLIB_LDFLAGS) -lm
