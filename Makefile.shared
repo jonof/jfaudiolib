@@ -6,6 +6,7 @@ JFAUDIOLIB_HAVE_XAUDIO2=0
 JFAUDIOLIB_USE_SDLMIXER=0
 
 JFAUDIOLIB=libjfaudiolib.a
+JFAUDIOLIB_DIR:=$(dir $(lastword $(MAKEFILE_LIST)))
 JFAUDIOLIB_LDFLAGS=
 
 SDL2CONFIG?=$(shell which sdl2-config || which false)
@@ -18,7 +19,7 @@ ifeq (mingw32,$(findstring mingw32,$(TARGETMACHINE)))
  JFAUDIOLIB_HAVE_XAUDIO2=1
  JFAUDIOLIB_LDFLAGS+= -lwinmm -ldxguid -lole32
  JFAUDIOLIB_HAVE_VORBIS=1
- JFAUDIOLIB_LDFLAGS+= -Lthird-party/mingw/$(TARGETMACHINE)/lib -lvorbisfile -lvorbis -logg
+ JFAUDIOLIB_LDFLAGS+= -L$(JFAUDIOLIB_DIR)third-party/mingw/$(TARGETMACHINE)/lib -lvorbisfile -lvorbis -logg
 else
  ifeq (yes,$(shell $(PKGCONFIG) --exists vorbisfile && echo yes))
   JFAUDIOLIB_HAVE_VORBIS=1
