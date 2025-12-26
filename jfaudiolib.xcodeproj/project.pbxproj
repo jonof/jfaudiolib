@@ -357,6 +357,7 @@
 				GCC_OPTIMIZATION_LEVEL = 0;
 				GCC_PREPROCESSOR_DEFINITIONS = (
 					HAVE_VORBIS,
+					HAVE_OSX_FRAMEWORKS,
 					__MACOSX__,
 				);
 				HEADER_SEARCH_PATHS = "$(PROJECT_DIR)/third-party/osx/out/include/**";
@@ -380,6 +381,7 @@
 				GCC_C_LANGUAGE_STANDARD = c99;
 				GCC_PREPROCESSOR_DEFINITIONS = (
 					HAVE_VORBIS,
+					HAVE_OSX_FRAMEWORKS,
 					__MACOSX__,
 				);
 				HEADER_SEARCH_PATHS = "$(PROJECT_DIR)/third-party/osx/out/include/**";
