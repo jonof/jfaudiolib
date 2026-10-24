@@ -68,6 +68,7 @@ static int MixBufferCount = 0;
 static int MixBufferCurrent = 0;
 static int MixBufferUsed = 0;
 static void ( *MixCallBack )( void ) = 0;
+static int SignedOutput = 0;    // SDL wants signed 8-bit, the mixers produce unsigned
 
 static void fillData(void * userdata, Uint8 * ptr, int remaining)
 {
@@ -95,7 +96,19 @@ static void fillData(void * userdata, Uint8 * ptr, int remaining)
                 len = remaining;
             }
             
-            memcpy(ptr, sptr, len);
+            if (SignedOutput) {
+                const Uint32 *s = (const Uint32 *)sptr;
+                Uint32 *d = (Uint32 *)ptr;
+                int i;
+                for (i = len >> 2; i > 0; i--) {
+                    *d++ = *s++ ^ 0x80808080;
+                }
+                for (i = len & ~3; i < len; i++) {
+                    ptr[i] = sptr[i] ^ 0x80;
+                }
+            } else {
+                memcpy(ptr, sptr, len);
+            }
             
             ptr += len;
             MixBufferUsed += len;
@@ -237,8 +250,9 @@ int SDLDrv_PCM_Init(int * mixrate, int * numchannels, int * samplebits, void * i
     err = 0;
 
     *mixrate = actual.freq;
-    if (actual.format == AUDIO_U8 || actual.format == AUDIO_S16SYS) {
+    if (actual.format == AUDIO_U8 || actual.format == AUDIO_S8 || actual.format == AUDIO_S16SYS) {
         *samplebits = actual.format & 0xff;
+        SignedOutput = actual.format == AUDIO_S8;
     } else {
         const char *format;
         switch (actual.format) {
